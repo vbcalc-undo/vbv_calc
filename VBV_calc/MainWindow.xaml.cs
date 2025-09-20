@@ -786,16 +786,17 @@ namespace VBV_calc
             double sokudo = 1.0;
             double enemy_sokudo = 1.0;
             double hissatu_kakuritu = 1.0;
-            if (enemy_sokudo_box != null && !string.IsNullOrEmpty(enemy_sokudo_box.Text))
-            {
+            if(sokudobox != null && !string.IsNullOrEmpty(sokudobox.Text)){
                 if (double.TryParse(sokudobox.Text, out sokudo))
                 {
-
                 }
                 else
                 {
                     // 変換できなかった場合はデフォルト値（1.0）のまま
                 }
+            }
+            if (enemy_sokudo_box != null && !string.IsNullOrEmpty(enemy_sokudo_box.Text))
+            {
                 if (double.TryParse(enemy_sokudo_box.Text, out enemy_sokudo))
                 {
                 }
@@ -3073,7 +3074,7 @@ namespace VBV_calc
             {
                 chiryoku = parsedChiryoku;
             }
-            temp_fig = (int)(Math.Sqrt(chiryoku) + int.Parse(fig));
+            temp_fig = (int)(Math.Truncate(Math.Sqrt(chiryoku)) + int.Parse(fig));
             return temp_fig;
         }
 
@@ -3095,6 +3096,7 @@ namespace VBV_calc
                         int temp = calc_chiryoku_assist(temp_skill1[1], 1);
                         //とりあえずすべて25上限
                         if (temp > 25) temp = 25;
+                        if (assist1_name.Text == "心核穿ち") temp = 5; //心核穿ちは5固定
                         assist1_fig_box.Text = temp.ToString();
                     }
                     else
@@ -3126,6 +3128,7 @@ namespace VBV_calc
                         int temp = calc_chiryoku_assist(temp_skill2[1], 2);
                         //とりあえずすべて25上限
                         if (temp > 25) temp = 25;
+                        if (assist2_name.Text == "心核穿ち") temp = 5; //心核穿ちは5固定
                         assist2_fig_box.Text = temp.ToString();
                     }
                     else
@@ -3156,6 +3159,7 @@ namespace VBV_calc
                         int temp = calc_chiryoku_assist(temp_skill3[1], 3);
                         //とりあえずすべて25上限
                         if (temp > 25) temp = 25;
+                        if (assist3_name.Text == "心核穿ち") temp = 5; //心核穿ちは5固定
                         assist3_fig_box.Text = temp.ToString();
                     }
                     else
