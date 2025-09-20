@@ -1718,8 +1718,13 @@ namespace VBV_calc
             ibeido_value -= ibeido_mushi;
             if (ibeido_value < 0) ibeido_value = 0;
             if(ibeido_value > 100) ibeido_value = 100;
-            DebugTextBox_damage.Text += "イベイド確率:" + ibeido_value + "\n";
-
+            enkaku_flag = enkaku_check();
+            if (enkaku_flag == true)
+                DebugTextBox_damage.Text += "イベイド確率:" + ibeido_value + "\n";
+            else
+            {
+                DebugTextBox_damage.Text += "イベイド確率:0\n";
+            }
             //カブト割、次元斬撃、致命必殺の計算
             double kabuto_jigen_chimei_bairitu = 1.0;
             kabuto_jigen_chimei_bairitu =((100.0 - kabuto_value) / 100.0)* (100.0 - jigen_value)/(100.0);
@@ -1804,7 +1809,6 @@ namespace VBV_calc
             }
             //遠隔攻撃がオンのとき、イベイドの確率で0になる。
 
-            enkaku_flag = enkaku_check();
             Debug.WriteLine("イベイド確率：" + ibeido_value);
             //クリティカルなしのダメージ
             temp_bougyo_bairitu = kabuto_jigen_chimei_bairitu;
@@ -1904,7 +1908,7 @@ namespace VBV_calc
             bairitu *= get_kyousenshi_value();
             if (get_kyousenshi_value() != 1.0)
             {
-                DebugTextBox.Text += "強戦士倍率:" + get_kyousenshi_value() + "\n";
+                DebugTextBox.Text += "狂戦士倍率:" + get_kyousenshi_value() + "\n";
             }
             bairitu *= get_kyohon_value();
             if (get_kyohon_value() != 1.0)
