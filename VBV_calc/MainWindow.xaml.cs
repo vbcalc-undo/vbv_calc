@@ -18,7 +18,7 @@ namespace VBV_calc
     /// </summary>
     public partial class MainWindow : Window
     {
-        public const int FINALSKILL_NUM = 20;
+        public const int FINALSKILL_NUM = 21;
         // ComboBox1 プロパティの型を object から ComboBox に変更
         public ComboBox ComboBox1 { get; private set; }
 
@@ -132,6 +132,8 @@ namespace VBV_calc
             final19_fig.Text = "";
             final20.Text = "";
             final20_fig.Text = "";
+            final21.Text = "";
+            final21_fig.Text = "";
 
             soubi_shogo_kou = 0;
             soubi_shogo_bou = 0;
@@ -1358,6 +1360,7 @@ namespace VBV_calc
             double enemy_ibeido_value= 0.0;
             double enemy_ukenagashi_value= 0.0;
             double enemy_block_value= 0.0;
+            int enemy_unmei_value = 0;
             if (double.TryParse(tokkobogyo_box.Text, out enemy_tokkou_value))
             {
                 // enermy_bougyo に変換された値が入る
@@ -1447,6 +1450,14 @@ namespace VBV_calc
                 // 変換できなかった場合はデフォルト値（1.0）のまま
             }
             if (double.TryParse(block_box.Text, out enemy_block_value))
+            {
+                // enermy_bougyo に変換された値が入る
+            }
+            else
+            {
+                // 変換できなかった場合はデフォルト値（1.0）のまま
+            }
+            if(int.TryParse(enemy_unmei_box.Text, out enemy_unmei_value))
             {
                 // enermy_bougyo に変換された値が入る
             }
@@ -1576,6 +1587,8 @@ namespace VBV_calc
                 hissatu_jougen = 75;
             }
             //確率の計算と上限の計算
+            if (enemy_hissatu_taisei_value > 0)
+                enemy_hissatu_taisei_value = enemy_hissatu_taisei_value + enemy_unmei_value;
             critical_kakuritu = hissatu_zouka_value + hissatu_param_kakuritu - enemy_hissatu_taisei_value;
             //ここは無形と心核の計算後に無形の上限で切り捨てるところ
             int bougyo_mukei_sinkaku= (int)(enemy_mukei_value);
@@ -1676,6 +1689,8 @@ namespace VBV_calc
             }
             //ブロック値は次元障壁と加算
             block_value+=(int)enemy_jigenshoheki_value;
+            if (block_value > 0)
+                block_value = block_value + enemy_unmei_value;
             if (get_shuyaku_value() != 1.0)
             {
                 //集約攻撃が入っている場合は、ブロックは無視する
@@ -1714,6 +1729,8 @@ namespace VBV_calc
             }
             //イベイドと次元障壁加、攻撃側のイベイド無視と減算
             ibeido_value += (int)enemy_jigenshoheki_value;
+            if (ibeido_value > 0)
+                ibeido_value = ibeido_value + enemy_unmei_value;
             ibeido_mushi= ibeido_mushi_calc(unmei_value);
             ibeido_value -= ibeido_mushi;
             if (ibeido_value < 0) ibeido_value = 0;
@@ -2329,7 +2346,27 @@ namespace VBV_calc
                         finalskills[assist3_name.Text] = 0;
                 }
             }
-
+            if (unmei_box.Text != "")
+            {
+                if (finalskills.ContainsKey("運命改変"))
+                {
+                    if (unmei_box.Text != "")
+                    {
+                        int value;
+                        if (int.TryParse(unmei_box.Text, out value))
+                            finalskills["運命改変"] = value + finalskills["運命改変"];
+                    }
+                }
+                else
+                {
+                    if (unmei_box.Text != "")
+                    {
+                        int value;
+                        if (int.TryParse(unmei_box.Text, out value))
+                            finalskills.Add("運命改変", value);
+                    }
+                }
+            }
 
 
             int skill_count = finalskills.Count;
@@ -2382,6 +2419,8 @@ namespace VBV_calc
             final19_fig.Text = null;
             final20.Text = null;
             final20_fig.Text = null;
+            final21.Text = null;
+            final21_fig.Text = null;
 
 
             foreach (var key in finalskills)
@@ -2486,6 +2525,11 @@ namespace VBV_calc
                 {
                     final20.Text = key.Key;
                     final20_fig.Text = key.Value.ToString();
+                }
+                else if (i == 20)
+                {
+                    final21.Text = key.Key;
+                    final21_fig.Text = key.Value.ToString();
                 }
 
                 i++;
@@ -3206,6 +3250,19 @@ namespace VBV_calc
         private void assistskill3_chiryoku_box_TextChanged(object sender, TextChangedEventArgs e)
         {
             assistskill3();
+        }
+
+        private void enemy_unmei_changed(object sender, TextChangedEventArgs e)
+        {
+            Resync_finalskil();
+            calc_damage();
+        }
+
+        private void unmei_box_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Resync_finalskil();
+            calc_final_attack_mag();
+            calc_damage();
         }
     }
 }
