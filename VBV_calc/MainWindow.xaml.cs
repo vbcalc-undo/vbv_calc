@@ -1,13 +1,15 @@
-﻿using VBV_calc.Helpers;
-using VBV_calc.Models;
-using JsonFileIO.Jsons;
+﻿using JsonFileIO.Jsons;
 using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using VBV_calc.Helpers;
+using VBV_calc.Models;
+
 
 namespace VBV_calc
 {
@@ -16,6 +18,7 @@ namespace VBV_calc
     /// </summary>
     public partial class MainWindow : Window
     {
+        public const int FINALSKILL_NUM = 20;
         // ComboBox1 プロパティの型を object から ComboBox に変更
         public ComboBox ComboBox1 { get; private set; }
 
@@ -123,6 +126,12 @@ namespace VBV_calc
             final16_fig.Text = "";
             final17.Text = "";
             final17_fig.Text = "";
+            final18.Text = "";
+            final18_fig.Text = "";
+            final19.Text = "";
+            final19_fig.Text = "";
+            final20.Text = "";
+            final20_fig.Text = "";
 
             soubi_shogo_kou = 0;
             soubi_shogo_bou = 0;
@@ -475,12 +484,20 @@ namespace VBV_calc
         List<CharacterJson> characters = null; // ここで宣言
         private void load_json_character2()
         {
+            List<String> temp_asistskills = new List<string>();
             using (var sr = new StreamReader(@"./json/units/units_ippan.json", System.Text.Encoding.UTF8))
             {
                 var jsonReadData = sr.ReadToEnd();
                 Debug.WriteLine("jsonReadData=" + jsonReadData);
 
                 characters = JsonConvert.DeserializeObject<List<CharacterJson>>(jsonReadData);
+                for(int i = 0; i < characters.Count; i++)
+                {
+                    String temp_name = ReplaceBracketNumberWithColon(characters[i].アシストスキル[0]);
+                    if (characters[i].アシストスキル.Count != 0 )
+                        if (!src_asistskills.Any(item => item.ItemValue == temp_name))
+                            src_asistskills.Add(new ItemSet(temp_name, temp_name));
+                }
             }
             using (var sr = new StreamReader(@"./json/units/units_busho.json", System.Text.Encoding.UTF8))
             {
@@ -491,18 +508,51 @@ namespace VBV_calc
                 for(int i = 0; i < bushoCharacters.Count; i++)
                 {
                     bushoCharacters[i].キャラクター = true;
+                    String temp_name = ReplaceBracketNumberWithColon(bushoCharacters[i].アシストスキル[0]);
+                    if (bushoCharacters[i].アシストスキル.Count != 0)
+                        if (!src_asistskills.Any(item => item.ItemValue == temp_name))
+                            src_asistskills.Add(new ItemSet(temp_name, temp_name));
                 }
                 if (bushoCharacters != null)
                 {
                     characters.AddRange(bushoCharacters);
                 }
             }
+            var sorted = src_asistskills.OrderBy(x => x.ItemDisp).ToList();
+            src_asistskills.Clear();
+            foreach (var item in sorted)
+            {
+                src_asistskills.Add(item);
+            }
+        }
+
+        public static string ReplaceBracketNumberWithColon(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+
+            // グループ1 = ブラケットの前の任意の文字（貪欲になりすぎないよう ? を付ける）
+            // グループ2 = ブラケット内の数字（1つ以上の数字）
+            var pattern = new Regex(@"([^\[\]]+?)\[(\d+)\]");
+
+            string result = pattern.Replace(input, match =>
+            {
+                string name = match.Groups[1].Value.Trim();
+                string number = match.Groups[2].Value;
+                return $"{name}:{number}";
+            });
+
+            return result;
         }
 
         ObservableCollection<ItemSet> src_equipment1;
         ObservableCollection<ItemSet> src_equipment2;
         ObservableCollection<ItemSet> src_shogo1;
         ObservableCollection<ItemSet> src_shogo2;
+        ObservableCollection<ItemSet> src_asistskills;
+        ObservableCollection<ItemSet> src_asistskill1;
+        ObservableCollection<ItemSet> src_asistskill2;
+        ObservableCollection<ItemSet> src_asistskill3;
+
         List<ItemSet> src_ryoshoku;
         Dictionary<string, List<EquipmentJson>> all_equipments; // ここで宣言
         Dictionary<string, List<ShogoJson>> all_shogo; // ここで宣言
@@ -622,8 +672,12 @@ namespace VBV_calc
             public string equipment1 { get; set; }
             public string equipment2 { get; set; }
             public string ryoshoku { get; set; }
+            public string assist1 { get; set; }
+            public string assist2 { get; set; }
+            public string assist3 { get; set; }
             public bool leader_flag { get; set; }
         }
+        public bool asist_flag=false;
         ObservableCollection<savedata> all_save_data = new ObservableCollection<savedata>();
         public MainWindow()
         {
@@ -641,6 +695,11 @@ namespace VBV_calc
             src_equipment1 = new ObservableCollection<ItemSet>();
             src_equipment2 = new ObservableCollection<ItemSet>();
             src_ryoshoku = new List<ItemSet>();
+
+            src_asistskills = new ObservableCollection<ItemSet>();
+            src_asistskill1 = new ObservableCollection<ItemSet>();
+            src_asistskill2 = new ObservableCollection<ItemSet>();
+            src_asistskill3 = new ObservableCollection<ItemSet>();
 
             //src_character.Add(new ItemSet("Number1", "Number1"));
             //src_character.Add(new ItemSet("Number2", "Number2"));
@@ -681,9 +740,20 @@ namespace VBV_calc
             ryoshokuBox.SelectedValuePath = "ItemValue";
             saved_list.ItemsSource = all_save_data;
 
+            assistskill1_box.ItemsSource = src_asistskills;
+            assistskill1_box.DisplayMemberPath = "ItemDisp";
+            assistskill1_box.SelectedValuePath = "ItemValue";
+            assistskill2_box.ItemsSource = src_asistskills;
+            assistskill2_box.DisplayMemberPath = "ItemDisp";
+            assistskill2_box.SelectedValuePath = "ItemValue";
+            assistskill3_box.ItemsSource = src_asistskills;
+            assistskill3_box.DisplayMemberPath = "ItemDisp";
+            assistskill3_box.SelectedValuePath = "ItemValue";
+
             //passive1.DataContext = src_character;
 
             // 初期値セット
+            asist_flag = true;
             CharacterBox.SelectedIndex = 0;
             ComboBox_SelectionChanged_character(null, null);
             Resync_finalskil();
@@ -716,20 +786,23 @@ namespace VBV_calc
             double sokudo = 1.0;
             double enemy_sokudo = 1.0;
             double hissatu_kakuritu = 1.0;
-            if (double.TryParse(sokudobox.Text, out sokudo))
+            if (enemy_sokudo_box != null && !string.IsNullOrEmpty(enemy_sokudo_box.Text))
             {
+                if (double.TryParse(sokudobox.Text, out sokudo))
+                {
 
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if( double.TryParse(enemy_sokudo_box.Text, out enemy_sokudo))
-            {
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (double.TryParse(enemy_sokudo_box.Text, out enemy_sokudo))
+                {
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
             }
             sokudo = status_bairitu * sokudo;
             hissatu_kakuritu = Math.Sqrt(sokudo ) * 3.0 -Math.Sqrt(enemy_sokudo);
@@ -742,7 +815,7 @@ namespace VBV_calc
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
 
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -763,7 +836,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -783,7 +856,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -802,7 +875,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -822,7 +895,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -841,7 +914,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -860,7 +933,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -879,7 +952,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -899,7 +972,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -922,7 +995,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -941,7 +1014,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -960,7 +1033,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -978,7 +1051,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -997,7 +1070,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1016,7 +1089,7 @@ namespace VBV_calc
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1036,7 +1109,7 @@ namespace VBV_calc
         private double get_kabutowari_value()
         {
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1056,7 +1129,7 @@ namespace VBV_calc
         private double get_jigenzangeki_value()
         {
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1077,7 +1150,7 @@ namespace VBV_calc
         private double get_hissatu_value(double unmei_value)
         {
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1099,7 +1172,7 @@ namespace VBV_calc
         private double get_chimei_value()
         {
             double skillvalue = 0.0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1117,10 +1190,10 @@ namespace VBV_calc
             return skillvalue;
         }
 
-        // final1-17まで範囲攻撃が入っているかチェック
+        // final1-FINALSKILL_NUMまで範囲攻撃が入っているかチェック
         private int check_hani_fromfinal(){
             int hani_value = 0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1141,7 +1214,7 @@ namespace VBV_calc
         private int check_tuigeki()
         {
             int tuigeki_value = 0;
-            for(int i=1; i<=17; i++)
+            for(int i=1; i<=FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1160,7 +1233,7 @@ namespace VBV_calc
         private int get_unmei_value()
         {
             int unmei_value = 0;
-            for(int i = 1; i <= 17; i++)
+            for(int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1179,7 +1252,7 @@ namespace VBV_calc
         private int get_sokumen_value()
         {
             int sokumen_value = 0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1198,7 +1271,7 @@ namespace VBV_calc
         private int get_bousou_value(int unmei_value)
         {
             int bousou_value = 0;
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1233,7 +1306,7 @@ namespace VBV_calc
         }
         private bool enkaku_check()
         {
-            for (int i = 1; i <= 17; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1963,7 +2036,9 @@ namespace VBV_calc
             bairitu *= critical_damage_bairitu_with_kakuritu;
 
             //種族特攻の計算
-            String shuzoku_str = enemy_shuzoku_box.Text;
+            String shuzoku_str = "";
+            if (enemy_shuzoku_box != null && !string.IsNullOrEmpty(enemy_shuzoku_box.Text))
+                shuzoku_str = enemy_shuzoku_box.Text;
             Dictionary<string, int> parse_enemy_shuzoku = new Dictionary<string, int>();
             for (int i = 0; i < shuzoku_str.Length; i++)
             {
@@ -2204,6 +2279,53 @@ namespace VBV_calc
                             finalskills[ryoshoku_name.Text] = 0;
                     }
             }
+            if(assist1_name.Text != "")
+            {
+                    if (finalskills.ContainsKey(assist1_name.Text))
+                    {
+                        if (assist1_fig_box.Text != "")
+                            finalskills[assist1_name.Text] = int.Parse(assist1_fig_box.Text) + finalskills[assist1_name.Text];
+                    }
+                    else
+                    {
+                        if (assist1_fig_box.Text != "")
+                            finalskills.Add(assist1_name.Text, int.Parse(assist1_fig_box.Text));
+                        else
+                            finalskills[assist1_name.Text] = 0;
+                    }
+            }
+            if (assist2_name.Text != "")
+            {
+                if (finalskills.ContainsKey(assist2_name.Text))
+                {
+                    if (assist2_fig_box.Text != "")
+                        finalskills[assist2_name.Text] = int.Parse(assist2_fig_box.Text) + finalskills[assist2_name.Text];
+                }
+                else
+                {
+                    if (assist2_fig_box.Text != "")
+                        finalskills.Add(assist2_name.Text, int.Parse(assist2_fig_box.Text));
+                    else
+                        finalskills[assist2_name.Text] = 0;
+                }
+            }
+            if (assist3_name.Text != "")
+            {
+                if (finalskills.ContainsKey(assist3_name.Text))
+                {
+                    if (assist3_fig_box.Text != "")
+                        finalskills[assist3_name.Text] = int.Parse(assist3_fig_box.Text) + finalskills[assist3_name.Text];
+                }
+                else
+                {
+                    if (assist3_fig_box.Text != "")
+                        finalskills.Add(assist3_name.Text, int.Parse(assist3_fig_box.Text));
+                    else
+                        finalskills[assist3_name.Text] = 0;
+                }
+            }
+
+
 
             int skill_count = finalskills.Count;
             int i = 0;
@@ -2249,6 +2371,12 @@ namespace VBV_calc
             final16_fig.Text = null;
             final17.Text = null;
             final17_fig.Text = null;
+            final18.Text = null;
+            final18_fig.Text = null;
+            final19.Text = null;
+            final19_fig.Text = null;
+            final20.Text = null;
+            final20_fig.Text = null;
 
 
             foreach (var key in finalskills)
@@ -2338,6 +2466,21 @@ namespace VBV_calc
                 {
                     final17.Text = key.Key;
                     final17_fig.Text = key.Value.ToString();
+                }
+                else if (i == 17)
+                {
+                    final18.Text = key.Key;
+                    final18_fig.Text = key.Value.ToString();
+                }
+                else if (i == 18)
+                {
+                    final19.Text = key.Key;
+                    final19_fig.Text = key.Value.ToString();
+                }
+                else if (i == 19)
+                {
+                    final20.Text = key.Key;
+                    final20_fig.Text = key.Value.ToString();
                 }
 
                 i++;
@@ -2570,19 +2713,25 @@ namespace VBV_calc
 
                     string[] temp_status = tmp.ItemValue.Split(',');
                     string[] temp_skillname = temp_status[0].Split(':');
-                    if (temp_skillname.Length > 1)
+                    if (!string.IsNullOrEmpty(tmp.ItemValue))
                     {
-                        shogo1.Text = temp_skillname[0];
-                        shogo1_fig.Text = temp_skillname[1];
-                        shogo1_status.change_status(int.Parse(temp_status[1]), int.Parse(temp_status[2]), int.Parse(temp_status[3]), int.Parse(temp_status[4]));
-                        shogo1_status.tokko=temp_status[5];
-                    }
-                    else if(temp_skillname.Length == 1)
-                    {
-                        shogo1.Text = temp_skillname[0];
-                        shogo1_fig.Text = "";
-                        shogo1_status.change_status(int.Parse(temp_status[1]), int.Parse(temp_status[2]), int.Parse(temp_status[3]), int.Parse(temp_status[4]));
-                        shogo1_status.tokko = temp_status[5];
+                        if (temp_status.Length > 5)
+                        {
+                            if (temp_skillname.Length > 1)
+                            {
+                                shogo1.Text = temp_skillname[0];
+                                shogo1_fig.Text = temp_skillname[1];
+                                shogo1_status.change_status(int.Parse(temp_status[1]), int.Parse(temp_status[2]), int.Parse(temp_status[3]), int.Parse(temp_status[4]));
+                                shogo1_status.tokko = temp_status[5];
+                            }
+                            else if (temp_skillname.Length == 1)
+                            {
+                                shogo1.Text = temp_skillname[0];
+                                shogo1_fig.Text = "";
+                                shogo1_status.change_status(int.Parse(temp_status[1]), int.Parse(temp_status[2]), int.Parse(temp_status[3]), int.Parse(temp_status[4]));
+                                shogo1_status.tokko = temp_status[5];
+                            }
+                        }
                     }
                 }
                 else
@@ -2612,19 +2761,25 @@ namespace VBV_calc
                 {
                     string[] temp_status = tmp.ItemValue.Split(',');
                     string[] temp_skillname = temp_status[0].Split(':');
-                    if (temp_skillname.Length > 1)
+                    if (!string.IsNullOrEmpty(tmp.ItemValue))
                     {
-                        shogo2.Text = temp_skillname[0];
-                        shogo2_fig.Text = temp_skillname[1];
-                        shogo2_status.change_status(int.Parse(temp_status[1]), int.Parse(temp_status[2]), int.Parse(temp_status[3]), int.Parse(temp_status[4]));
-                        shogo2_status.tokko = temp_status[5];
-                    }
-                    if (temp_skillname.Length == 1)
-                    {
-                        shogo2.Text = temp_skillname[0];
-                        shogo2_fig.Text = "0";
-                        shogo2_status.change_status(int.Parse(temp_status[1]), int.Parse(temp_status[2]), int.Parse(temp_status[3]), int.Parse(temp_status[4]));
-                        shogo2_status.tokko = temp_status[5];
+                        if (temp_status.Length > 5)
+                        {
+                            if (temp_skillname.Length > 1)
+                            {
+                                shogo2.Text = temp_skillname[0];
+                                shogo2_fig.Text = temp_skillname[1];
+                                shogo2_status.change_status(int.Parse(temp_status[1]), int.Parse(temp_status[2]), int.Parse(temp_status[3]), int.Parse(temp_status[4]));
+                                shogo2_status.tokko = temp_status[5];
+                            }
+                            if (temp_skillname.Length == 1)
+                            {
+                                shogo2.Text = temp_skillname[0];
+                                shogo2_fig.Text = "0";
+                                shogo2_status.change_status(int.Parse(temp_status[1]), int.Parse(temp_status[2]), int.Parse(temp_status[3]), int.Parse(temp_status[4]));
+                                shogo2_status.tokko = temp_status[5];
+                            }
+                        }
                     }
                 }
                 else
@@ -2761,6 +2916,42 @@ namespace VBV_calc
                         tempdata.shogo2 = "";
                     }
                 }
+                if(assistskill1_box.ItemsSource != null && assistskill1_box.SelectedItem != null)
+                {
+                    ItemSet selectedassist1 = (ItemSet)assistskill1_box.SelectedItem;
+                    if (selectedassist1 != null)
+                    {
+                        tempdata.assist1 = selectedassist1.ItemValue;
+                    }
+                    else
+                    {
+                        tempdata.assist1 = "";
+                    }
+                }
+                if (assistskill2_box.ItemsSource != null && assistskill2_box.SelectedItem != null)
+                {
+                    ItemSet selectedassist2 = (ItemSet)assistskill2_box.SelectedItem;
+                    if (selectedassist2 != null)
+                    {
+                        tempdata.assist2 = selectedassist2.ItemValue;
+                    }
+                    else
+                    {
+                        tempdata.assist2 = "";
+                    }
+                }
+                if (assistskill3_box.ItemsSource != null && assistskill3_box.SelectedItem != null)
+                {
+                    ItemSet selectedassist3 = (ItemSet)assistskill3_box.SelectedItem;
+                    if (selectedassist3 != null)
+                        {
+                        tempdata.assist3 = selectedassist3.ItemValue;
+                    }
+                    else
+                    {
+                        tempdata.assist3 = "";
+                    }
+                } 
                 tempdata.leader_flag = leader_flag;
                 all_save_data.Add(tempdata);
             }
@@ -2821,7 +3012,7 @@ namespace VBV_calc
                         ryoshokuBox.SelectedItem = ryoshoku;
                     }
                 }
-                // 将護1選択
+                // 称号1選択
                 if (!string.IsNullOrEmpty(selected.shogo1))
                 {
                     ItemSet shogo1 = src_shogo1.ToList().Find(s => s != null && s.ItemValue == selected.shogo1);
@@ -2830,13 +3021,37 @@ namespace VBV_calc
                         shogo1Box.SelectedItem = shogo1;
                     }
                 }
-                // 将護2選択
+                // 称号2選択
                 if (!string.IsNullOrEmpty(selected.shogo2))
                 {
                     ItemSet shogo2 = src_shogo2.ToList().Find(s => s != null && s.ItemValue == selected.shogo2);
                     if (shogo2 != null)
                     {
                         shogo2Box.SelectedItem = shogo2;
+                    }
+                }
+                if(!string.IsNullOrEmpty(selected.assist1))
+                {
+                    ItemSet assist1 = src_asistskills.ToList().Find(a => a != null && a.ItemValue == selected.assist1);
+                    if (assist1 != null)
+                    {
+                        assistskill1_box.SelectedItem = assist1;
+                    }
+                }
+                if (!string.IsNullOrEmpty(selected.assist2))
+                {
+                    ItemSet assist2 = src_asistskills.ToList().Find(a => a != null && a.ItemValue == selected.assist2);
+                    if (assist2 != null)
+                    {
+                        assistskill2_box.SelectedItem = assist2;
+                    }
+                }
+                if (!string.IsNullOrEmpty(selected.assist3))
+                {
+                    ItemSet assist3 = src_asistskills.ToList().Find(a => a != null && a.ItemValue == selected.assist3);
+                    if (assist3 != null)
+                    {
+                        assistskill3_box.SelectedItem = assist3;
                     }
                 }
                 // リーダーフラグ設定
@@ -2847,6 +3062,142 @@ namespace VBV_calc
                 calc_final_attack_mag();
                 calc_damage();
             }
+        }
+
+        private int calc_chiryoku_assist(string fig,int number)
+        {
+            var chiryokuBox = (TextBox)this.FindName($"assistskill{number}_chiryoku_box");
+            int temp_fig = 0;
+            int chiryoku = 1;
+            if (chiryokuBox != null && !string.IsNullOrEmpty(chiryokuBox.Text) && int.TryParse(chiryokuBox.Text, out int parsedChiryoku))
+            {
+                chiryoku = parsedChiryoku;
+            }
+            temp_fig = (int)(Math.Sqrt(chiryoku) + int.Parse(fig));
+            return temp_fig;
+        }
+
+
+        private void assistskill1()
+        {
+            // labelに現在コンボ選択の内容を表示
+            ItemSet tmp = ((ItemSet)assistskill1_box.SelectedItem);//表示名はキャストして取りだす
+            if (tmp != null)
+            {
+                if (tmp.ItemValue != null)
+                {
+
+                    string[] temp_skillname = tmp.ItemValue.Split(',');
+                    string[] temp_skill1 = temp_skillname[0].Split(':');
+                    assist1_name.Text = temp_skill1[0];
+                    if (temp_skill1.Length > 1)
+                    {
+                        int temp = calc_chiryoku_assist(temp_skill1[1], 1);
+                        //とりあえずすべて25上限
+                        if (temp > 25) temp = 25;
+                        assist1_fig_box.Text = temp.ToString();
+                    }
+                    else
+                    {
+                        assist1_fig_box.Text = null;
+                    }
+
+                }
+            }
+            Resync_finalskil();
+            calc_final_attack_mag();
+            calc_damage();
+
+        }
+        private void assistskill2()
+        {
+            // labelに現在コンボ選択の内容を表示
+            ItemSet tmp = ((ItemSet)assistskill2_box.SelectedItem);//表示名はキャストして取りだす
+            if (tmp != null)
+            {
+                if (tmp.ItemValue != null)
+                {
+
+                    string[] temp_skillname = tmp.ItemValue.Split(',');
+                    string[] temp_skill2 = temp_skillname[0].Split(':');
+                    assist2_name.Text = temp_skill2[0];
+                    if (temp_skill2.Length > 1)
+                    {
+                        int temp = calc_chiryoku_assist(temp_skill2[1], 2);
+                        //とりあえずすべて25上限
+                        if (temp > 25) temp = 25;
+                        assist2_fig_box.Text = temp.ToString();
+                    }
+                    else
+                    {
+                        assist2_fig_box.Text = null;
+                    }
+
+                }
+            }
+            Resync_finalskil();
+            calc_final_attack_mag();
+            calc_damage();
+        }
+        private void assistskill3()
+        {
+            // labelに現在コンボ選択の内容を表示
+            ItemSet tmp = ((ItemSet)assistskill3_box.SelectedItem);//表示名はキャストして取りだす
+            if (tmp != null)
+            {
+                if (tmp.ItemValue != null)
+                {
+
+                    string[] temp_skillname = tmp.ItemValue.Split(',');
+                    string[] temp_skill3 = temp_skillname[0].Split(':');
+                    assist3_name.Text = temp_skill3[0];
+                    if (temp_skill3.Length > 1)
+                    {
+                        int temp = calc_chiryoku_assist(temp_skill3[1], 3);
+                        //とりあえずすべて25上限
+                        if (temp > 25) temp = 25;
+                        assist3_fig_box.Text = temp.ToString();
+                    }
+                    else
+                    {
+                        assist3_fig_box.Text = null;
+                    }
+
+                }
+            }
+            Resync_finalskil();
+            calc_final_attack_mag();
+            calc_damage();
+        }
+
+        private void assistskill1_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            assistskill1();
+        }
+        private void assistskill2_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            assistskill2();
+        }
+
+        private void assistskill3_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            assistskill3();
+        }
+
+        private void assistskill1_chiryoku_box_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            assistskill1();
+
+        }
+
+        private void assistskill2_chiryoku_box_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            assistskill2();
+        }
+
+        private void assistskill3_chiryoku_box_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            assistskill3();
         }
     }
 }
