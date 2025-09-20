@@ -669,6 +669,7 @@ namespace VBV_calc
         public class savedata
         {
             public string character_name { get; set; }
+            public string character_id { get; set; }
             public string shogo1 { get; set; }
             public string shogo2 { get; set; }
             public string equipment1 { get; set; }
@@ -2909,6 +2910,7 @@ namespace VBV_calc
                 {
                     tempdata = new savedata();
                     tempdata.character_name = selectedCharacter.名称;
+                    tempdata.character_id = selectedCharacter.名称 + "(" + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") + ")";
                 }
                 else
                 {
@@ -3052,6 +3054,10 @@ namespace VBV_calc
                         EquipmentBox1.SelectedItem = equipment1;
                     }
                 }
+                else
+                {
+                    EquipmentBox1.SelectedIndex = -1; // 装備1が空の場合、選択を解除
+                }
                 // 装備2選択
                 if (!string.IsNullOrEmpty(selected.equipment2))
                 {
@@ -3060,6 +3066,10 @@ namespace VBV_calc
                     {
                         EquipmentBox2.SelectedItem = equipment2;
                     }
+                }
+                else
+                {
+                    EquipmentBox2.SelectedIndex = -1; // 装備2が空の場合、選択を解除
                 }
                 // 料理選択
                 if (!string.IsNullOrEmpty(selected.ryoshoku))
@@ -3070,6 +3080,10 @@ namespace VBV_calc
                         ryoshokuBox.SelectedItem = ryoshoku;
                     }
                 }
+                else
+                {
+                    ryoshokuBox.SelectedIndex = -1; // 料理が空の場合、選択を解除
+                }
                 // 称号1選択
                 if (!string.IsNullOrEmpty(selected.shogo1))
                 {
@@ -3078,6 +3092,10 @@ namespace VBV_calc
                     {
                         shogo1Box.SelectedItem = shogo1;
                     }
+                }
+                else
+                {
+                    shogo1Box.SelectedIndex = -1; // 称号1が空の場合、選択を解除
                 }
                 // 称号2選択
                 if (!string.IsNullOrEmpty(selected.shogo2))
@@ -3088,7 +3106,11 @@ namespace VBV_calc
                         shogo2Box.SelectedItem = shogo2;
                     }
                 }
-                if(!string.IsNullOrEmpty(selected.assist1))
+                else
+                {
+                    shogo2Box.SelectedIndex = -1; // 称号2が空の場合、選択を解除
+                }
+                if (!string.IsNullOrEmpty(selected.assist1))
                 {
                     ItemSet assist1 = src_asistskills.ToList().Find(a => a != null && a.ItemValue == selected.assist1);
                     if (assist1 != null)
@@ -3272,6 +3294,18 @@ namespace VBV_calc
             Resync_finalskil();
             calc_final_attack_mag();
             calc_damage();
+        }
+
+        private void Delete_Button_Click(object sender, RoutedEventArgs e)
+        {
+            // saved_list.SelectedItem から選択された savedata を取得
+            var selected = saved_list.SelectedItem as savedata;
+            if (selected != null)
+            {
+                //まずキャラクター選択のフィルターを解除する
+                // キャラクター選択
+                all_save_data.Remove(selected);
+            }
         }
     }
 }

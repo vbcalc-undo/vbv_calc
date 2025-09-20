@@ -223,10 +223,11 @@
             <TextBox x:Name="enemy_unmei_box" Height="18" Canvas.Left="602" TextWrapping="Wrap" Text="" Canvas.Top="104" Width="78" TextChanged="enemy_unmei_changed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         </Canvas>
         <Canvas Height="682" Canvas.Left="-240" Canvas.Top="18" Width="221">
-            <ListBox Height="580" x:Name="saved_list" Canvas.Left="10" Canvas.Top="10" Width="201" SelectionMode="Single" HorizontalAlignment="Center" VerticalAlignment="Top" DisplayMemberPath="character_name" SelectedValuePath="character_name">
+            <ListBox Height="496" x:Name="saved_list" Canvas.Left="10" Canvas.Top="10" Width="201" SelectionMode="Single" HorizontalAlignment="Center" VerticalAlignment="Top" DisplayMemberPath="character_id" SelectedValuePath="character_name">
             </ListBox>
-            <Button Content="読み込み" Canvas.Left="10" Canvas.Top="608" Height="36" Width="85" HorizontalAlignment="Left" VerticalAlignment="Center" Click="Load_Button_Click"/>
-            <Button Content="保存" Canvas.Left="110" Canvas.Top="608" Height="36" Width="86" HorizontalAlignment="Left" VerticalAlignment="Center" Click="Saved_Button_Click"/>
+            <Button Content="読み込み" Canvas.Left="10" Canvas.Top="527" Height="36" Width="56" HorizontalAlignment="Center" VerticalAlignment="Top" Click="Load_Button_Click"/>
+            <Button Content="保存" Canvas.Left="87" Canvas.Top="527" Height="36" Width="47" HorizontalAlignment="Center" VerticalAlignment="Top" Click="Saved_Button_Click"/>
+            <Button Content="削除" Canvas.Left="154" Canvas.Top="527" Height="36" Width="47" Click="Delete_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Center"/>
         </Canvas>
 
     </Canvas>
