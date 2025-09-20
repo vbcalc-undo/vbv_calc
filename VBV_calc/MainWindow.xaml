@@ -225,9 +225,11 @@
         <Canvas Height="682" Canvas.Left="-240" Canvas.Top="18" Width="221">
             <ListBox Height="496" x:Name="saved_list" Canvas.Left="10" Canvas.Top="10" Width="201" SelectionMode="Single" HorizontalAlignment="Center" VerticalAlignment="Top" DisplayMemberPath="character_id" SelectedValuePath="character_name">
             </ListBox>
-            <Button Content="読み込み" Canvas.Left="10" Canvas.Top="527" Height="36" Width="56" HorizontalAlignment="Center" VerticalAlignment="Top" Click="Load_Button_Click"/>
-            <Button Content="保存" Canvas.Left="87" Canvas.Top="527" Height="36" Width="47" HorizontalAlignment="Center" VerticalAlignment="Top" Click="Saved_Button_Click"/>
+            <Button Content="読み込み" Canvas.Left="82" Canvas.Top="527" Height="36" Width="56" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Load_Button_Click"/>
+            <Button Content="保存" Canvas.Left="19" Canvas.Top="527" Height="36" Width="47" HorizontalAlignment="Left" VerticalAlignment="Center" Click="Saved_Button_Click"/>
             <Button Content="削除" Canvas.Left="154" Canvas.Top="527" Height="36" Width="47" Click="Delete_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <Button Content="　ファイル&#xD;&#xA;から読み込み" Canvas.Left="121" Canvas.Top="596" Height="36" Width="90" Click="Read_File_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <Button Content="　ファイル&#xD;&#xA;へ書き込み" Canvas.Left="10" Canvas.Top="596" Height="36" Width="90" Click="Write_File_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Center"/>
         </Canvas>
 
     </Canvas>

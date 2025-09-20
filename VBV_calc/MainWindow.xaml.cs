@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Shapes;
 using VBV_calc.Helpers;
 using VBV_calc.Models;
 
@@ -43,19 +44,20 @@ namespace VBV_calc
             public string ItemCharacter { get; set; }
 
             // プロパティをコンストラクタでセット
-            public DataSet(string character, Dictionary<string,string> s)
+            public DataSet(string character, Dictionary<string, string> s)
             {
                 ItemCharacter = character;
                 ItemValue = s;
             }
         }
-        
+
         int soubi_shogo_kou = 0;
         int soubi_shogo_bou = 0;
         int soubi_shogo_soku = 0;
         int soubi_shogo_chiryoku = 0;
 
-        private void ResetAllskills() {
+        private void ResetAllskills()
+        {
             passive1.Text = "";
             passive1_fig.Text = "";
             passive2.Text = "";
@@ -113,7 +115,7 @@ namespace VBV_calc
             final10_fig.Text = "";
             final11.Text = "";
             final11_fig.Text = "";
-                
+
             final12.Text = "";
             final12_fig.Text = "";
             final13.Text = "";
@@ -142,10 +144,10 @@ namespace VBV_calc
 
         }
 
-        private void status_calc(string hp, string soku, string kou,string bou,string chiryoku, string cost, string rank)
+        private void status_calc(string hp, string soku, string kou, string bou, string chiryoku, string cost, string rank)
         {
             double keikenti = 0;
-            if (hp =="" ||soku==""||kou==""||bou==""||cost==""||rank==""|| chiryoku=="")
+            if (hp == "" || soku == "" || kou == "" || bou == "" || cost == "" || rank == "" || chiryoku == "")
             {
                 levelbox.Text = "1";
                 hpbox.Text = "1";
@@ -186,16 +188,16 @@ namespace VBV_calc
                 keikenti += 490050;
                 level = 100;
             }
-            double buko = 75/ 2 / (Math.Sqrt(double.Parse(cost))) ;
-            Debug.WriteLine("buko="+buko);
-            double level1 = 1 + Math.Sqrt(keikenti)/1000;
-            Debug.WriteLine("level1="+level1);
-            double level2 = Math.Sqrt(keikenti)/50;
-            Debug.WriteLine("level2="+level2);
+            double buko = 75 / 2 / (Math.Sqrt(double.Parse(cost)));
+            Debug.WriteLine("buko=" + buko);
+            double level1 = 1 + Math.Sqrt(keikenti) / 1000;
+            Debug.WriteLine("level1=" + level1);
+            double level2 = Math.Sqrt(keikenti) / 50;
+            Debug.WriteLine("level2=" + level2);
 
             //int hp_status = (int)(double.Parse(hp) * ((double)(level)/4.0) + 1.0);
-            int hp_status = (int)(double.Parse(hp) * ((double)(level)  + 1.0) / 4.0);
-            int soku_status = (int)((double.Parse(soku)) * level1 + level2) + soubi1_status.sokudo + soubi2_status.sokudo+ryoshoku_status.sokudo;
+            int hp_status = (int)(double.Parse(hp) * ((double)(level) + 1.0) / 4.0);
+            int soku_status = (int)((double.Parse(soku)) * level1 + level2) + soubi1_status.sokudo + soubi2_status.sokudo + ryoshoku_status.sokudo;
             int chi_status = (int)((double.Parse(chiryoku)) * level1 + level2) + soubi1_status.tiryoku + soubi2_status.tiryoku + ryoshoku_status.tiryoku;
             int kou_status = (int)((double.Parse(kou) + buko) * level1 + level2) + soubi1_status.kougeki + soubi2_status.kougeki + ryoshoku_status.kougeki;
             int bou_status = (int)((double.Parse(kou) + buko) * level1 + level2) + soubi1_status.bougyo + soubi2_status.bougyo + ryoshoku_status.bougyo;
@@ -213,7 +215,7 @@ namespace VBV_calc
             double keikenti = 0;
             int hp, soku, kou, bou, chiryoku, cost;
             string rank;
-            current_Character_Status.get_status(out hp, out  kou,out bou, out soku, out chiryoku,out cost,out rank);
+            current_Character_Status.get_status(out hp, out kou, out bou, out soku, out chiryoku, out cost, out rank);
             int level = 0;
             if (rank == "S")
             {
@@ -253,12 +255,12 @@ namespace VBV_calc
             Debug.WriteLine("level2=" + level2);
 
             Debug.WriteLine("character_kou=" + kou);
-            Debug.WriteLine("soubi1_status.kougeki=" + soubi1_status.kougeki + "soubi2_soubi1_status.kougeki="+ soubi2_status.kougeki);
+            Debug.WriteLine("soubi1_status.kougeki=" + soubi1_status.kougeki + "soubi2_soubi1_status.kougeki=" + soubi2_status.kougeki);
             double temp = (level - 1.0) / 4.0 + 1.0;
-            Debug.WriteLine("te,@:"+temp * hp);
+            Debug.WriteLine("te,@:" + temp * hp);
             int hp_status = (int)(hp * ((level - 1.0) / 4.0 + 1.0));
             int soku_status = (int)((soku + shogo1_status.sokudo + shogo2_status.sokudo) * level1 + level2) + soubi1_status.sokudo + soubi2_status.sokudo + ryoshoku_status.sokudo;
-            int chi_status = (int)((chiryoku + shogo1_status.tiryoku + shogo2_status.tiryoku) * level1 + level2) + soubi1_status.tiryoku + soubi2_status.tiryoku + ryoshoku_status.tiryoku ; 
+            int chi_status = (int)((chiryoku + shogo1_status.tiryoku + shogo2_status.tiryoku) * level1 + level2) + soubi1_status.tiryoku + soubi2_status.tiryoku + ryoshoku_status.tiryoku;
             int kou_status = (int)((kou + buko + shogo1_status.kougeki + shogo2_status.kougeki) * level1 + level2) + soubi1_status.kougeki + soubi2_status.kougeki + ryoshoku_status.kougeki;
             int bou_status = (int)((kou + buko + shogo1_status.bougyo + shogo2_status.bougyo) * level1 + level2) + soubi1_status.bougyo + soubi2_status.bougyo + ryoshoku_status.bougyo;
 
@@ -294,7 +296,7 @@ namespace VBV_calc
                     if (characters[i].名称 == selectedPerson.名称)
                     {
                         //Passive1 = characters[i].パッシブスキル[0];
-                        (skill_name,skill_value) = SkillParser.Div_Skill_Name_Value(characters[i].パッシブスキル[0]);
+                        (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(characters[i].パッシブスキル[0]);
                         passive1.Text = skill_name;
                         passive1_fig.Text = skill_value.ToString();
 
@@ -344,16 +346,16 @@ namespace VBV_calc
                         status_calc(characters[i].基本パラメータ_HP, characters[i].基本パラメータ_速, characters[i].基本パラメータ_攻, characters[i].基本パラメータ_防, characters[i].基本パラメータ_知, characters[i].コスト, characters[i].ランク);
                         //current_Character_Status.set_status(int.Parse(characters[i].基本パラメータ_HP),int.Parse(characters[i].基本パラメータ_攻),int.Parse(characters[i].基本パラメータ_防),int.Parse(characters[i].基本パラメータ_速), characters[i].基本パラメータ_知), int.Parse(characters[i].基本パラメータ_コスト),characters[i].ランク);
 
-                        if(characters[i].基本パラメータ_攻!=""&& characters[i].基本パラメータ_防 !=""&& characters[i].基本パラメータ_速 !="" && characters[i].基本パラメータ_知 !="")
-                        current_Character_Status.set_status(int.Parse(characters[i].基本パラメータ_HP),
-                            int.Parse(characters[i].基本パラメータ_攻),
-                            int.Parse(characters[i].基本パラメータ_防),
-                            int.Parse(characters[i].基本パラメータ_速),
-                            int.Parse(characters[i].基本パラメータ_知),
-                            int.Parse(characters[i].コスト),
-                            characters[i].ランク, 
-                            characters[i].種族,
-                            characters[i].特攻);
+                        if (characters[i].基本パラメータ_攻 != "" && characters[i].基本パラメータ_防 != "" && characters[i].基本パラメータ_速 != "" && characters[i].基本パラメータ_知 != "")
+                            current_Character_Status.set_status(int.Parse(characters[i].基本パラメータ_HP),
+                                int.Parse(characters[i].基本パラメータ_攻),
+                                int.Parse(characters[i].基本パラメータ_防),
+                                int.Parse(characters[i].基本パラメータ_速),
+                                int.Parse(characters[i].基本パラメータ_知),
+                                int.Parse(characters[i].コスト),
+                                characters[i].ランク,
+                                characters[i].種族,
+                                characters[i].特攻);
                         shuzoku_box.Text = characters[i].種族;
                         tokko_box.Text = characters[i].特攻;
                         src_shogo1.Clear();
@@ -363,7 +365,7 @@ namespace VBV_calc
 
                         src_shogo1.Add(new ItemSet(null, null));
                         src_shogo2.Add(new ItemSet(null, null));
-                        
+
                         string rank = characters[i].ランク;
                         int rank_value = 0;
                         if (rank == "S")
@@ -386,7 +388,7 @@ namespace VBV_calc
                             int count_shogo = all_shogo[key].Count;
                             if (count_shogo > 0)
                             {
-                                if ((key.ToString()!= "キャラクター" && characters[i].キャラクター != true)|| (key.ToString() == "キャラクター" && characters[i].キャラクター == true))
+                                if ((key.ToString() != "キャラクター" && characters[i].キャラクター != true) || (key.ToString() == "キャラクター" && characters[i].キャラクター == true))
                                 {
                                     src_shogo1.Add(new ItemSet("", "※" + key.ToString()));
                                     src_shogo2.Add(new ItemSet("", "※" + key.ToString()));
@@ -433,32 +435,33 @@ namespace VBV_calc
                         src_equipment1.Add(null);
                         src_equipment2.Add(null);
                         //EquipmentBox1.Items.Clear();:
-                        for (int j = 0; j < count_equip; j++) { 
+                        for (int j = 0; j < count_equip; j++)
+                        {
                             // 修正: all_equipments[characters[i].装備[0]] は List<EquipmentJson> 型なので、ItemSet に変換する必要があります
-                            if (all_equipments[characters[i].装備[0]][j].能力付加.Count>1)
+                            if (all_equipments[characters[i].装備[0]][j].能力付加.Count > 1)
                             {
                                 //Debug.WriteLine("all_equipments[characters[i].装備[0]=" + all_equipments[characters[i].装備[0]][j].名称+"(" + all_equipments[characters[i].装備[0]][j].能力付加[0] + ","+ all_equipments[characters[i].装備[0]][j].能力付加[1] + ")");
-                                string tempkey= all_equipments[characters[i].装備[0]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[0]][j].能力付加[1].ToString() + ")";
-                                string tempvalue =  all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[0]][j].能力付加[1].ToString()+ ","+all_equipments[characters[i].装備[0]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[0]][j].性能変化_防 + "," + all_equipments[characters[i].装備[0]][j].性能変化_速+","+ all_equipments[characters[i].装備[0]][j].性能変化_知;
-                                src_equipment1.Add(new ItemSet( tempvalue, tempkey));
+                                string tempkey = all_equipments[characters[i].装備[0]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[0]][j].能力付加[1].ToString() + ")";
+                                string tempvalue = all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[0]][j].能力付加[1].ToString() + "," + all_equipments[characters[i].装備[0]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[0]][j].性能変化_防 + "," + all_equipments[characters[i].装備[0]][j].性能変化_速 + "," + all_equipments[characters[i].装備[0]][j].性能変化_知;
+                                src_equipment1.Add(new ItemSet(tempvalue, tempkey));
                             }
                             else
                             {
-                                string tempkey = all_equipments[characters[i].装備[0]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[0]][j].能力付加[0].ToString()  + ")";
-                                string tempvalue = all_equipments[characters[i].装備[0]][j].能力付加[0].ToString()+","+","+ all_equipments[characters[i].装備[0]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[0]][j].性能変化_防 + "," + all_equipments[characters[i].装備[0]][j].性能変化_速 + "," + all_equipments[characters[i].装備[0]][j].性能変化_知;
+                                string tempkey = all_equipments[characters[i].装備[0]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + ")";
+                                string tempvalue = all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + "," + all_equipments[characters[i].装備[0]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[0]][j].性能変化_防 + "," + all_equipments[characters[i].装備[0]][j].性能変化_速 + "," + all_equipments[characters[i].装備[0]][j].性能変化_知;
                                 src_equipment1.Add(new ItemSet(tempvalue, tempkey));
                             }
                             if (all_equipments[characters[i].装備[1]][j].能力付加.Count > 1)
                             {
                                 //Debug.WriteLine("all_equipments[characters[i].装備[0]=" + all_equipments[characters[i].装備[1]][j].名称 + "(" + all_equipments[characters[i].装備[1]][j].能力付加[0] + "," + all_equipments[characters[i].装備[1]][j].能力付加[1] + ")");
                                 string tempkey = all_equipments[characters[i].装備[1]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[1]][j].能力付加[1].ToString() + ")";
-                                string tempvalue = all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[1]][j].能力付加[1].ToString() +","+ all_equipments[characters[i].装備[1]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[1]][j].性能変化_防 + "," + all_equipments[characters[i].装備[1]][j].性能変化_速 + "," + all_equipments[characters[i].装備[1]][j].性能変化_知;
+                                string tempvalue = all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[1]][j].能力付加[1].ToString() + "," + all_equipments[characters[i].装備[1]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[1]][j].性能変化_防 + "," + all_equipments[characters[i].装備[1]][j].性能変化_速 + "," + all_equipments[characters[i].装備[1]][j].性能変化_知;
                                 src_equipment2.Add(new ItemSet(tempvalue, tempkey));
                             }
                             else
                             {
                                 string tempkey = all_equipments[characters[i].装備[1]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + ")";
-                                string tempvalue = all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() +"," + "," +all_equipments[characters[i].装備[1]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[1]][j].性能変化_防 + "," + all_equipments[characters[i].装備[1]][j].性能変化_速 + "," + all_equipments[characters[i].装備[1]][j].性能変化_知; ;
+                                string tempvalue = all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + "," + "," + all_equipments[characters[i].装備[1]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[1]][j].性能変化_防 + "," + all_equipments[characters[i].装備[1]][j].性能変化_速 + "," + all_equipments[characters[i].装備[1]][j].性能変化_知; ;
                                 src_equipment2.Add(new ItemSet(tempvalue, tempkey));
                             }
 
@@ -493,10 +496,10 @@ namespace VBV_calc
                 Debug.WriteLine("jsonReadData=" + jsonReadData);
 
                 characters = JsonConvert.DeserializeObject<List<CharacterJson>>(jsonReadData);
-                for(int i = 0; i < characters.Count; i++)
+                for (int i = 0; i < characters.Count; i++)
                 {
                     String temp_name = ReplaceBracketNumberWithColon(characters[i].アシストスキル[0]);
-                    if (characters[i].アシストスキル.Count != 0 )
+                    if (characters[i].アシストスキル.Count != 0)
                         if (!src_asistskills.Any(item => item.ItemValue == temp_name))
                             src_asistskills.Add(new ItemSet(temp_name, temp_name));
                 }
@@ -507,7 +510,7 @@ namespace VBV_calc
                 Debug.WriteLine("jsonReadData=" + jsonReadData);
 
                 var bushoCharacters = JsonConvert.DeserializeObject<List<CharacterJson>>(jsonReadData);
-                for(int i = 0; i < bushoCharacters.Count; i++)
+                for (int i = 0; i < bushoCharacters.Count; i++)
                 {
                     bushoCharacters[i].キャラクター = true;
                     String temp_name = ReplaceBracketNumberWithColon(bushoCharacters[i].アシストスキル[0]);
@@ -558,7 +561,7 @@ namespace VBV_calc
         List<ItemSet> src_ryoshoku;
         Dictionary<string, List<EquipmentJson>> all_equipments; // ここで宣言
         Dictionary<string, List<ShogoJson>> all_shogo; // ここで宣言
-        private void load_json_equipment_func(string filename,string equipmentname)
+        private void load_json_equipment_func(string filename, string equipmentname)
         {         // ここにJSON読み込みのコードを追加
             List<EquipmentJson> equipments = null; // ここで宣言
             using (var sr = new StreamReader(filename, System.Text.Encoding.UTF8))
@@ -587,7 +590,7 @@ namespace VBV_calc
             load_json_equipment_func(@"./json/equipments\soubi_soushoku.json", "装飾");
             load_json_equipment_func(@"./json/equipments\soubi_dougu.json", "道具");
             load_json_equipment_func(@"./json/equipments\soubi_ryoushoku.json", "糧食");
-            src_ryoshoku.Add(new ItemSet(null,null));
+            src_ryoshoku.Add(new ItemSet(null, null));
 
             if (all_equipments["糧食"] != null && all_equipments["糧食"].Count > 0)
             {
@@ -595,8 +598,8 @@ namespace VBV_calc
                 for (int i = 0; i < count; i++)
                 {
                     string tempkey = all_equipments["糧食"][i].名称 + "(" + all_equipments["糧食"][i].能力付加[0] + ")";
-                    string tempvalue =  all_equipments["糧食"][i].能力付加[0]+","+all_equipments["糧食"][i].性能変化_攻+","+all_equipments["糧食"][i].性能変化_防 + "," + all_equipments["糧食"][i].性能変化_速 + "," + all_equipments["糧食"][i].性能変化_知;
-                    src_ryoshoku.Add(new ItemSet(tempvalue,tempkey));
+                    string tempvalue = all_equipments["糧食"][i].能力付加[0] + "," + all_equipments["糧食"][i].性能変化_攻 + "," + all_equipments["糧食"][i].性能変化_防 + "," + all_equipments["糧食"][i].性能変化_速 + "," + all_equipments["糧食"][i].性能変化_知;
+                    src_ryoshoku.Add(new ItemSet(tempvalue, tempkey));
                     // ここで要素を処理
                     // 例: Console.WriteLine($"処理中の要素: {numbers[i]}");
                 }
@@ -680,7 +683,7 @@ namespace VBV_calc
             public string assist3 { get; set; }
             public bool leader_flag { get; set; }
         }
-        public bool asist_flag=false;
+        public bool asist_flag = false;
         ObservableCollection<savedata> all_save_data = new ObservableCollection<savedata>();
         public MainWindow()
         {
@@ -763,7 +766,7 @@ namespace VBV_calc
             _isInitialized = true; // 初期化完了
         }
         private string _Passive1;
-   
+
 
         private void OnPropertyChanged(string passive1)
         {
@@ -789,7 +792,8 @@ namespace VBV_calc
             double sokudo = 1.0;
             double enemy_sokudo = 1.0;
             double hissatu_kakuritu = 1.0;
-            if(sokudobox != null && !string.IsNullOrEmpty(sokudobox.Text)){
+            if (sokudobox != null && !string.IsNullOrEmpty(sokudobox.Text))
+            {
                 if (double.TryParse(sokudobox.Text, out sokudo))
                 {
                 }
@@ -809,7 +813,7 @@ namespace VBV_calc
                 }
             }
             sokudo = status_bairitu * sokudo;
-            hissatu_kakuritu = Math.Sqrt(sokudo ) * 3.0 -Math.Sqrt(enemy_sokudo);
+            hissatu_kakuritu = Math.Sqrt(sokudo) * 3.0 - Math.Sqrt(enemy_sokudo);
             return (int)hissatu_kakuritu;
 
         }
@@ -824,12 +828,12 @@ namespace VBV_calc
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
                 {
-                    if(textBox.Text == "巨人狩り")
+                    if (textBox.Text == "巨人狩り")
                     {
                         var valueBox = (TextBox)this.FindName($"final{i}_fig");
                         if (double.TryParse(valueBox.Text, out skillvalue))
 
-                        kougeki_bairitu = (100.0 + skillvalue) / 100.0;
+                            kougeki_bairitu = (100.0 + skillvalue) / 100.0;
                     }
                 }
             }
@@ -908,7 +912,7 @@ namespace VBV_calc
                     {
                         var valueBox = (TextBox)this.FindName($"final{i}_fig");
                         if (double.TryParse(valueBox.Text, out skillvalue))
-                            kougeki_bairitu = (100.0 + skillvalue*6.0 )/ 100.0;
+                            kougeki_bairitu = (100.0 + skillvalue * 6.0) / 100.0;
                     }
                 }
             }
@@ -966,7 +970,7 @@ namespace VBV_calc
                         var valueBox = (TextBox)this.FindName($"final{i}_fig");
                         if (double.TryParse(valueBox.Text, out skillvalue))
                             if (skillvalue > 6) skillvalue = 6;
-                            kougeki_bairitu = (100.0 + (skillvalue * 35)) / 100.0;
+                        kougeki_bairitu = (100.0 + (skillvalue * 35)) / 100.0;
                     }
                 }
             }
@@ -984,9 +988,10 @@ namespace VBV_calc
                     if (textBox.Text == "無効喰い")
                     {
                         var valueBox = (TextBox)this.FindName($"final{i}_fig");
-                        if (double.TryParse(valueBox.Text, out skillvalue)) {
+                        if (double.TryParse(valueBox.Text, out skillvalue))
+                        {
                             double temp_value = skillvalue + unmei_value;
-                            if (temp_value >100 ) temp_value = 100;
+                            if (temp_value > 100) temp_value = 100;
                             kougeki_bairitu = (100.0 + temp_value) / 100.0;
                         }
 
@@ -995,7 +1000,7 @@ namespace VBV_calc
             }
             return kougeki_bairitu;
         }
-        private double get_sippuu_value(double tuigeki_value,double unmei_value)
+        private double get_sippuu_value(double tuigeki_value, double unmei_value)
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
@@ -1014,7 +1019,7 @@ namespace VBV_calc
             }
             return kougeki_bairitu;
         }
-        private double get_kenkon_value(double tuigeki_value,double unmei_value)
+        private double get_kenkon_value(double tuigeki_value, double unmei_value)
         {
             double kougeki_bairitu = 1.0;
             double skillvalue = 0.0;
@@ -1195,7 +1200,8 @@ namespace VBV_calc
         }
 
         // final1-FINALSKILL_NUMまで範囲攻撃が入っているかチェック
-        private int check_hani_fromfinal(){
+        private int check_hani_fromfinal()
+        {
             int hani_value = 0;
             for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
@@ -1218,7 +1224,7 @@ namespace VBV_calc
         private int check_tuigeki()
         {
             int tuigeki_value = 0;
-            for(int i=1; i<=FINALSKILL_NUM; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1237,7 +1243,7 @@ namespace VBV_calc
         private int get_unmei_value()
         {
             int unmei_value = 0;
-            for(int i = 1; i <= FINALSKILL_NUM; i++)
+            for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
@@ -1247,7 +1253,7 @@ namespace VBV_calc
                         var valueBox = (TextBox)this.FindName($"final{i}_fig");
                         int temp_unmei_value = 0;
                         if (int.TryParse(valueBox.Text, out temp_unmei_value))
-                            unmei_value+= temp_unmei_value;
+                            unmei_value += temp_unmei_value;
                     }
                 }
             }
@@ -1284,7 +1290,7 @@ namespace VBV_calc
                     {
                         var valueBox = (TextBox)this.FindName($"final{i}_fig");
                         if (int.TryParse(valueBox.Text, out bousou_value))
-                            return bousou_value+unmei_value;
+                            return bousou_value + unmei_value;
                     }
                 }
             }
@@ -1295,7 +1301,7 @@ namespace VBV_calc
         {
             int ibeido_mushi_value = 0;
             double tadanti = 0.0;
-            double tadan=get_tadan_value();
+            double tadan = get_tadan_value();
             int tadan_value = 0;
             if (tadan != 1.0)
             {
@@ -1315,7 +1321,7 @@ namespace VBV_calc
                 var textBox = (TextBox)this.FindName($"final{i}");
                 if (textBox != null)
                 {
-                    if (textBox.Text == "遠隔攻撃"||textBox.Text == "次元斬撃")
+                    if (textBox.Text == "遠隔攻撃" || textBox.Text == "次元斬撃")
                     {
                         return true;
                     }
@@ -1327,18 +1333,18 @@ namespace VBV_calc
         bool shinma_flag = false;
         bool shuyaku_flag = false;
         bool enkaku_flag = false;
-        double hissatu_kougeki_bairitu=0.0;
+        double hissatu_kougeki_bairitu = 0.0;
         double hissatu_bougyo_bairitu = 0.0;
         double hissatu_kakuritu = 0.0;
         int ibeido_mushi = 0;
-        private void calc_damage ()
+        private void calc_damage()
         {
             // ここに計算ロジックを追加
             // 例: int finalAttack = int.Parse(passive1_fig.Text) + int.Parse(passive2_fig.Text);
             // Debug.WriteLine("最終攻撃力: " + finalAttack);
-            double kougeki_bairitu =1.0,bougyo_bairitu = 1.0;
-            double temp_kougeki_bairitu=1.0, temp_bougyo_bairitu = 1.0;
-            double enermy_bougyo=1.0;
+            double kougeki_bairitu = 1.0, bougyo_bairitu = 1.0;
+            double temp_kougeki_bairitu = 1.0, temp_bougyo_bairitu = 1.0;
+            double enermy_bougyo = 1.0;
             hissatu_kougeki_bairitu = 1.0;
             hissatu_bougyo_bairitu = 1.0;
             hissatu_kakuritu = 0.0;
@@ -1349,18 +1355,18 @@ namespace VBV_calc
             DebugTextBox_damage.Text = "========ダメージ計算========\n";
 
             //スキル値の取得
-            double enemy_tokkou_value= 0.0;
-            double enemy_kenshu_value= 0.0;
-            double enemy_mukei_value= 0.0;
-            double enemy_shinma_value= 0.0;
-            double enemy_jigenshoheki_value= 0.0;
-            double enemy_hissatu_taisei_value= 0.0;
-            double enemy_chimei_taisei_value= 0.0;
-            double enemy_tousho_value= 0.0;
-            double enemy_seisen_value= 0.0;
-            double enemy_ibeido_value= 0.0;
-            double enemy_ukenagashi_value= 0.0;
-            double enemy_block_value= 0.0;
+            double enemy_tokkou_value = 0.0;
+            double enemy_kenshu_value = 0.0;
+            double enemy_mukei_value = 0.0;
+            double enemy_shinma_value = 0.0;
+            double enemy_jigenshoheki_value = 0.0;
+            double enemy_hissatu_taisei_value = 0.0;
+            double enemy_chimei_taisei_value = 0.0;
+            double enemy_tousho_value = 0.0;
+            double enemy_seisen_value = 0.0;
+            double enemy_ibeido_value = 0.0;
+            double enemy_ukenagashi_value = 0.0;
+            double enemy_block_value = 0.0;
             int enemy_sikou_value = 0;
             int enemy_unmei_value = 0;
             if (double.TryParse(tokkobogyo_box.Text, out enemy_tokkou_value))
@@ -1459,7 +1465,7 @@ namespace VBV_calc
             {
                 // 変換できなかった場合はデフォルト値（1.0）のまま
             }
-            if(int.TryParse(enemy_unmei_box.Text, out enemy_unmei_value))
+            if (int.TryParse(enemy_unmei_box.Text, out enemy_unmei_value))
             {
                 // enermy_bougyo に変換された値が入る
             }
@@ -1485,8 +1491,8 @@ namespace VBV_calc
             }
 
 
-            double player_kougeki =1.0;
-            if(double.TryParse(kougekibox.Text,out player_kougeki))
+            double player_kougeki = 1.0;
+            if (double.TryParse(kougekibox.Text, out player_kougeki))
             {
                 // player_kougeki に変換された値が入る
             }
@@ -1502,7 +1508,7 @@ namespace VBV_calc
             bool use_kenshu = false;
             shinma_flag = false;
             //堅守の場合上限92
-            if (enemy_kenshu_value> 92)
+            if (enemy_kenshu_value > 92)
             {
                 enemy_kenshu_value = 92;
             }
@@ -1543,7 +1549,7 @@ namespace VBV_calc
             p_status_bairitu *= get_kyousenshi_value();
             p_status_bairitu *= get_kyohon_value();
             DebugTextBox_damage.Text += "ステータス倍率:" + p_status_bairitu + "\n";
-            player_kougeki= player_kougeki * p_status_bairitu;
+            player_kougeki = player_kougeki * p_status_bairitu;
 
             //次に確率追撃の計算
             kougeki_kaisu = get_kakuritu_tuigeki_value(unmei_value);
@@ -1551,7 +1557,7 @@ namespace VBV_calc
             //次にほかの倍率を計算
             //巨人狩りは神魔体躯がない場合のみ
 
-            if (enemy_shinma_value==0)
+            if (enemy_shinma_value == 0)
                 bairitu *= get_kyojingari_value();
             bairitu *= get_sippuu_value(kougeki_kaisu * 100, unmei_value);
             bairitu *= get_kenkon_value(kougeki_kaisu * 100, unmei_value);
@@ -1577,9 +1583,9 @@ namespace VBV_calc
             kabuto_value -= enemy_ukenagashi_value;
             jigen_value -= enemy_jigenshoheki_value;
             if (kabuto_value < 0) kabuto_value = 0;
-            if(kabuto_value >75) kabuto_value=75;
+            if (kabuto_value > 75) kabuto_value = 75;
             if (jigen_value < 0) jigen_value = 0;
-            if(jigen_value > 75) jigen_value = 75;
+            if (jigen_value > 75) jigen_value = 75;
 
             //クリティカルの計算
             double critical_kakuritu = 0.0;
@@ -1599,8 +1605,8 @@ namespace VBV_calc
                 enemy_hissatu_taisei_value = enemy_hissatu_taisei_value + enemy_unmei_value;
             critical_kakuritu = hissatu_zouka_value + hissatu_param_kakuritu - enemy_hissatu_taisei_value;
             //ここは無形と心核の計算後に無形の上限で切り捨てるところ
-            int bougyo_mukei_sinkaku= (int)(enemy_mukei_value);
-            if (get_shinkaku_value()!=1.0)
+            int bougyo_mukei_sinkaku = (int)(enemy_mukei_value);
+            if (get_shinkaku_value() != 1.0)
             {
                 enemy_mukei_value -= 25;
             }
@@ -1608,35 +1614,36 @@ namespace VBV_calc
             if (enemy_mukei_value > 60) enemy_mukei_value = 60;
             //必殺の上限値から無形体躯の値を減算
             hissatu_jougen -= (int)enemy_mukei_value;
-            if(hissatu_jougen<5) hissatu_jougen = 5;
+            if (hissatu_jougen < 5) hissatu_jougen = 5;
             if (critical_kakuritu > hissatu_jougen)
                 critical_kakuritu = hissatu_jougen;
             if (hissatu_param_kakuritu > hissatu_jougen)
                 hissatu_param_kakuritu = hissatu_jougen;
-            if(critical_kakuritu < 5)
+            if (critical_kakuritu < 5)
                 critical_kakuritu = 5;
             //クリティカルと致命の倍率の計算
             double critical_damage_bairitu = hissatu_param_kakuritu + chimei_value - enemy_chimei_taisei_value;
             if (critical_damage_bairitu < 50)
                 critical_damage_bairitu = 50;
             critical_damage_bairitu = (100.0 + critical_damage_bairitu) / 100.0;
-            double critical_damage_bairitu_with_kakuritu =critical_damage_bairitu *critical_kakuritu / 100.0 + 1.0*(100.0 - critical_kakuritu)/100.0;
+            double critical_damage_bairitu_with_kakuritu = critical_damage_bairitu * critical_kakuritu / 100.0 + 1.0 * (100.0 - critical_kakuritu) / 100.0;
             DebugTextBox_damage.Text += "クリティカルダメージ倍率:" + critical_damage_bairitu + "\n";
             DebugTextBox_damage.Text += "クリティカルダメージ確率:" + critical_kakuritu + "\n";
             DebugTextBox_damage.Text += "致命値:" + chimei_value + "\n";
             DebugTextBox_damage.Text += "最終クリダメ倍率:" + critical_damage_bairitu_with_kakuritu + "\n";
             //城壁による防御計算
             double joheki = 0.0;
-            if(double.TryParse(enemy_joheki_box.Text,out joheki))
+            if (double.TryParse(enemy_joheki_box.Text, out joheki))
             {
 
             }
-            else {
+            else
+            {
             }
             double joheki_bougyo = Math.Sqrt(joheki);
 
             //神魔がある場合巨人狩りがあっても無効
-            if (use_kenshu == true && enemy_shinma_value ==0 && get_kyojingari_value()!=1.0)
+            if (use_kenshu == true && enemy_shinma_value == 0 && get_kyojingari_value() != 1.0)
             {
                 enemy_kenshu_value -= 10;
                 if (enemy_kenshu_value < 0) enemy_kenshu_value = 0;
@@ -1646,7 +1653,7 @@ namespace VBV_calc
             if (enemy_senshu_flag == true)
                 senshu = 0.5;
             double bougyo_skill_bairitu = 1.0;
-            if(use_kenshu)
+            if (use_kenshu)
                 bougyo_skill_bairitu = senshu * ((100.0 - enemy_kenshu_value) / 100.0) * ((100.0 - enemy_mukei_value) / 100.0);
             else
                 bougyo_skill_bairitu = senshu * ((100.0 - enemy_shinma_value) / 100.0) * ((100.0 - enemy_mukei_value) / 100.0);
@@ -1696,7 +1703,7 @@ namespace VBV_calc
                 }
             }
             //ブロック値は次元障壁、至高の盾と加算
-            block_value+=(int)enemy_jigenshoheki_value;
+            block_value += (int)enemy_jigenshoheki_value;
             block_value += (int)enemy_sikou_value;
             if (block_value > 0)
                 block_value = block_value + enemy_unmei_value;
@@ -1706,11 +1713,11 @@ namespace VBV_calc
             }
             else
             {
-                if(block_value > 0)
+                if (block_value > 0)
                 {
                     //ブロックが入っている場合は、ブロック値を使う
-                    if(block_value > 75) block_value = 75;
-                    block_bairitu = 1.0 * (100.0-block_value) / 100.0 + 0.25 * (block_value)/100.0;
+                    if (block_value > 75) block_value = 75;
+                    block_bairitu = 1.0 * (100.0 - block_value) / 100.0 + 0.25 * (block_value) / 100.0;
                     Debug.WriteLine("ブロック倍率: " + block_bairitu);
                     DebugTextBox_damage.Text += "ブロック倍率:" + block_bairitu + "\n";
                 }
@@ -1725,7 +1732,7 @@ namespace VBV_calc
 
             //イベイド含めた計算
             int ibeido_value = 0;
-            if(ibeido_box.Text != "")
+            if (ibeido_box.Text != "")
             {
                 if (int.TryParse(ibeido_box.Text, out ibeido_value))
                 {
@@ -1741,10 +1748,10 @@ namespace VBV_calc
             ibeido_value += enemy_sikou_value;
             if (ibeido_value > 0)
                 ibeido_value = ibeido_value + enemy_unmei_value;
-            ibeido_mushi= ibeido_mushi_calc(unmei_value);
+            ibeido_mushi = ibeido_mushi_calc(unmei_value);
             ibeido_value -= ibeido_mushi;
             if (ibeido_value < 0) ibeido_value = 0;
-            if(ibeido_value > 100) ibeido_value = 100;
+            if (ibeido_value > 100) ibeido_value = 100;
             enkaku_flag = enkaku_check();
             if (enkaku_flag == true)
                 DebugTextBox_damage.Text += "イベイド確率:" + ibeido_value + "\n";
@@ -1754,7 +1761,7 @@ namespace VBV_calc
             }
             //カブト割、次元斬撃、致命必殺の計算
             double kabuto_jigen_chimei_bairitu = 1.0;
-            kabuto_jigen_chimei_bairitu =((100.0 - kabuto_value) / 100.0)* (100.0 - jigen_value)/(100.0);
+            kabuto_jigen_chimei_bairitu = ((100.0 - kabuto_value) / 100.0) * (100.0 - jigen_value) / (100.0);
             double kabuto_jigen_chimei_bairitu_hissatu_force = kabuto_jigen_chimei_bairitu * 0.75;
             double kabuto_jigen_chimei_bairitu_hissatu_kakuritu = kabuto_jigen_chimei_bairitu * (critical_kakuritu);
             double kabuto_jigen_chimei_bairitu_hissatu_nashi = kabuto_jigen_chimei_bairitu;
@@ -1762,7 +1769,7 @@ namespace VBV_calc
 
 
             //凍傷と聖戦の計算
-            int temp_toushou_bairitu = (int)(toushou_bairitu * 100.0-100) - (int)enemy_tousho_value;
+            int temp_toushou_bairitu = (int)(toushou_bairitu * 100.0 - 100) - (int)enemy_tousho_value;
             int temp_seisen_bairitu = (int)(seisen_bairitu * 100.0 - 100) - (int)enemy_seisen_value;
             if (temp_toushou_bairitu > 30) temp_toushou_bairitu = 30;
             if (temp_toushou_bairitu < -30) temp_toushou_bairitu = -30;
@@ -1773,13 +1780,13 @@ namespace VBV_calc
 
             if (temp_seisen_bairitu > 0)
             {
-                seisen_bairitu = (100.0+temp_seisen_bairitu)/100.0;
+                seisen_bairitu = (100.0 + temp_seisen_bairitu) / 100.0;
                 enemy_seisen_bairitu = 1.0;
             }
-            else if(temp_seisen_bairitu < 0)
+            else if (temp_seisen_bairitu < 0)
             {
                 seisen_bairitu = 1.0;
-                enemy_seisen_bairitu = (100.0 + temp_seisen_bairitu)/100.0;
+                enemy_seisen_bairitu = (100.0 + temp_seisen_bairitu) / 100.0;
             }
             else
             {
@@ -1822,7 +1829,7 @@ namespace VBV_calc
             kougeki_bairitu = bairitu * toushou_bairitu * seisen_bairitu;
             bougyo_skill_bairitu *= enemy_toushou_bairitu * enemy_seisen_bairitu;
 
-            if (double.TryParse(enemy_bougyo_box.Text,out enemy_bougyo_value))
+            if (double.TryParse(enemy_bougyo_box.Text, out enemy_bougyo_value))
             {
             }
             else
@@ -1831,7 +1838,7 @@ namespace VBV_calc
             /*防御値の最小値は1*/
             if (get_chimei_value() != 0.0)
             {
-                kabuto_jigen_chimei_bairitu = ((100 - kabuto_value)/100) * ((100 - jigen_value)/100);
+                kabuto_jigen_chimei_bairitu = ((100 - kabuto_value) / 100) * ((100 - jigen_value) / 100);
 
             }
             //遠隔攻撃がオンのとき、イベイドの確率で0になる。
@@ -1855,14 +1862,14 @@ namespace VBV_calc
             double critical_ari_damage = ((2.0 * player_kougeki * status_bairitu + 5.0) * Math.Sqrt(double.Parse(hpbox.Text)) / (2.0 + enemy_bougyo_value_temp + joheki_bougyo)) * tokko_bairitu * bougyo_skill_bairitu * block_bairitu * critical_damage_bairitu * kougeki_bairitu;
             //統合する
             damage_value = critical_ari_damage * (critical_kakuritu) / 100 + critical_nasi_damage * (100 - critical_kakuritu) / 100;
-            
+
             //イベイドの確率で最大0になる
             if (enkaku_flag == true && ibeido_value != 0)
             {
-                damage_value = (100-ibeido_value) * damage_value / 100.0;
+                damage_value = (100 - ibeido_value) * damage_value / 100.0;
             }
             double tuigeki = 0;
-            if (get_kenkon_value(kougeki_kaisu,unmei_value) != 1.0)
+            if (get_kenkon_value(kougeki_kaisu, unmei_value) != 1.0)
             {
                 tuigeki = 1.0;
             }
@@ -1890,7 +1897,7 @@ namespace VBV_calc
             damage_max_box.Text = Math.Truncate(max_damage_value).ToString();
 
             //ダメージ最小値の計算。ブロック必ず発動、必殺なし、イベイドは無視
-            kougeki_temp = (2.0 * player_kougeki * status_bairitu + 5.0) *Math.Sqrt(double.Parse(hpbox.Text)) * tokko_bairitu * kougeki_bairitu;
+            kougeki_temp = (2.0 * player_kougeki * status_bairitu + 5.0) * Math.Sqrt(double.Parse(hpbox.Text)) * tokko_bairitu * kougeki_bairitu;
             enemy_bougyo_value_temp = enemy_bougyo_value * temp_bougyo_bairitu;
             if (enemy_bougyo_value_temp < 1.0)
                 enemy_bougyo_value_temp = 1.0;
@@ -1898,7 +1905,7 @@ namespace VBV_calc
             double min_damage_value;
             if (block_bairitu != 1.0)
             {
-                min_damage_value = (kougeki_temp / bougyo_temp )* bougyo_skill_bairitu * 0.25;
+                min_damage_value = (kougeki_temp / bougyo_temp) * bougyo_skill_bairitu * 0.25;
             }
             else
             {
@@ -1922,7 +1929,7 @@ namespace VBV_calc
 
             //運命値を最初に取得しておく
             unmei_value = get_unmei_value();
-            if(unmei_value != 0)
+            if (unmei_value != 0)
             {
                 DebugTextBox.Text += "運命値:" + unmei_value + "\n";
             }
@@ -1930,7 +1937,7 @@ namespace VBV_calc
             bairitu *= get_kasoku_value();
             if (get_kasoku_value() != 1.0)
             {
-                DebugTextBox.Text += "加速倍率:" + get_kasoku_value()* get_kasoku_value() + "\n";
+                DebugTextBox.Text += "加速倍率:" + get_kasoku_value() * get_kasoku_value() + "\n";
             }
             bairitu *= get_kyousenshi_value();
             if (get_kyousenshi_value() != 1.0)
@@ -1958,12 +1965,12 @@ namespace VBV_calc
             {
                 DebugTextBox.Text += "巨人狩り倍率:" + get_kyojingari_value() + "\n";
             }
-            bairitu *= get_sippuu_value(kougeki_kaisu*100,unmei_value);
+            bairitu *= get_sippuu_value(kougeki_kaisu * 100, unmei_value);
             if (get_sippuu_value(kougeki_kaisu * 100, unmei_value) != 1.0)
             {
                 DebugTextBox.Text += "疾風倍率:" + get_sippuu_value(kougeki_kaisu * 100, unmei_value) + "\n";
             }
-            bairitu *= get_kenkon_value(kougeki_kaisu*100, unmei_value);
+            bairitu *= get_kenkon_value(kougeki_kaisu * 100, unmei_value);
             if (get_kenkon_value(kougeki_kaisu * 100, unmei_value) != 1.0)
             {
                 DebugTextBox.Text += "乾坤倍率:" + get_kenkon_value(kougeki_kaisu * 100, unmei_value) + "\n";
@@ -2012,7 +2019,7 @@ namespace VBV_calc
             //カブト次元の計算
             double kabuto_value = get_kabutowari_value();
             if (kabuto_value > 75) kabuto_value = 75;
-            if(100.0 / (100 - kabuto_value)!=1.0)
+            if (100.0 / (100 - kabuto_value) != 1.0)
             {
                 DebugTextBox.Text += "カブト倍率:" + 100.0 / (100 - kabuto_value) + "\n";
             }
@@ -2030,7 +2037,7 @@ namespace VBV_calc
             double hissatu_zouka_value = 0.0;
             double hissatu_param_kakuritu = 0.0;
             double chimei_value = 0.0;
-            int hissatu_jougen=50;
+            int hissatu_jougen = 50;
             hissatu_zouka_value = get_hissatu_value(unmei_value);
             chimei_value = get_chimei_value();
             hissatu_param_kakuritu = hissatu_from_param(status_bairitu);
@@ -2041,16 +2048,16 @@ namespace VBV_calc
             }
             //確率の計算と上限の計算
             critical_kakuritu = hissatu_zouka_value + hissatu_param_kakuritu;
-            if(critical_kakuritu >hissatu_jougen)
+            if (critical_kakuritu > hissatu_jougen)
                 critical_kakuritu = hissatu_jougen;
-            if(hissatu_param_kakuritu > hissatu_jougen)
+            if (hissatu_param_kakuritu > hissatu_jougen)
                 hissatu_param_kakuritu = hissatu_jougen;
             //クリティカルと致命の倍率の計算
 
             double critical_damage_bairitu = hissatu_param_kakuritu + chimei_value;
-            if(critical_damage_bairitu < 50)
+            if (critical_damage_bairitu < 50)
                 critical_damage_bairitu = 50;
-            critical_damage_bairitu =1.0+ critical_damage_bairitu / 100 ;
+            critical_damage_bairitu = 1.0 + critical_damage_bairitu / 100;
             //critical_damage_bairitu = (100.0 + critical_damage_bairitu) / 100.0 * (100/(100-critical_kakuritu));
             double critical_damage_bairitu_with_kakuritu = 1.0;
             if (get_chimei_value() == 0)
@@ -2059,12 +2066,12 @@ namespace VBV_calc
             }
             else
             {
-                critical_damage_bairitu_with_kakuritu = 1.25*critical_damage_bairitu * critical_kakuritu / 100 + 1.0 * (100.0 - critical_kakuritu) / 100.0;
+                critical_damage_bairitu_with_kakuritu = 1.25 * critical_damage_bairitu * critical_kakuritu / 100 + 1.0 * (100.0 - critical_kakuritu) / 100.0;
             }
             DebugTextBox.Text += "クリティカルダメージ倍率:" + Math.Round(critical_damage_bairitu, 2) + "\n";
-            DebugTextBox.Text += "クリティカルダメージ確率:" + Math.Round(critical_kakuritu, 2) +"("+ hissatu_param_kakuritu+")" + "\n";
+            DebugTextBox.Text += "クリティカルダメージ確率:" + Math.Round(critical_kakuritu, 2) + "(" + hissatu_param_kakuritu + ")" + "\n";
             DebugTextBox.Text += "致命値:" + chimei_value + "\n";
-            DebugTextBox.Text += "総合クリティカルダメージ倍率:" + Math.Round(critical_damage_bairitu_with_kakuritu,2) + "\n";
+            DebugTextBox.Text += "総合クリティカルダメージ倍率:" + Math.Round(critical_damage_bairitu_with_kakuritu, 2) + "\n";
             bairitu *= critical_damage_bairitu_with_kakuritu;
 
             //種族特攻の計算
@@ -2094,7 +2101,7 @@ namespace VBV_calc
                     //倍率を+1.0
                     tokko_bairitu += 1.0;
                 }
-                else if(player_tokko_str[i].ToString() == "全")
+                else if (player_tokko_str[i].ToString() == "全")
                 {
                     tokko_bairitu += parse_enemy_shuzoku.Count;
                 }
@@ -2102,9 +2109,9 @@ namespace VBV_calc
             Debug.WriteLine("特攻倍率: " + tokko_bairitu);
             DebugTextBox.Text += "特攻倍率: " + tokko_bairitu + "\n";
             double tuigeki = 1.0;
-            if (get_kenkon_value(kougeki_kaisu, unmei_value)!=1.0)
+            if (get_kenkon_value(kougeki_kaisu, unmei_value) != 1.0)
             {
-                tuigeki= 1.0;
+                tuigeki = 1.0;
             }
             else
             {
@@ -2114,7 +2121,7 @@ namespace VBV_calc
             bairitu_kaisu_kitaiti_box.Text = tuigeki.ToString();
             bairitu_kitaiti_box.Text = (Math.Truncate(bairitu * 100) / 100).ToString();
 
-            Debug.WriteLine("最終攻撃倍率: " + Math.Truncate(bairitu*100)/100);
+            Debug.WriteLine("最終攻撃倍率: " + Math.Truncate(bairitu * 100) / 100);
         }
         Boolean leader_flag;
         // 修正内容: Resync_finalskil メソッドの構文エラーと Dictionary の使い方の誤りを修正
@@ -2146,7 +2153,7 @@ namespace VBV_calc
                     }
                     else
                     {
-                        
+
                     }
                 }
             }
@@ -2157,11 +2164,11 @@ namespace VBV_calc
                     if (finalskills.ContainsKey(leader1.Text))
                     {
                         if (leader1_fig.Text != "")
-                            finalskills[leader1.Text]=int.Parse(leader1_fig.Text)+ finalskills[leader1.Text];
+                            finalskills[leader1.Text] = int.Parse(leader1_fig.Text) + finalskills[leader1.Text];
                     }
                     else
                     {
-                        if(leader1_fig.Text!= "")
+                        if (leader1_fig.Text != "")
                             finalskills.Add(leader1.Text, int.Parse(leader1_fig.Text));
                     }
                 }
@@ -2174,7 +2181,7 @@ namespace VBV_calc
                     if (finalskills.ContainsKey(leader2.Text))
                     {
                         if (leader2_fig.Text != "")
-                            finalskills[leader2.Text]=int.Parse(leader2_fig.Text) + finalskills[leader2.Text];
+                            finalskills[leader2.Text] = int.Parse(leader2_fig.Text) + finalskills[leader2.Text];
                     }
                     else
                     {
@@ -2191,7 +2198,7 @@ namespace VBV_calc
                     }
                 }
             }
-            string temp_tokko="";
+            string temp_tokko = "";
             if (shogo1.Text != "")
             {
                 if (finalskills.ContainsKey(shogo1.Text))
@@ -2229,102 +2236,102 @@ namespace VBV_calc
             tokko_box.Text = tokko + temp_tokko;
             if (equipment1_skill1.Text != "")
             {
-                    if (finalskills.ContainsKey(equipment1_skill1.Text))
-                    {
-                        equipment_tokko_plus(equipment1_skill1.Text,equipment1_skill1_fig.Text);
-                        if (equipment1_skill1_fig.Text != "")
-                            finalskills[equipment1_skill1.Text]=int.Parse(equipment1_skill1_fig.Text) + finalskills[equipment1_skill1.Text];
-                    }
+                if (finalskills.ContainsKey(equipment1_skill1.Text))
+                {
+                    equipment_tokko_plus(equipment1_skill1.Text, equipment1_skill1_fig.Text);
+                    if (equipment1_skill1_fig.Text != "")
+                        finalskills[equipment1_skill1.Text] = int.Parse(equipment1_skill1_fig.Text) + finalskills[equipment1_skill1.Text];
+                }
+                else
+                {
+                    equipment_tokko_plus(equipment1_skill1.Text, equipment1_skill1_fig.Text);
+                    if (equipment1_skill1_fig.Text != "")
+                        finalskills.Add(equipment1_skill1.Text, int.Parse(equipment1_skill1_fig.Text));
                     else
-                    {
-                        equipment_tokko_plus(equipment1_skill1.Text, equipment1_skill1_fig.Text);
-                        if (equipment1_skill1_fig.Text != "")
-                            finalskills.Add(equipment1_skill1.Text, int.Parse(equipment1_skill1_fig.Text));
-                        else
-                            finalskills.Add(equipment1_skill1.Text, 0);
+                        finalskills.Add(equipment1_skill1.Text, 0);
 
-                    }
+                }
             }
             if (equipment1_skill2.Text != "")
             {
-                    if (finalskills.ContainsKey(equipment1_skill2.Text))
-                    {
-                        equipment_tokko_plus(equipment1_skill2.Text, equipment1_skill2_fig.Text);
-                        if (equipment1_skill2_fig.Text != "")
-                            finalskills[equipment1_skill2.Text] = int.Parse(equipment1_skill2_fig.Text) + finalskills[equipment1_skill2.Text];
-                    }
+                if (finalskills.ContainsKey(equipment1_skill2.Text))
+                {
+                    equipment_tokko_plus(equipment1_skill2.Text, equipment1_skill2_fig.Text);
+                    if (equipment1_skill2_fig.Text != "")
+                        finalskills[equipment1_skill2.Text] = int.Parse(equipment1_skill2_fig.Text) + finalskills[equipment1_skill2.Text];
+                }
+                else
+                {
+                    equipment_tokko_plus(equipment1_skill2.Text, equipment1_skill2_fig.Text);
+                    if (equipment1_skill2_fig.Text != "")
+                        finalskills.Add(equipment1_skill2.Text, int.Parse(equipment1_skill2_fig.Text));
                     else
-                    {
-                        equipment_tokko_plus(equipment1_skill2.Text, equipment1_skill2_fig.Text);
-                        if (equipment1_skill2_fig.Text != "")
-                            finalskills.Add(equipment1_skill2.Text, int.Parse(equipment1_skill2_fig.Text));
-                        else
-                            finalskills.Add(equipment1_skill2.Text, 0);
-                    }
+                        finalskills.Add(equipment1_skill2.Text, 0);
+                }
             }
-            if(equipment2_skill1.Text != "")
+            if (equipment2_skill1.Text != "")
             {
-                    if (finalskills.ContainsKey(equipment2_skill1.Text))
-                    {
-                        equipment_tokko_plus(equipment2_skill1.Text, equipment2_skill1_fig.Text);                        
-                        if (equipment2_skill1_fig.Text != "")
-                            finalskills[equipment2_skill1.Text]= int.Parse(equipment2_skill1_fig.Text) + finalskills[equipment2_skill1.Text];
-                    }
-                    else
-                    {
-                        equipment_tokko_plus(equipment2_skill1.Text, equipment2_skill1_fig.Text);
-                        if (equipment2_skill1_fig.Text != "")
-                            finalskills.Add(equipment2_skill1.Text, int.Parse(equipment2_skill1_fig.Text));
-                        else finalskills.Add(equipment2_skill1.Text, 0);
+                if (finalskills.ContainsKey(equipment2_skill1.Text))
+                {
+                    equipment_tokko_plus(equipment2_skill1.Text, equipment2_skill1_fig.Text);
+                    if (equipment2_skill1_fig.Text != "")
+                        finalskills[equipment2_skill1.Text] = int.Parse(equipment2_skill1_fig.Text) + finalskills[equipment2_skill1.Text];
+                }
+                else
+                {
+                    equipment_tokko_plus(equipment2_skill1.Text, equipment2_skill1_fig.Text);
+                    if (equipment2_skill1_fig.Text != "")
+                        finalskills.Add(equipment2_skill1.Text, int.Parse(equipment2_skill1_fig.Text));
+                    else finalskills.Add(equipment2_skill1.Text, 0);
 
-                    }
+                }
             }
-            if(equipment2_skill2.Text != "")
+            if (equipment2_skill2.Text != "")
             {
-                    if (finalskills.ContainsKey(equipment2_skill2.Text))
-                    {
-                        equipment_tokko_plus(equipment2_skill2.Text, equipment2_skill2_fig.Text);
-                        if (equipment2_skill2_fig.Text != "")
-                            finalskills[equipment2_skill2.Text]= int.Parse(equipment2_skill2_fig.Text) + finalskills[equipment2_skill2.Text];
-                    }
+                if (finalskills.ContainsKey(equipment2_skill2.Text))
+                {
+                    equipment_tokko_plus(equipment2_skill2.Text, equipment2_skill2_fig.Text);
+                    if (equipment2_skill2_fig.Text != "")
+                        finalskills[equipment2_skill2.Text] = int.Parse(equipment2_skill2_fig.Text) + finalskills[equipment2_skill2.Text];
+                }
+                else
+                {
+                    equipment_tokko_plus(equipment2_skill2.Text, equipment2_skill2_fig.Text);
+                    if (equipment2_skill2_fig.Text != "")
+                        finalskills.Add(equipment2_skill2.Text, int.Parse(equipment2_skill2_fig.Text));
                     else
-                    {
-                        equipment_tokko_plus(equipment2_skill2.Text, equipment2_skill2_fig.Text);
-                        if (equipment2_skill2_fig.Text != "")
-                            finalskills.Add(equipment2_skill2.Text, int.Parse(equipment2_skill2_fig.Text));
-                        else
-                            finalskills[equipment2_skill2.Text] = 0;
-                    }
+                        finalskills[equipment2_skill2.Text] = 0;
+                }
             }
             if (ryoshoku_name.Text != "")
             {
-                    if (finalskills.ContainsKey(ryoshoku_name.Text))
-                    {
-                        if (ryoshoku_fig_box.Text != "")
-                            finalskills[ryoshoku_name.Text] = int.Parse(ryoshoku_fig_box.Text) + finalskills[ryoshoku_name.Text];
-                    }
+                if (finalskills.ContainsKey(ryoshoku_name.Text))
+                {
+                    if (ryoshoku_fig_box.Text != "")
+                        finalskills[ryoshoku_name.Text] = int.Parse(ryoshoku_fig_box.Text) + finalskills[ryoshoku_name.Text];
+                }
+                else
+                {
+                    if (ryoshoku_fig_box.Text != "")
+                        finalskills.Add(ryoshoku_name.Text, int.Parse(ryoshoku_fig_box.Text));
                     else
-                    {
-                        if (ryoshoku_fig_box.Text != "")
-                            finalskills.Add(ryoshoku_name.Text, int.Parse(ryoshoku_fig_box.Text));
-                        else
-                            finalskills[ryoshoku_name.Text] = 0;
-                    }
+                        finalskills[ryoshoku_name.Text] = 0;
+                }
             }
-            if(assist1_name.Text != "")
+            if (assist1_name.Text != "")
             {
-                    if (finalskills.ContainsKey(assist1_name.Text))
-                    {
-                        if (assist1_fig_box.Text != "")
-                            finalskills[assist1_name.Text] = int.Parse(assist1_fig_box.Text) + finalskills[assist1_name.Text];
-                    }
+                if (finalskills.ContainsKey(assist1_name.Text))
+                {
+                    if (assist1_fig_box.Text != "")
+                        finalskills[assist1_name.Text] = int.Parse(assist1_fig_box.Text) + finalskills[assist1_name.Text];
+                }
+                else
+                {
+                    if (assist1_fig_box.Text != "")
+                        finalskills.Add(assist1_name.Text, int.Parse(assist1_fig_box.Text));
                     else
-                    {
-                        if (assist1_fig_box.Text != "")
-                            finalskills.Add(assist1_name.Text, int.Parse(assist1_fig_box.Text));
-                        else
-                            finalskills[assist1_name.Text] = 0;
-                    }
+                        finalskills[assist1_name.Text] = 0;
+                }
             }
             if (assist2_name.Text != "")
             {
@@ -2452,7 +2459,7 @@ namespace VBV_calc
 
                 }
                 else if (i == 3)
-                    {
+                {
                     final4.Text = key.Key;
                     final4_fig.Text = key.Value.ToString();
                 }
@@ -2477,7 +2484,7 @@ namespace VBV_calc
                     final8_fig.Text = key.Value.ToString();
                 }
                 else if (i == 8)
-                    {
+                {
                     final9.Text = key.Key;
                     final9_fig.Text = key.Value.ToString();
                 }
@@ -2562,7 +2569,7 @@ namespace VBV_calc
                 string temp_tokko = skillname[0].ToString();
                 Debug.WriteLine("特攻装備のスキル名: " + temp_tokko);
                 //:で分割
-                temp_tokko_value= int.Parse(skillvalue);
+                temp_tokko_value = int.Parse(skillvalue);
                 for (int i = 0; i < temp_tokko_value; i++)
                 {
                     tokko_box.Text += temp_tokko;
@@ -2594,7 +2601,7 @@ namespace VBV_calc
             calc_damage();
         }
 
-        bool enemy_senshu_flag=false;
+        bool enemy_senshu_flag = false;
 
         private void CheckBox_senshu_Checked(object sender, RoutedEventArgs e)
         {
@@ -2616,11 +2623,11 @@ namespace VBV_calc
             calc_damage();
         }
 
-        ShogoStatus soubi1_status = new ShogoStatus(0,0,0,0,"");
-        ShogoStatus soubi2_status = new ShogoStatus(0, 0, 0, 0,"");
-        ShogoStatus shogo1_status = new ShogoStatus(0, 0, 0, 0,"");
-        ShogoStatus shogo2_status = new ShogoStatus(0, 0, 0, 0,"");
-        ShogoStatus ryoshoku_status = new ShogoStatus(0, 0, 0, 0,"");
+        ShogoStatus soubi1_status = new ShogoStatus(0, 0, 0, 0, "");
+        ShogoStatus soubi2_status = new ShogoStatus(0, 0, 0, 0, "");
+        ShogoStatus shogo1_status = new ShogoStatus(0, 0, 0, 0, "");
+        ShogoStatus shogo2_status = new ShogoStatus(0, 0, 0, 0, "");
+        ShogoStatus ryoshoku_status = new ShogoStatus(0, 0, 0, 0, "");
         private void ComboBox_SelectionChanged_EquipmentBox1(object sender, SelectionChangedEventArgs e)
         {
             // labelに現在コンボ選択の内容を表示
@@ -2676,7 +2683,7 @@ namespace VBV_calc
             // labelに現在コンボ選択の内容を表示
             ItemSet tmp = ((ItemSet)EquipmentBox2.SelectedItem);//表示名はキャストして取りだす
 
-            soubi2_status.change_status(0,0,0,0);
+            soubi2_status.change_status(0, 0, 0, 0);
 
             if (tmp != null)
             {
@@ -2903,7 +2910,7 @@ namespace VBV_calc
         private void Saved_Button_Click(object sender, RoutedEventArgs e)
         {
             savedata tempdata;
-            if (CharacterBox.ItemsSource != null )
+            if (CharacterBox.ItemsSource != null)
             {
                 CharacterJson selectedCharacter = (CharacterJson)CharacterBox.SelectedItem;
                 if (selectedCharacter != null)
@@ -2976,7 +2983,7 @@ namespace VBV_calc
                         tempdata.shogo2 = "";
                     }
                 }
-                if(assistskill1_box.ItemsSource != null && assistskill1_box.SelectedItem != null)
+                if (assistskill1_box.ItemsSource != null && assistskill1_box.SelectedItem != null)
                 {
                     ItemSet selectedassist1 = (ItemSet)assistskill1_box.SelectedItem;
                     if (selectedassist1 != null)
@@ -3004,14 +3011,14 @@ namespace VBV_calc
                 {
                     ItemSet selectedassist3 = (ItemSet)assistskill3_box.SelectedItem;
                     if (selectedassist3 != null)
-                        {
+                    {
                         tempdata.assist3 = selectedassist3.ItemValue;
                     }
                     else
                     {
                         tempdata.assist3 = "";
                     }
-                } 
+                }
                 tempdata.leader_flag = leader_flag;
                 all_save_data.Add(tempdata);
             }
@@ -3144,7 +3151,7 @@ namespace VBV_calc
             }
         }
 
-        private int calc_chiryoku_assist(string fig,int number)
+        private int calc_chiryoku_assist(string fig, int number)
         {
             var chiryokuBox = (TextBox)this.FindName($"assistskill{number}_chiryoku_box");
             int temp_fig = 0;
@@ -3305,6 +3312,58 @@ namespace VBV_calc
                 //まずキャラクター選択のフィルターを解除する
                 // キャラクター選択
                 all_save_data.Remove(selected);
+            }
+        }
+
+        private void Write_File_Button_Click(object sender, RoutedEventArgs e)
+        {
+            //現在のall_save_dataをjsonにして保存する
+            try
+            {
+                string json = JsonConvert.SerializeObject(all_save_data, Formatting.Indented);
+                // 保存先のフォルダが無ければ作る
+                File.WriteAllText("./json/saved.json", json);
+                MessageBox.Show("保存しました。");
+                return; // 成功
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine("権限が無いため保存できません: " + ex.Message);
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                Console.WriteLine("ディレクトリが見つかりません: " + ex.Message);
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine("入出力エラー: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("不明なエラー: " + ex.Message);
+            }
+
+        }
+
+        private void Read_File_Button_Click(object sender, RoutedEventArgs e)
+        {
+            //jsonファイルから読み込んでall_save_dataに追加する
+            if (File.Exists("./json/saved.json"))
+            {
+                string loadedJson = File.ReadAllText("./json/saved.json");
+                //all_save_dataをすべて消す
+                all_save_data.Clear();
+                //all_save_dataに読み込んだjsonを追加する
+                all_save_data = JsonConvert.DeserializeObject<ObservableCollection<savedata>>(loadedJson);
+                if (all_save_data == null)
+                {
+                    all_save_data = new ObservableCollection<savedata>();
+                }
+                saved_list.ItemsSource = all_save_data;
+            }
+            else
+            {
+                MessageBox.Show("保存ファイルが見つかりません。");
             }
         }
     }
