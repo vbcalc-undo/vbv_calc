@@ -1360,6 +1360,7 @@ namespace VBV_calc
             double enemy_ibeido_value= 0.0;
             double enemy_ukenagashi_value= 0.0;
             double enemy_block_value= 0.0;
+            int enemy_sikou_value = 0;
             int enemy_unmei_value = 0;
             if (double.TryParse(tokkobogyo_box.Text, out enemy_tokkou_value))
             {
@@ -1469,7 +1470,13 @@ namespace VBV_calc
             //ステータス値の取得
             if (double.TryParse(enemy_bougyo_box.Text, out enermy_bougyo))
             {
-                // enermy_bougyo に変換された値が入る
+            }
+            else
+            {
+                // 変換できなかった場合はデフォルト値（1.0）のまま
+            }
+            if (int.TryParse(enemy_sikou_box.Text, out enemy_sikou_value))
+            {
             }
             else
             {
@@ -1687,8 +1694,9 @@ namespace VBV_calc
                 {
                 }
             }
-            //ブロック値は次元障壁と加算
+            //ブロック値は次元障壁、至高の盾と加算
             block_value+=(int)enemy_jigenshoheki_value;
+            block_value += (int)enemy_sikou_value;
             if (block_value > 0)
                 block_value = block_value + enemy_unmei_value;
             if (get_shuyaku_value() != 1.0)
@@ -1727,8 +1735,9 @@ namespace VBV_calc
             {
                 // 変換できなかった場合はデフォルト値（0）のまま
             }
-            //イベイドと次元障壁加、攻撃側のイベイド無視と減算
+            //イベイドと次元障壁と至高の盾加算後に値があるならさらに運命値、攻撃側のイベイド無視と減算
             ibeido_value += (int)enemy_jigenshoheki_value;
+            ibeido_value += enemy_sikou_value;
             if (ibeido_value > 0)
                 ibeido_value = ibeido_value + enemy_unmei_value;
             ibeido_mushi= ibeido_mushi_calc(unmei_value);
