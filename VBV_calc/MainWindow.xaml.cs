@@ -358,6 +358,7 @@ namespace VBV_calc
                                 characters[i].特攻);
                         shuzoku_box.Text = characters[i].種族;
                         tokko_box.Text = characters[i].特攻;
+                        shokugyo_box.Text = characters[i].職業;
                         src_shogo1.Clear();
                         src_shogo2.Clear();
                         //src_shogo1.Add(null);
@@ -557,6 +558,9 @@ namespace VBV_calc
         ObservableCollection<ItemSet> src_asistskill1;
         ObservableCollection<ItemSet> src_asistskill2;
         ObservableCollection<ItemSet> src_asistskill3;
+        ObservableCollection<String> enemy_stancelist;
+        ObservableCollection<String> stancelist;
+        ObservableCollection<String> enemy_shokugholist;
 
         List<ItemSet> src_ryoshoku;
         Dictionary<string, List<EquipmentJson>> all_equipments; // ここで宣言
@@ -572,6 +576,64 @@ namespace VBV_calc
                 equipments = JsonConvert.DeserializeObject<List<EquipmentJson>>(jsonReadData);
                 all_equipments.Add(equipmentname, equipments);
             }
+        }
+
+        private double calc_shokugyo_bairitu()
+        {
+            string shokugyo = shokugyo_box.Text;
+            string enemy_shokugyo = enemy_shokugyo_box.SelectedItem as string;
+            //ItemSet tmp = (enemy_shokugyo_box.SelectedItem);//表示名はキャストして取りだす
+
+            if (shokugyo !="" && enemy_shokugyo != "")
+            {
+                if(shokugyo=="ブレイダー" && enemy_shokugyo == "デストロイヤー")
+                {
+                    return 1.5;
+                }
+                if (shokugyo == "デストロイヤー" && enemy_shokugyo == "ガーダー")
+                {
+                    return 1.5;
+                }
+                if (shokugyo == "ガーダー" && enemy_shokugyo == "キャスター")
+                {
+                    return 1.5;
+                }
+                if (shokugyo == "キャスター" && enemy_shokugyo == "シューター")
+                {
+                    return 1.5;
+                }
+                if (shokugyo == "シューター" && enemy_shokugyo == "ランサー")
+                {
+                    return 1.5;
+                }
+                if (shokugyo == "ランサー" && enemy_shokugyo == "ブレイダー")
+                {
+                    return 1.5;
+                }
+            }
+            return 1.0;
+        }
+
+        private double calc_stance_bairitu()
+        {
+            string stance = stance_box.SelectedItem as string;
+            string enemy_stance = enemy_stance_box.SelectedItem as string; ;
+            if (stance != "" && enemy_stance != "")
+            {
+                if (stance == "進撃" && enemy_stance == "計略")
+                {
+                    return 1.25;
+                }
+                if (stance == "計略" && enemy_stance == "防備")
+                {
+                    return 1.25;
+                }
+                if (stance == "防備" && enemy_stance == "進撃")
+                {
+                    return 1.25;
+                }
+            }
+            return 1.0;
         }
 
         private void load_json_equipment()
@@ -685,6 +747,9 @@ namespace VBV_calc
         }
         public bool asist_flag = false;
         ObservableCollection<savedata> all_save_data = new ObservableCollection<savedata>();
+        List<string> STANCE_LIST = new List<string> { "","防備", "計略", "進撃", "乱戦" };
+        List<string> SHOKUGYO_LIST = new List<string> { "", "ブレイダー", "ランサー", "シューター", "キャスター", "ガーダー", "デストロイヤー", "ヒーラー" };
+
         public MainWindow()
         {
             InitializeComponent();
@@ -706,6 +771,11 @@ namespace VBV_calc
             src_asistskill1 = new ObservableCollection<ItemSet>();
             src_asistskill2 = new ObservableCollection<ItemSet>();
             src_asistskill3 = new ObservableCollection<ItemSet>();
+
+            enemy_stancelist = new ObservableCollection<String>();
+            stancelist = new ObservableCollection<String>();
+            enemy_shokugholist = new ObservableCollection<String>();
+
 
             //src_character.Add(new ItemSet("Number1", "Number1"));
             //src_character.Add(new ItemSet("Number2", "Number2"));
@@ -755,6 +825,13 @@ namespace VBV_calc
             assistskill3_box.ItemsSource = src_asistskills;
             assistskill3_box.DisplayMemberPath = "ItemDisp";
             assistskill3_box.SelectedValuePath = "ItemValue";
+
+            enemy_stance_box.ItemsSource = STANCE_LIST;
+            enemy_stance_box.SelectedIndex = -1;
+            stance_box.ItemsSource = STANCE_LIST;
+            stance_box.SelectedIndex = -1;
+            enemy_shokugyo_box.ItemsSource = SHOKUGYO_LIST;
+            enemy_shokugyo_box.SelectedIndex = -1;
 
             //passive1.DataContext = src_character;
 
@@ -1853,8 +1930,20 @@ namespace VBV_calc
             enemy_waisho_bairitu = (100.0 + enemy_waisho_value) / 100.0;
             enemy_waisho_kakuritu = (100.0 - enemy_waisho_value) / 100.0; //そのままダメージ期待値にかけてしまう
             DebugTextBox_damage.Text += "矮小値:" + enemy_waisho_value + "\n";
-
             bougyo_skill_bairitu *= enemy_waisho_bairitu;
+
+            //職業とスタンスの計算
+            double shokugyo_bairitu = calc_shokugyo_bairitu();
+            double stance_bairitu = calc_stance_bairitu();
+            if(shokugyo_bairitu > 1.0)
+            {
+                DebugTextBox_damage.Text += "職業補正:" + shokugyo_bairitu + "\n";
+            }
+            if(stance_bairitu > 1.0)
+            {
+                DebugTextBox_damage.Text += "スタンス補正:" + stance_bairitu + "\n";
+            }
+            kougeki_bairitu = bairitu * shokugyo_bairitu * stance_bairitu;
 
             Debug.WriteLine("防御スキル倍率：" + bougyo_skill_bairitu);
             DebugTextBox_damage.Text += "防御スキル倍率:" + bougyo_skill_bairitu + "\n";
@@ -3402,6 +3491,11 @@ namespace VBV_calc
         }
 
         private void enemy_waisho_changed(object sender, TextChangedEventArgs e)
+        {
+            calc_damage();
+        }
+
+        private void enemy_stance_boxChanged(object sender, SelectionChangedEventArgs e)
         {
             calc_damage();
         }
