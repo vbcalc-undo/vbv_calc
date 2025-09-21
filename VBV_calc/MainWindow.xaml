@@ -208,7 +208,7 @@
             <TextBox x:Name="block_box" Canvas.Left="505" TextWrapping="Wrap" Text="" Canvas.Top="145" Width="78" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="enemy_status_changed"/>
             <TextBlock Canvas.Left="505" TextWrapping="Wrap" Text="イベイド" Canvas.Top="163"/>
             <TextBox x:Name="ibeido_box" Height="17" Canvas.Left="505" TextWrapping="Wrap" Text="" Canvas.Top="181" Width="78" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="enemy_status_changed"/>
-            <CheckBox x:Name="senshubouei_check" Content="専守防衛" Canvas.Left="602" Canvas.Top="167" Checked="CheckBox_senshu_Checked" Unchecked="CheckBox_senshu_Unchecked" />
+            <CheckBox x:Name="senshubouei_check" Content="専守防衛" Canvas.Left="607" Canvas.Top="181" Checked="CheckBox_senshu_Checked" Unchecked="CheckBox_senshu_Unchecked" />
             <TextBox x:Name ="damage_max_box" Height="23" Canvas.Left="1008" TextWrapping="Wrap" Text="" Canvas.Top="61" Width="111" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBlock Canvas.Left="1135" TextWrapping="Wrap" Text="を" Canvas.Top="63" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBox x:Name ="damage_kaisu_max_box" Canvas.Left="1163" TextWrapping="Wrap" Text="" Canvas.Top="61" Width="30" RenderTransformOrigin="-0.716,4" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -219,8 +219,10 @@
             <TextBlock Canvas.Left="1210" TextWrapping="Wrap" Text="回与える" Canvas.Top="119" RenderTransformOrigin="0.444,0.098" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBlock Canvas.Left="602" TextWrapping="Wrap" Canvas.Top="45" Height="20" Width="53" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="至高の盾"/><LineBreak/><Run Language="ja-jp"/></TextBlock>
             <TextBox x:Name="enemy_sikou_box" Height="18" Canvas.Left="602" TextWrapping="Wrap" Text="" Canvas.Top="63" Width="78" TextChanged="enemy_unmei_changed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-            <TextBlock Canvas.Left="602" TextWrapping="Wrap" Canvas.Top="88" HorizontalAlignment="Center" VerticalAlignment="Top" Height="20" Width="53"><Run Language="ja-jp" Text="運命値"/><LineBreak/><Run Language="ja-jp"/></TextBlock>
-            <TextBox x:Name="enemy_unmei_box" Height="18" Canvas.Left="602" TextWrapping="Wrap" Text="" Canvas.Top="104" Width="78" TextChanged="enemy_unmei_changed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="602" TextWrapping="Wrap" Canvas.Top="126" HorizontalAlignment="Center" VerticalAlignment="Top" Height="20" Width="53"><Run Language="ja-jp" Text="運命値"/><LineBreak/><Run Language="ja-jp"/></TextBlock>
+            <TextBox x:Name="enemy_unmei_box" Height="18" Canvas.Left="602" TextWrapping="Wrap" Text="" Canvas.Top="149" Width="78" TextChanged="enemy_unmei_changed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBox x:Name="enemy_waisho_box" Height="18" Canvas.Left="602" TextWrapping="Wrap" Text="" Canvas.Top="105" Width="78" TextChanged="enemy_waisho_changed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="602" TextWrapping="Wrap" Canvas.Top="88" Height="20" Width="53" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="矮小体躯"/><LineBreak/><Run Language="ja-jp"/></TextBlock>
         </Canvas>
         <Canvas Height="654" Canvas.Left="-226" Width="221" HorizontalAlignment="Left" VerticalAlignment="Center">
             <ListBox Height="496" x:Name="saved_list" Canvas.Left="10" Canvas.Top="31" Width="201" SelectionMode="Single" HorizontalAlignment="Center" VerticalAlignment="Top" DisplayMemberPath="character_id" SelectedValuePath="character_name">

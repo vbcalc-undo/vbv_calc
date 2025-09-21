@@ -763,6 +763,23 @@ namespace VBV_calc
             CharacterBox.SelectedIndex = 0;
             ComboBox_SelectionChanged_character(null, null);
             Resync_finalskil();
+
+            if (File.Exists("./json/saved.json"))
+            {
+                string loadedJson = File.ReadAllText("./json/saved.json");
+                //all_save_dataをすべて消す
+                all_save_data.Clear();
+                //all_save_dataに読み込んだjsonを追加する
+                all_save_data = JsonConvert.DeserializeObject<ObservableCollection<savedata>>(loadedJson);
+                if (all_save_data == null)
+                {
+                    all_save_data = new ObservableCollection<savedata>();
+                }
+                saved_list.ItemsSource = all_save_data;
+            }
+            else
+            {
+            }
             _isInitialized = true; // 初期化完了
         }
         private string _Passive1;
@@ -771,11 +788,6 @@ namespace VBV_calc
         private void OnPropertyChanged(string passive1)
         {
             throw new NotImplementedException();
-        }
-
-        public class ViewModel
-        {
-            public string Txt { get; set; } = "Hello";
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -939,7 +951,7 @@ namespace VBV_calc
         }
         private double get_kakuritu_tuigeki_value(double unmei_value)
         {
-            double kougeki_bairitu = 1.0;
+            double kougeki_bairitu = 0.0;
             double skillvalue = 0.0;
             for (int i = 1; i <= FINALSKILL_NUM; i++)
             {
@@ -1367,6 +1379,7 @@ namespace VBV_calc
             double enemy_ibeido_value = 0.0;
             double enemy_ukenagashi_value = 0.0;
             double enemy_block_value = 0.0;
+            int enemy_waisho_value = 0;
             int enemy_sikou_value = 0;
             int enemy_unmei_value = 0;
             if (double.TryParse(tokkobogyo_box.Text, out enemy_tokkou_value))
@@ -1488,6 +1501,9 @@ namespace VBV_calc
             else
             {
                 // 変換できなかった場合はデフォルト値（1.0）のまま
+            }
+            if(int.TryParse(enemy_waisho_box.Text,out enemy_waisho_value))
+            {
             }
 
 
@@ -1658,9 +1674,6 @@ namespace VBV_calc
             else
                 bougyo_skill_bairitu = senshu * ((100.0 - enemy_shinma_value) / 100.0) * ((100.0 - enemy_mukei_value) / 100.0);
 
-            Debug.WriteLine("防御スキル倍率：" + bougyo_skill_bairitu);
-            DebugTextBox_damage.Text += "防御スキル倍率:" + bougyo_skill_bairitu + "\n";
-
             //特攻倍率の計算
             String shuzoku_str = enemy_shuzoku_box.Text;
             Dictionary<string, int> parse_enemy_shuzoku = new Dictionary<string, int>();
@@ -1775,8 +1788,6 @@ namespace VBV_calc
             if (temp_toushou_bairitu < -30) temp_toushou_bairitu = -30;
             if (temp_seisen_bairitu > 30) temp_seisen_bairitu = 30;
             if (temp_seisen_bairitu < -30) temp_seisen_bairitu = -30;
-            DebugTextBox_damage.Text += "聖戦補正値:" + temp_seisen_bairitu + "\n";
-            DebugTextBox_damage.Text += "凍傷補正値:" + temp_toushou_bairitu + "\n";
 
             if (temp_seisen_bairitu > 0)
             {
@@ -1798,18 +1809,18 @@ namespace VBV_calc
             {
                 string p_shuzoku = shuzoku_box.Text;
                 toushou_bairitu = 1.0;
-                if (p_shuzoku.Contains("炎") || p_shuzoku.Contains("氷") || p_shuzoku.Contains("星"))
+                if (Regex.IsMatch(p_shuzoku, "炎|氷|星"))
                 {
-                    enemy_toushou_bairitu = (100.0 + temp_toushou_bairitu) / 100.0;
+                    enemy_toushou_bairitu = 1.0;
                 }
                 else
                 {
-                    enemy_toushou_bairitu = 1.0;
+                    enemy_toushou_bairitu = (100.0 + temp_toushou_bairitu) / 100.0;
                 }
             }
             else if (temp_toushou_bairitu > 0)
             {
-                if (shuzoku_str.Contains("炎") || shuzoku_str.Contains("氷") || shuzoku_str.Contains("星"))
+                if (Regex.IsMatch(shuzoku_str, "炎|氷|星"))
                 {
                     toushou_bairitu = 1.0;
                 }
@@ -1824,10 +1835,29 @@ namespace VBV_calc
                 toushou_bairitu = 1.0;
                 enemy_toushou_bairitu = 1.0;
             }
-
+            DebugTextBox_damage.Text += "聖戦補正値:" + temp_seisen_bairitu + "\n";
+            DebugTextBox_damage.Text += "凍傷補正値:" + temp_toushou_bairitu + "\n";
             double enemy_bougyo_value = 1;
-            kougeki_bairitu = bairitu * toushou_bairitu * seisen_bairitu;
-            bougyo_skill_bairitu *= enemy_toushou_bairitu * enemy_seisen_bairitu;
+            kougeki_bairitu = bairitu * toushou_bairitu * seisen_bairitu ;
+            bougyo_skill_bairitu = bougyo_skill_bairitu * enemy_toushou_bairitu * enemy_seisen_bairitu;
+
+            //矮小値の計算
+            if (enemy_waisho_value > 0)
+                enemy_waisho_value = enemy_waisho_value + enemy_unmei_value;
+
+            if (enemy_waisho_value > 80)
+                enemy_waisho_value = 80;
+
+            double enemy_waisho_bairitu;
+            double enemy_waisho_kakuritu = 0.0;
+            enemy_waisho_bairitu = (100.0 + enemy_waisho_value) / 100.0;
+            enemy_waisho_kakuritu = (100.0 - enemy_waisho_value) / 100.0; //そのままダメージ期待値にかけてしまう
+            DebugTextBox_damage.Text += "矮小値:" + enemy_waisho_value + "\n";
+
+            bougyo_skill_bairitu *= enemy_waisho_bairitu;
+
+            Debug.WriteLine("防御スキル倍率：" + bougyo_skill_bairitu);
+            DebugTextBox_damage.Text += "防御スキル倍率:" + bougyo_skill_bairitu + "\n";
 
             if (double.TryParse(enemy_bougyo_box.Text, out enemy_bougyo_value))
             {
@@ -1868,6 +1898,9 @@ namespace VBV_calc
             {
                 damage_value = (100 - ibeido_value) * damage_value / 100.0;
             }
+
+            damage_value = damage_value * enemy_waisho_kakuritu;
+
             double tuigeki = 0;
             if (get_kenkon_value(kougeki_kaisu, unmei_value) != 1.0)
             {
@@ -1877,6 +1910,7 @@ namespace VBV_calc
             {
                 tuigeki = 1.0 + kougeki_kaisu;
             }
+
 
             damage_kaisu_kitaiti_box.Text = tuigeki.ToString();
             damage_kitaiti_box.Text = Math.Truncate(damage_value).ToString();
@@ -3365,6 +3399,11 @@ namespace VBV_calc
             {
                 MessageBox.Show("保存ファイルが見つかりません。");
             }
+        }
+
+        private void enemy_waisho_changed(object sender, TextChangedEventArgs e)
+        {
+            calc_damage();
         }
     }
 }
