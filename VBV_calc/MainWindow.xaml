@@ -5,31 +5,31 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VBV_calc"
         mc:Ignorable="d"
-        Title="VBVダメージ倍率計算機" Height="727" Width="1629">
+        Title="VBVダメージ倍率計算機" Height="775" Width="1629">
     <Canvas Margin="242,0,10,309">
-        <Canvas x:Name="maincanvas" Height="456" Width="1387" HorizontalAlignment="Center" VerticalAlignment="Top">
-            <ComboBox Width="288" HorizontalAlignment="Center" VerticalAlignment="Top" Canvas.Left="16" Canvas.Top="44" x:Name="CharacterBox" DisplayMemberPath="名称" SelectedValuePath="名称" SelectionChanged="ComboBox_SelectionChanged_character" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" IsEditable="True" StaysOpenOnEdit="True" IsTextSearchEnabled="False">
+        <Canvas x:Name="maincanvas" Height="490" Width="1387" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <ComboBox Width="288" VerticalAlignment="Top" Canvas.Left="16" Canvas.Top="44" x:Name="CharacterBox" DisplayMemberPath="名称" SelectedValuePath="名称" SelectionChanged="ComboBox_SelectionChanged_character" VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" IsEditable="True" StaysOpenOnEdit="True" IsTextSearchEnabled="False">
                 <ComboBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel/>
                     </ItemsPanelTemplate>
                 </ComboBox.ItemsPanel>
             </ComboBox>
-            <ComboBox x:Name="shogo1Box" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" Canvas.Left="16" Canvas.Top="170" SelectionChanged="shogo1_SelectionChanged"/>
-            <ComboBox x:Name="shogo2Box" Width="120" Canvas.Left="183" Canvas.Top="170" HorizontalAlignment="Center" VerticalAlignment="Top" SelectionChanged="shogo2_SelectionChanged"/>
-            <ComboBox Canvas.Left="16" Canvas.Top="220" Width="120"  x:Name="EquipmentBox1" SelectionChanged="ComboBox_SelectionChanged_EquipmentBox1" HorizontalAlignment="Center" VerticalAlignment="Top" />
-            <ComboBox Canvas.Left="183" Canvas.Top="220" Width="120" x:Name="EquipmentBox2" SelectionChanged="ComboBox_SelectionChanged_EquipmentBox2" HorizontalAlignment="Center" VerticalAlignment="Top" />
-            <TextBlock Canvas.Left="55" TextWrapping="Wrap" Canvas.Top="153" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="称号１"/></TextBlock>
-            <TextBlock Canvas.Left="218" TextWrapping="Wrap" Canvas.Top="153" HorizontalAlignment="Center" VerticalAlignment="Top" Text="称号２"/>
-            <TextBlock Canvas.Left="55" TextWrapping="Wrap" Canvas.Top="199" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="装備１"/></TextBlock>
-            <TextBlock Canvas.Left="218" TextWrapping="Wrap" Canvas.Top="199" HorizontalAlignment="Center" VerticalAlignment="Top" Text="装備２" RenderTransformOrigin="0.611,-2.441"/>
+            <ComboBox x:Name="shogo1Box" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" Canvas.Left="16" Canvas.Top="149" SelectionChanged="shogo1_SelectionChanged"/>
+            <ComboBox x:Name="shogo2Box" Width="120" Canvas.Left="183" Canvas.Top="149" HorizontalAlignment="Center"  VerticalAlignment="Top" SelectionChanged="shogo2_SelectionChanged"/>
+            <ComboBox Canvas.Left="16" Canvas.Top="199" Width="120"  x:Name="EquipmentBox1" SelectionChanged="ComboBox_SelectionChanged_EquipmentBox1" HorizontalAlignment="Center"  VerticalAlignment="Top" />
+            <ComboBox Canvas.Left="183" Canvas.Top="199" Width="120" x:Name="EquipmentBox2" SelectionChanged="ComboBox_SelectionChanged_EquipmentBox2" HorizontalAlignment="Center" VerticalAlignment="Top" />
+            <TextBlock Canvas.Left="55" TextWrapping="Wrap" Canvas.Top="132" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="称号１"/></TextBlock>
+            <TextBlock Canvas.Left="218" TextWrapping="Wrap" Canvas.Top="132" HorizontalAlignment="Center" VerticalAlignment="Top" Text="称号２"/>
+            <TextBlock Canvas.Left="55" TextWrapping="Wrap" Canvas.Top="178" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="装備１"/></TextBlock>
+            <TextBlock Canvas.Left="218" TextWrapping="Wrap" Canvas.Top="178" HorizontalAlignment="Center" VerticalAlignment="Top" Text="装備２" RenderTransformOrigin="0.611,-2.441"/>
             <TextBox x:Name="passive1" Canvas.Left="344" TextWrapping="Wrap" Text="" Canvas.Top="41" Width="75" Height="22" HorizontalAlignment="Left" VerticalAlignment="Center" />
             <TextBox x:Name="passive2" Canvas.Left="344" TextWrapping="Wrap" Text="" Canvas.Top="75" Width="75" Height="22" HorizontalAlignment="Center" VerticalAlignment="Top" />
             <TextBox x:Name="passive3" Canvas.Left="344" TextWrapping="Wrap" Text="" Canvas.Top="107" Width="75" Height="22" HorizontalAlignment="Center" VerticalAlignment="Top" />
             <TextBox x:Name="passive4" Canvas.Left="344" TextWrapping="Wrap" Text="" Canvas.Top="138" Width="75" Height="22" HorizontalAlignment="Center" VerticalAlignment="Top" />
             <TextBox x:Name="passive5" Canvas.Left="344" TextWrapping="Wrap" Text="" Canvas.Top="171" Width="75" Height="22" HorizontalAlignment="Center" VerticalAlignment="Top" />
             <TextBox x:Name="passive6" Canvas.Left="344" TextWrapping="Wrap" Text="" Canvas.Top="203" Width="75" Height="22" HorizontalAlignment="Center" VerticalAlignment="Top" />
-            <CheckBox x:Name="leaderflag" Content="リーダーフラグ" Canvas.Left="16" Canvas.Top="314" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <CheckBox x:Name="leaderflag" Content="リーダーフラグ" Canvas.Left="337" Canvas.Top="461" Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked" HorizontalAlignment="Left" VerticalAlignment="Center"/>
             <TextBox x:Name="final1" Canvas.Left="657" TextWrapping="Wrap" Text="" Canvas.Top="43" Width="75" Height="22" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBox x:Name="final2" Canvas.Left="657" TextWrapping="Wrap" Text="" Canvas.Top="77" Width="75" Height="22" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBox x:Name="final3" Canvas.Left="657" TextWrapping="Wrap" Text="" Canvas.Top="107" Width="75" Height="22" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -103,8 +103,8 @@
             <TextBox x:Name="final15_fig" Canvas.Left="915" TextWrapping="Wrap" Canvas.Top="143" Width="45"  Text="" HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <TextBox x:Name="final16_fig" Canvas.Left="915" TextWrapping="Wrap" Canvas.Top="176" Width="45"  Text="" HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <TextBox x:Name="final13_fig" Canvas.Left="915" TextWrapping="Wrap" Canvas.Top="81" Width="45"  Text="" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <TextBlock Canvas.Left="61" TextWrapping="Wrap" Canvas.Top="252" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="糧食"/></TextBlock>
-            <ComboBox Canvas.Left="16" Canvas.Top="272" Width="120" x:Name="ryoshokuBox" SelectionChanged="ComboBox_SelectionChanged_ryoshokuBox" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="61" TextWrapping="Wrap" Canvas.Top="231" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="糧食"/></TextBlock>
+            <ComboBox Canvas.Left="16" Canvas.Top="251" Width="120" x:Name="ryoshokuBox" SelectionChanged="ComboBox_SelectionChanged_ryoshokuBox" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBlock Canvas.Left="548" TextWrapping="Wrap" Canvas.Top="297"><Run Language="ja-jp" Text="糧食"/></TextBlock>
             <TextBox x:Name ="ryoshoku_name" Canvas.Left="501" TextWrapping="Wrap" Text="" Canvas.Top="318" Width="71" HorizontalAlignment="Left" VerticalAlignment="Center" />
             <TextBox x:Name ="ryoshoku_fig_box" Canvas.Left="591" TextWrapping="Wrap" Canvas.Top="318" Width="37" HorizontalAlignment="Left" VerticalAlignment="Center"/>
@@ -122,10 +122,10 @@
             <TextBox x:Name ="final19_fig" Canvas.Left="915" TextWrapping="Wrap" Canvas.Top="275" Width="45" HorizontalAlignment="Left" VerticalAlignment="Top" TextChanged="TextBox_TextChanged_13"/>
             <TextBox x:Name ="final20" Height="22" Canvas.Left="818" TextWrapping="Wrap" Text="" Canvas.Top="307" Width="74" TextChanged="TextBox_TextChanged_12" HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <TextBox x:Name ="final20_fig" Canvas.Left="915" TextWrapping="Wrap" Canvas.Top="309" Width="45" HorizontalAlignment="Left" VerticalAlignment="Top" TextChanged="TextBox_TextChanged_13"/>
-            <TextBlock Canvas.Left="188" TextWrapping="Wrap" Text="種族" Canvas.Top="256" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-            <TextBlock Canvas.Left="190" TextWrapping="Wrap" Text="特攻" Canvas.Top="306" RenderTransformOrigin="0.678,-0.709" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <TextBox x:Name ="shuzoku_box" Canvas.Left="188" TextWrapping="Wrap" Text="" Canvas.Top="277" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-            <TextBox x:Name ="tokko_box" Canvas.Left="188" TextWrapping="Wrap" Text="" Canvas.Top="327" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="190" TextWrapping="Wrap" Text="種族" Canvas.Top="229" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="186" TextWrapping="Wrap" Text="特攻" Canvas.Top="279" RenderTransformOrigin="0.678,-0.709" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <TextBox x:Name ="shuzoku_box" Canvas.Left="184" TextWrapping="Wrap" Text="" Canvas.Top="250" Width="120" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <TextBox x:Name ="tokko_box" Canvas.Left="184" TextWrapping="Wrap" Text="" Canvas.Top="300" Width="120" HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <TextBox x:Name ="DebugTextBox" Height="218" Canvas.Left="1125" TextWrapping="Wrap" Text="" Canvas.Top="26" Width="231" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBox x:Name ="DebugTextBox_damage" Height="255" Canvas.Left="1125" TextWrapping="Wrap" Text="" Canvas.Top="252" Width="231" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <CheckBox x:Name ="shokugyo_blader" Content="ブレイダー" Canvas.Left="22" Canvas.Top="92" Click="RadioButton_Checked" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -142,35 +142,43 @@
             <TextBox x:Name="bougyobox" Canvas.Left="1040" TextWrapping="Wrap" Text="0" Canvas.Top="185" Width="68" HorizontalAlignment="Center" VerticalAlignment="Top"  TextChanged="status_TextChanged"/>
             <TextBox x:Name="sokudobox" Canvas.Left="1040" TextWrapping="Wrap" Text="0" Canvas.Top="228" Width="68" HorizontalAlignment="Center" VerticalAlignment="Top"  TextChanged="status_TextChanged"/>
             <TextBox x:Name="chiryokubox" Canvas.Left="1040" TextWrapping="Wrap" Text="0" Canvas.Top="271" Width="68" HorizontalAlignment="Center" VerticalAlignment="Top"  TextChanged="status_TextChanged"/>
-            <TextBlock Canvas.Left="25" TextWrapping="Wrap" Text="アシストスキル１" Canvas.Top="354" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <TextBlock Canvas.Left="182" TextWrapping="Wrap" Text="アシストスキル２" Canvas.Top="354" HorizontalAlignment="Left" VerticalAlignment="Top" />
-            <TextBlock Canvas.Left="332" TextWrapping="Wrap" Text="アシストスキル３" Canvas.Top="357" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            <ComboBox x:Name="assistskill1_box" Canvas.Left="10" Canvas.Top="378" Width="120" HorizontalAlignment="Left" VerticalAlignment="Top" SelectionChanged="assistskill1_box_SelectionChanged"/>
-            <ComboBox x:Name="assistskill2_box" Canvas.Left="160" Canvas.Top="380" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" SelectionChanged="assistskill2_box_SelectionChanged"/>
-            <ComboBox x:Name="assistskill3_box" Canvas.Left="307" Canvas.Top="380" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" SelectionChanged="assistskill3_box_SelectionChanged"/>
-            <TextBlock Canvas.Left="35" TextWrapping="Wrap" Text="合計知力値" Canvas.Top="405" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <TextBlock Canvas.Left="190" TextWrapping="Wrap" Text="合計知力値" Canvas.Top="408" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            <TextBlock Canvas.Left="337" TextWrapping="Wrap" Text="合計知力値" Canvas.Top="408" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            <TextBox x:Name="assistskill1_chiryoku_box" Canvas.Left="10" TextWrapping="Wrap" Canvas.Top="426" Width="120" HorizontalAlignment="Left" VerticalAlignment="Top" TextChanged="assistskill1_chiryoku_box_TextChanged" />
-            <TextBox x:Name="assistskill2_chiryoku_box" Canvas.Left="160" TextWrapping="Wrap" Canvas.Top="428" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="assistskill2_chiryoku_box_TextChanged"/>
-            <TextBox x:Name="assistskill3_chiryoku_box" Canvas.Left="307" TextWrapping="Wrap" Canvas.Top="428" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="assistskill3_chiryoku_box_TextChanged"/>
+            <TextBlock Canvas.Left="33" TextWrapping="Wrap" Text="アシストスキル１" Canvas.Top="327" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="182" TextWrapping="Wrap" Text="アシストスキル２" Canvas.Top="327" HorizontalAlignment="Center" VerticalAlignment="Top" />
+            <TextBlock Canvas.Left="322" TextWrapping="Wrap" Text="アシストスキル３" Canvas.Top="327" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="-0.157,0.441"/>
+            <ComboBox x:Name="assistskill1_box" Canvas.Left="18" Canvas.Top="351" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" SelectionChanged="assistskill1_box_SelectionChanged"/>
+            <ComboBox x:Name="assistskill2_box" Canvas.Left="160" Canvas.Top="353" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" SelectionChanged="assistskill2_box_SelectionChanged"/>
+            <ComboBox x:Name="assistskill3_box" Canvas.Left="301" Canvas.Top="354" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" SelectionChanged="assistskill3_box_SelectionChanged"/>
+            <TextBlock Canvas.Left="43" TextWrapping="Wrap" Text="合計知力値" Canvas.Top="385" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="197" TextWrapping="Wrap" Text="合計知力値" Canvas.Top="385" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="330" TextWrapping="Wrap" Text="合計知力値" Canvas.Top="385" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <TextBox x:Name="assistskill1_chiryoku_box" Canvas.Left="18" TextWrapping="Wrap" Canvas.Top="406" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="assistskill1_chiryoku_box_TextChanged" />
+            <TextBox x:Name="assistskill2_chiryoku_box" Canvas.Left="160" TextWrapping="Wrap" Canvas.Top="406" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="assistskill2_chiryoku_box_TextChanged"/>
+            <TextBox x:Name="assistskill3_chiryoku_box" Canvas.Left="300" TextWrapping="Wrap" Canvas.Top="406" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="assistskill3_chiryoku_box_TextChanged"/>
             <TextBlock Canvas.Left="527" TextWrapping="Wrap" Canvas.Top="336" HorizontalAlignment="Left" VerticalAlignment="Top"><Run Language="ja-jp" Text="アシストスキル"/></TextBlock>
+            <TextBox x:Name ="final21" Height="22" Canvas.Left="819" TextWrapping="Wrap" Text="" Canvas.Top="336" Width="74"  HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <TextBox x:Name ="final21_fig" Canvas.Left="915" TextWrapping="Wrap" Canvas.Top="338" Width="45" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBox x:Name="unmei_box" Canvas.Left="18" TextWrapping="Wrap" Canvas.Top="460" Width="120" TextChanged="unmei_box_TextChanged" HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <TextBlock Canvas.Left="46" TextWrapping="Wrap" Text="師団運命値" Canvas.Top="439" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="209" TextWrapping="Wrap" Text="スタンス" Canvas.Top="439" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBox x:Name ="shokugyo_box" Canvas.Left="16" TextWrapping="Wrap" Text="" Canvas.Top="300" Width="120" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="56" TextWrapping="Wrap" Text="職業" Canvas.Top="282" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <ComboBox x:Name="stance_box" Canvas.Left="160" Canvas.Top="460" Width="120" SelectionChanged="assistskill1_box_SelectionChanged" HorizontalAlignment="Left" VerticalAlignment="Center"/>
         </Canvas>
-        <Canvas Height="203" Width="1387" HorizontalAlignment="Center" Canvas.Top="461" VerticalAlignment="Top">
+        <Canvas Height="220" Width="1387" HorizontalAlignment="Center" Canvas.Top="490" VerticalAlignment="Top" Canvas.Left="-14">
             <TextBlock Canvas.Left="723" TextWrapping="Wrap" Canvas.Top="86" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Text="攻撃"/><Run Text="倍率"/><Run Text="最大値"/></TextBlock>
             <TextBlock Canvas.Left="723" TextWrapping="Wrap" Canvas.Top="35" HorizontalAlignment="Left" VerticalAlignment="Top"><Run Language="ja-jp" Text="攻撃倍率最小値"/></TextBlock>
             <TextBlock Canvas.Left="723" TextWrapping="Wrap" Canvas.Top="145" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="攻撃倍率期待値"/></TextBlock>
-            <TextBlock Canvas.Left="17" TextWrapping="Wrap" Canvas.Top="18"><Run Language="ja-jp" Text="敵ステータス"/></TextBlock>
-            <TextBlock Canvas.Left="33" TextWrapping="Wrap" Canvas.Top="59" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="-11.359,0.656"><Run Language="ja-jp" Text="防御"/></TextBlock>
-            <TextBlock Canvas.Left="33" TextWrapping="Wrap" Canvas.Top="104" HorizontalAlignment="Left" VerticalAlignment="Top"><Run Language="ja-jp" Text="速度"/></TextBlock>
+            <TextBlock Canvas.Left="17" TextWrapping="Wrap" Canvas.Top="13" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="敵ステータス"/></TextBlock>
+            <TextBlock Canvas.Left="33" TextWrapping="Wrap" Canvas.Top="39" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="-11.359,0.656"><Run Language="ja-jp" Text="防御"/></TextBlock>
+            <TextBlock Canvas.Left="33" TextWrapping="Wrap" Canvas.Top="73" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="速度"/></TextBlock>
             <TextBlock Canvas.Left="973" TextWrapping="Wrap" Canvas.Top="36" HorizontalAlignment="Left" VerticalAlignment="Top"><Run Language="ja-jp" Text="ダメージ最大値"/></TextBlock>
             <TextBlock Canvas.Left="973" TextWrapping="Wrap" Canvas.Top="89" HorizontalAlignment="Left" VerticalAlignment="Top"><Run Language="ja-jp" Text="ダメージ最小値"/></TextBlock>
             <TextBlock Canvas.Left="973" TextWrapping="Wrap" Text="ダメージ期待値" Canvas.Top="145" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <TextBox x:Name ="enemy_bougyo_box" TextWrapping="Wrap" Text="" Width="120" Canvas.Left="86" Canvas.Top="67" TextChanged="enemy_status_changed"/>
-            <TextBox x:Name ="enemy_sokudo_box" Canvas.Left="86" TextWrapping="Wrap" Text="" Canvas.Top="105" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="enemy_status_changed"/>
-            <TextBox x:Name ="enemy_joheki_box" Canvas.Left="86" TextWrapping="Wrap" Text="" Canvas.Top="140" Width="120" TextChanged="enemy_status_changed"/>
-            <TextBox x:Name="enemy_shuzoku_box" Height="21" Canvas.Left="86" TextWrapping="Wrap" Text="" Canvas.Top="176" Width="122" TextChanged="enemy_status_changed" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            <TextBlock Canvas.Left="33" TextWrapping="Wrap" Canvas.Top="140" HorizontalAlignment="Left" VerticalAlignment="Top"><Run Language="ja-jp" Text="城壁"/></TextBlock>
+            <TextBox x:Name ="enemy_bougyo_box" TextWrapping="Wrap" Text="" Width="120" Canvas.Left="86" Canvas.Top="39" TextChanged="enemy_status_changed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBox x:Name ="enemy_sokudo_box" Canvas.Left="86" TextWrapping="Wrap" Text="" Canvas.Top="68" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="enemy_status_changed"/>
+            <TextBox x:Name ="enemy_joheki_box" Canvas.Left="86" TextWrapping="Wrap" Text="" Canvas.Top="101" Width="120" TextChanged="enemy_status_changed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBox x:Name="enemy_shuzoku_box" Height="21" Canvas.Left="86" TextWrapping="Wrap" Text="" Canvas.Top="130" Width="122" TextChanged="enemy_status_changed" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="33" TextWrapping="Wrap" Canvas.Top="102" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="城壁"/></TextBlock>
             <TextBox x:Name ="bairitu_kitaiti_box" Height="23" Canvas.Left="739" TextWrapping="Wrap" Text="" Canvas.Top="168" Width="111" HorizontalAlignment="Center" VerticalAlignment="Top" />
             <TextBlock Canvas.Left="855" TextWrapping="Wrap" Text="で" Canvas.Top="170" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBox x:Name ="bairitu_kaisu_kitaiti_box"  Canvas.Left="870" TextWrapping="Wrap" Text="" Canvas.Top="171" Width="30" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -179,32 +187,32 @@
             <TextBlock Canvas.Left="1135" TextWrapping="Wrap" Text="を" Canvas.Top="170" HorizontalAlignment="Left" VerticalAlignment="Top"/>
             <TextBox x:Name ="damage_kaisu_kitaiti_box" Canvas.Left="1163" TextWrapping="Wrap" Text="" Canvas.Top="168" Width="30" HorizontalAlignment="Center" VerticalAlignment="Top" RenderTransformOrigin="-0.716,4"/>
             <TextBlock Canvas.Left="1210" TextWrapping="Wrap" Text="回与える" Canvas.Top="167" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.444,0.098"/>
-            <TextBlock Height="23" Canvas.Left="33" TextWrapping="Wrap" Text="種族" Width="28" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Top="176" RenderTransformOrigin="0.886,1.464"/>
-            <TextBox x:Name="tokkobogyo_box" Height="18" Canvas.Left="273" TextWrapping="Wrap" Text="" Canvas.Top="68" Width="78" HorizontalAlignment="Left" VerticalAlignment="Top" TextChanged="enemy_status_changed"/>
-            <TextBox x:Name="kenshutaiku_box" Height="18" Canvas.Left="273" TextWrapping="Wrap" Text="" Canvas.Top="104" Width="78" HorizontalAlignment="Left" VerticalAlignment="Top" TextChanged="enemy_status_changed"/>
-            <TextBox x:Name="mukeitaiku_box" Height="18" Canvas.Left="273" TextWrapping="Wrap" Text="" Canvas.Top="142" Width="78" HorizontalAlignment="Left" VerticalAlignment="Top" TextChanged="enemy_status_changed"/>
-            <TextBox x:Name="shinmataiku_box" Height="18" Canvas.Left="273" TextWrapping="Wrap" Text="" Canvas.Top="178" Width="78" HorizontalAlignment="Left" VerticalAlignment="Top" TextChanged="enemy_status_changed"/>
-            <TextBlock Canvas.Left="273" TextWrapping="Wrap" Text="特攻防御" Canvas.Top="44"/>
-            <TextBlock Canvas.Left="273" TextWrapping="Wrap" Text="堅守体躯" Canvas.Top="88" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <TextBlock Canvas.Left="273" TextWrapping="Wrap" Text="無形体躯" Canvas.Top="122" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5"/>
-            <TextBox x:Name="jigenshoheki_box" Height="18" Canvas.Left="394" TextWrapping="Wrap" Text="" Canvas.Top="65" Width="78" HorizontalAlignment="Left" VerticalAlignment="Top" TextChanged="enemy_status_changed" RenderTransformOrigin="-2.53,1.253"/>
-            <TextBox x:Name="ukenagashi_box" Height="18" Canvas.Left="394" TextWrapping="Wrap" Text="" Canvas.Top="104" Width="78" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="enemy_status_changed"/>
-            <TextBox x:Name="hissatutaisei_box" Height="18" Canvas.Left="394" TextWrapping="Wrap" Text="" Canvas.Top="139" Width="78" HorizontalAlignment="Left" VerticalAlignment="Top" TextChanged="enemy_status_changed" RenderTransformOrigin="-2.584,-1.061"/>
-            <TextBox x:Name="chimeitaisei_box" Height="18" Canvas.Left="394" TextWrapping="Wrap" Text="" Canvas.Top="178" Width="78" HorizontalAlignment="Left" VerticalAlignment="Top" TextChanged="enemy_status_changed"/>
-            <TextBlock Canvas.Left="391" TextWrapping="Wrap" Text="次元障壁" Canvas.Top="44" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <TextBlock Canvas.Left="397" TextWrapping="Wrap" Text="受け流し" Canvas.Top="83" HorizontalAlignment="Left" VerticalAlignment="Top" />
-            <TextBlock Canvas.Left="394" TextWrapping="Wrap" Text="必殺耐性" Canvas.Top="122" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            <TextBlock Canvas.Left="273" TextWrapping="Wrap" Text="神魔体躯" Canvas.Top="163" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <TextBlock Canvas.Left="394" TextWrapping="Wrap" Text="致命耐性" Canvas.Top="158" HorizontalAlignment="Left" VerticalAlignment="Top" />
-            <TextBlock Canvas.Left="505" TextWrapping="Wrap" Text="凍傷気流" Canvas.Top="50" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <TextBlock Canvas.Left="505" TextWrapping="Wrap" Text="聖戦の導き" Canvas.Top="89" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <TextBox x:Name="tosho_box" Height="18" Canvas.Left="505" TextWrapping="Wrap" Text="" Canvas.Top="68" Width="78" TextChanged="enemy_status_changed" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <TextBox x:Name="seisen_box" Height="18" Canvas.Left="505" TextWrapping="Wrap" Text="" Canvas.Top="104" Width="78" TextChanged="enemy_status_changed" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            <TextBlock Canvas.Left="505" TextWrapping="Wrap" Text="ブロック" Canvas.Top="124"/>
-            <TextBox x:Name="block_box" Canvas.Left="505" TextWrapping="Wrap" Text="" Canvas.Top="145" Width="78" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="enemy_status_changed"/>
-            <TextBlock Canvas.Left="505" TextWrapping="Wrap" Text="イベイド" Canvas.Top="163"/>
-            <TextBox x:Name="ibeido_box" Height="17" Canvas.Left="505" TextWrapping="Wrap" Text="" Canvas.Top="181" Width="78" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="enemy_status_changed"/>
-            <CheckBox x:Name="senshubouei_check" Content="専守防衛" Canvas.Left="625" Canvas.Top="66" Checked="CheckBox_senshu_Checked" Unchecked="CheckBox_senshu_Unchecked" />
+            <TextBlock Height="23" Canvas.Left="33" TextWrapping="Wrap" Text="種族" Width="28" HorizontalAlignment="Center" VerticalAlignment="Top" Canvas.Top="130" RenderTransformOrigin="0.886,1.464"/>
+            <TextBox x:Name="tokkobogyo_box" Height="18" Canvas.Left="234" TextWrapping="Wrap" Text="" Canvas.Top="53" Width="78" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="enemy_status_changed"/>
+            <TextBox x:Name="kenshutaiku_box" Height="18" Canvas.Left="234" TextWrapping="Wrap" Text="" Canvas.Top="99" Width="78" HorizontalAlignment="Left" VerticalAlignment="Top" TextChanged="enemy_status_changed"/>
+            <TextBox x:Name="mukeitaiku_box" Height="18" Canvas.Left="234" TextWrapping="Wrap" Text="" Canvas.Top="142" Width="78" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="enemy_status_changed"/>
+            <TextBox x:Name="shinmataiku_box" Height="18" Canvas.Left="234" TextWrapping="Wrap" Text="" Canvas.Top="179" Width="78" HorizontalAlignment="Left" VerticalAlignment="Top" TextChanged="enemy_status_changed"/>
+            <TextBlock Canvas.Left="230" TextWrapping="Wrap" Text="特攻防御" Canvas.Top="31"/>
+            <TextBlock Canvas.Left="234" TextWrapping="Wrap" Text="堅守体躯" Canvas.Top="78" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="234" TextWrapping="Wrap" Text="無形体躯" Canvas.Top="119" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5"/>
+            <TextBox x:Name="jigenshoheki_box" Height="18" Canvas.Left="340" TextWrapping="Wrap" Text="" Canvas.Top="55" Width="78" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="enemy_status_changed" RenderTransformOrigin="-2.53,1.253"/>
+            <TextBox x:Name="ukenagashi_box" Height="18" Canvas.Left="340" TextWrapping="Wrap" Text="" Canvas.Top="99" Width="78" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="enemy_status_changed"/>
+            <TextBox x:Name="hissatutaisei_box" Height="18" Canvas.Left="340" TextWrapping="Wrap" Text="" Canvas.Top="142" Width="78" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="enemy_status_changed" RenderTransformOrigin="-2.584,-1.061"/>
+            <TextBox x:Name="chimeitaisei_box" Height="18" Canvas.Left="340" TextWrapping="Wrap" Text="" Canvas.Top="181" Width="78" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="enemy_status_changed"/>
+            <TextBlock Canvas.Left="340" TextWrapping="Wrap" Text="次元障壁" Canvas.Top="28" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="343" TextWrapping="Wrap" Text="受け流し" Canvas.Top="78" HorizontalAlignment="Center" VerticalAlignment="Top" />
+            <TextBlock Canvas.Left="340" TextWrapping="Wrap" Text="必殺耐性" Canvas.Top="122" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <TextBlock Canvas.Left="234" TextWrapping="Wrap" Text="神魔体躯" Canvas.Top="163" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <TextBlock Canvas.Left="340" TextWrapping="Wrap" Text="致命耐性" Canvas.Top="162" HorizontalAlignment="Center" VerticalAlignment="Top" />
+            <TextBlock Canvas.Left="432" TextWrapping="Wrap" Text="凍傷気流" Canvas.Top="32" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="432" TextWrapping="Wrap" Text="聖戦の導き" Canvas.Top="80" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <TextBox x:Name="tosho_box" Height="18" Canvas.Left="432" TextWrapping="Wrap" Text="" Canvas.Top="52" Width="78" TextChanged="enemy_status_changed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBox x:Name="seisen_box" Height="18" Canvas.Left="432" TextWrapping="Wrap" Text="" Canvas.Top="99" Width="78" TextChanged="enemy_status_changed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="432" TextWrapping="Wrap" Text="ブロック" Canvas.Top="121" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBox x:Name="block_box" Canvas.Left="432" TextWrapping="Wrap" Text="" Canvas.Top="140" Width="78" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="enemy_status_changed"/>
+            <TextBlock Canvas.Left="432" TextWrapping="Wrap" Text="イベイド" Canvas.Top="161" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBox x:Name="ibeido_box" Height="17" Canvas.Left="432" TextWrapping="Wrap" Text="" Canvas.Top="180" Width="78" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="enemy_status_changed"/>
+            <CheckBox x:Name="senshubouei_check" Content="専守防衛" Canvas.Left="541" Canvas.Top="180" Checked="CheckBox_senshu_Checked" Unchecked="CheckBox_senshu_Unchecked" HorizontalAlignment="Left" VerticalAlignment="Center" />
             <TextBox x:Name ="damage_max_box" Height="23" Canvas.Left="1008" TextWrapping="Wrap" Text="" Canvas.Top="61" Width="111" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBlock Canvas.Left="1135" TextWrapping="Wrap" Text="を" Canvas.Top="63" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBox x:Name ="damage_kaisu_max_box" Canvas.Left="1163" TextWrapping="Wrap" Text="" Canvas.Top="61" Width="30" RenderTransformOrigin="-0.716,4" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -213,12 +221,26 @@
             <TextBlock Canvas.Left="1135" TextWrapping="Wrap" Text="を" Canvas.Top="122" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBox x:Name ="damage_kaisu_min_box" Canvas.Left="1163" TextWrapping="Wrap" Text="" Canvas.Top="120" Width="30" RenderTransformOrigin="-0.716,4" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBlock Canvas.Left="1210" TextWrapping="Wrap" Text="回与える" Canvas.Top="119" RenderTransformOrigin="0.444,0.098" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="536" TextWrapping="Wrap" Canvas.Top="35" Height="20" Width="53" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="至高の盾"/><LineBreak/><Run Language="ja-jp"/></TextBlock>
+            <TextBox x:Name="enemy_sikou_box" Height="18" Canvas.Left="536" TextWrapping="Wrap" Text="" Canvas.Top="50" Width="78" TextChanged="enemy_unmei_changed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="536" TextWrapping="Wrap" Canvas.Top="120" HorizontalAlignment="Center" VerticalAlignment="Top" Height="20" Width="53"><Run Language="ja-jp" Text="運命値"/><LineBreak/><Run Language="ja-jp"/></TextBlock>
+            <TextBox x:Name="enemy_unmei_box" Height="18" Canvas.Left="536" TextWrapping="Wrap" Text="" Canvas.Top="142" Width="78" TextChanged="enemy_unmei_changed" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <TextBox x:Name="enemy_waisho_box" Height="18" Canvas.Left="536" TextWrapping="Wrap" Text="" Canvas.Top="99" Width="78" TextChanged="enemy_waisho_changed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="536" TextWrapping="Wrap" Canvas.Top="81" Height="20" Width="53" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="矮小体躯"/><LineBreak/><Run Language="ja-jp"/></TextBlock>
+            <TextBlock Height="23" Canvas.Left="21" TextWrapping="Wrap" Text="スタンス" Width="52" Canvas.Top="190" RenderTransformOrigin="0.886,1.464" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            <ComboBox x:Name="enemy_shokugyo_box" Canvas.Left="86" Canvas.Top="158" Width="122" SelectionChanged="enemy_stance_boxChanged" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <ComboBox x:Name="enemy_stance_box" Canvas.Left="86" Canvas.Top="189" Width="122" SelectionChanged="enemy_stance_boxChanged" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <TextBlock Height="23" Canvas.Left="33" TextWrapping="Wrap" Text="職業" Width="28" Canvas.Top="162" RenderTransformOrigin="0.886,1.464" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         </Canvas>
-        <Canvas Height="682" Canvas.Left="-226" Canvas.Top="20" Width="221">
-            <ListBox Height="580" x:Name="saved_list" Canvas.Left="10" Canvas.Top="10" Width="201" SelectionMode="Single" HorizontalAlignment="Center" VerticalAlignment="Top" DisplayMemberPath="character_name" SelectedValuePath="character_name">
+        <Canvas Height="654" Canvas.Left="-226" Width="221" HorizontalAlignment="Left" VerticalAlignment="Center">
+            <ListBox Height="496" x:Name="saved_list" Canvas.Left="10" Canvas.Top="31" Width="201" SelectionMode="Single" HorizontalAlignment="Center" VerticalAlignment="Top" DisplayMemberPath="character_id" SelectedValuePath="character_name">
             </ListBox>
-            <Button Content="読み込み" Canvas.Left="10" Canvas.Top="608" Height="36" Width="85" HorizontalAlignment="Left" VerticalAlignment="Center" Click="Load_Button_Click"/>
-            <Button Content="保存" Canvas.Left="110" Canvas.Top="608" Height="36" Width="86" HorizontalAlignment="Left" VerticalAlignment="Center" Click="Saved_Button_Click"/>
+            <Button Content="読み込み" Canvas.Left="86" Canvas.Top="545" Height="36" Width="56" HorizontalAlignment="Left" VerticalAlignment="Center" Click="Load_Button_Click"/>
+            <Button Content="保存" Canvas.Left="10" Canvas.Top="545" Height="36" Width="47" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Saved_Button_Click"/>
+            <Button Content="削除" Canvas.Left="164" Canvas.Top="545" Height="36" Width="47" Click="Delete_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <Button Content="　ファイル&#xD;&#xA;から読み込み" Canvas.Left="121" Canvas.Top="614" Height="36" Width="90" Click="Read_File_Button_Click" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <Button Content="　ファイル&#xD;&#xA;へ書き込み" Canvas.Left="10" Canvas.Top="614" Height="36" Width="90" Click="Write_File_Button_Click" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <TextBlock Canvas.Left="55" TextWrapping="Wrap" Text="キャラクター保存リスト" Canvas.Top="10" HorizontalAlignment="Left" VerticalAlignment="Center"/>
         </Canvas>
 
     </Canvas>

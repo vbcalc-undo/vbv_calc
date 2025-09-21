@@ -10,9 +10,9 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-ただし、JSONフォルダ以下にあるデータはhttps://wikiwiki.jp/vbv-jp2/から生成しており、このデータを使う限りこちらの二次利用に関する規約にも準拠する必要があります。
+ただし、JSONフォルダ以下にあるデータはhttps://wikiwiki.jp/vbv-jp2/ から生成しており、このデータを使う限りこちらの二次利用に関する規約にも準拠する必要があります。
 具体的には、データの改変や再配布は自由ですが、データの出典元の明記とデータを使用した成果物が非営利であることが求められます。また、データに関してdualtail様に問い合わせなどもやめてください。
 以上より、JSONフォルダ以下のデータを使用する際は十分にご注意ください。
 
-つまりソースコードやバイナリはMITライセンスに則り好きにしていいけど、JSONフォルダ以下のデータを使用したらhttps://wikiwiki.jp/vbv-jp2/の規約を守ってね、ということです。
+つまりソースコードやバイナリはMITライセンスに則り好きにしていいけど、JSONフォルダ以下のデータを使用したらhttps://wikiwiki.jp/vbv-jp2/ の規約を守ってね、ということです。
 
