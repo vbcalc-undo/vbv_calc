@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Shapes;
 using VBV_calc.Helpers;
@@ -2978,7 +2979,6 @@ namespace VBV_calc
         {
             var clicked = sender as CheckBox;
             if (clicked == null) return;
-
             foreach (var cb in ((Panel)clicked.Parent).Children.OfType<CheckBox>())
             {
                 if (cb != clicked)
@@ -2989,21 +2989,175 @@ namespace VBV_calc
                            .FirstOrDefault(cb => cb.IsChecked == true);
 
             var view = CollectionViewSource.GetDefaultView(CharacterBox.ItemsSource);
-
             if (selected != null)
             {
                 filter_shokugyo = selected.Content.ToString();
-                view.Filter = item => ((CharacterJson)item).職業 == filter_shokugyo;
+                //view.Filter = item => ((CharacterJson)item).職業 == filter_shokugyo;
             }
             else
             {
                 filter_shokugyo = "";
-                view.Filter = null;
-                CharacterBox.SelectedIndex = 0; // 解除時に選択リセット
+                //view.Filter = null;
+                //CharacterBox.SelectedIndex = -1; // 解除時に選択リセット
             }
-
             // 非同期でRefresh
+            //Dispatcher.BeginInvoke(() => view.Refresh());
+        }
+        private void CharacterBox_DropDownOpened(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(CharacterBox.ItemsSource);
+
+            if (string.IsNullOrEmpty(filter_shokugyo))
+            {
+                if (string.IsNullOrEmpty(character_search_box.Text))
+                {
+                    view.Filter = null;
+                    //CharacterBox.SelectedIndex = -1; // 解除時に選択リセット
+                }
+                else
+                {
+
+                    view.Filter = item =>
+                    {
+                        var cj = (CharacterJson)item;
+                        return cj.名称 != null &&
+                               cj.名称.IndexOf(character_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    };
+                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(character_search_box.Text))
+                {
+                    view.Filter = item => ((CharacterJson)item).職業 == filter_shokugyo;
+                }
+                else
+                {
+                    view.Filter = item =>
+                    {
+                        var cj = (CharacterJson)item;
+                        return cj.名称 != null &&
+                               cj.名称.IndexOf(character_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0 && cj.職業 == filter_shokugyo;
+                    };
+                }
+            }
             Dispatcher.BeginInvoke(() => view.Refresh());
+            //ItemsView.Refresh(); // 開いたときにだけフィルタ適用
+        }
+
+        private void ShogoBox_DropDownOpened(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(CharacterBox.ItemsSource);
+
+            if (string.IsNullOrEmpty(shogo_search_box.Text))
+            {
+                view.Filter = null;
+                //shogo1Box.SelectedIndex = -1; // 解除時に選択リセット
+            }
+            else
+            {
+                view = CollectionViewSource.GetDefaultView(src_shogo1);
+
+                // フィルタ設定（部分一致・大文字小文字無視）
+                view.Filter = item =>
+                {
+                    if (item is ItemSet i && i.ItemDisp != null)
+                        return i.ItemDisp.IndexOf(shogo_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    return false;
+                };
+            }
+            Dispatcher.BeginInvoke(() => view.Refresh());
+            //ItemsView.Refresh(); // 開いたときにだけフィルタ適用
+        }
+        private void Shogo2Box_DropDownOpened(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(CharacterBox.ItemsSource);
+
+            if (string.IsNullOrEmpty(shogo_search_box.Text))
+            {
+                view.Filter = null;
+                //shogo1Box.SelectedIndex = -1; // 解除時に選択リセット
+            }
+            else
+            {
+                view = CollectionViewSource.GetDefaultView(src_shogo2);
+
+                // フィルタ設定（部分一致・大文字小文字無視）
+                view.Filter = item =>
+                {
+                    if (item is ItemSet i && i.ItemDisp != null)
+                        return i.ItemDisp.IndexOf(shogo_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    return false;
+                };
+            }
+            Dispatcher.BeginInvoke(() => view.Refresh());
+            //ItemsView.Refresh(); // 開いたときにだけフィルタ適用
+        }
+        private void EquipmentBox_DropDownOpened(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(EquipmentBox1.ItemsSource);
+            if (string.IsNullOrEmpty(equipment_search_box.Text))
+            {
+                view.Filter = null;
+                //EquipmentBox1.SelectedIndex = -1; // 解除時に選択リセット
+            }
+            else
+            {
+                view = CollectionViewSource.GetDefaultView(src_equipment1);
+                // フィルタ設定（部分一致・大文字小文字無視）
+                view.Filter = item =>
+                {
+                    if (item is ItemSet i && i.ItemDisp != null)
+                        return i.ItemDisp.IndexOf(equipment_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    return false;
+                };
+            }
+            Dispatcher.BeginInvoke(() => view.Refresh());
+            //ItemsView.Refresh(); // 開いたときにだけフィルタ適用
+        }
+        private void Equipment2Box_DropDownOpened(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(EquipmentBox2.ItemsSource);
+            if (string.IsNullOrEmpty(equipment_search_box.Text))
+            {
+                view.Filter = null;
+                //EquipmentBox2.SelectedIndex = -1; // 解除時に選択リセット
+            }
+            else
+            {
+                view = CollectionViewSource.GetDefaultView(src_equipment2);
+                // フィルタ設定（部分一致・大文字小文字無視）
+                view.Filter = item =>
+                {
+                    if (item is ItemSet i && i.ItemDisp != null)
+                        return i.ItemDisp.IndexOf(equipment_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    return false;
+                };
+            }
+            Dispatcher.BeginInvoke(() => view.Refresh());
+            //ItemsView.Refresh(); // 開いたときにだけフィルタ適用
+        }
+        private void RyoshokuBox_DropDownOpened(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(ryoshokuBox.ItemsSource);
+            if (string.IsNullOrEmpty(equipment_search_box.Text))
+            {
+                view.Filter = null;
+                //EquipmentBox2.SelectedIndex = -1; // 解除時に選択リセット
+            }
+            else
+            {
+                view = CollectionViewSource.GetDefaultView(src_ryoshoku);
+                // フィルタ設定（部分一致・大文字小文字無視）
+                view.Filter = item =>
+                {
+                    if (item is ItemSet i && i.ItemDisp != null)
+                        return i.ItemDisp.IndexOf(equipment_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    return false;
+                };
+            }
+            Dispatcher.BeginInvoke(() => view.Refresh());
+            //ItemsView.Refresh(); // 開いたときにだけフィルタ適用
         }
 
         private void status_TextChanged(object sender, TextChangedEventArgs e)
@@ -3622,6 +3776,20 @@ namespace VBV_calc
         private void enemy_stance_boxChanged(object sender, SelectionChangedEventArgs e)
         {
             calc_damage();
+        }
+
+        private void Character_CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            character_search_box.Text = "";
+        }
+
+        private void shogo_CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            shogo_search_box.Text = "";
+        }
+        private void Equipment_CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            equipment_search_box.Text = "";
         }
     }
 }
