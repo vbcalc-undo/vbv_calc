@@ -1095,7 +1095,10 @@ namespace VBV_calc
                     {
                         var valueBox = (TextBox)this.FindName($"final{i}_fig");
                         if (double.TryParse(valueBox.Text, out skillvalue))
-                            kougeki_bairitu = (100.0 + skillvalue + tuigeki_value - unmei_value) / 100.0;
+                            if(tuigeki_value > 1.0)
+                                kougeki_bairitu = (100.0 + skillvalue + tuigeki_value - unmei_value) / 100.0;
+                            else
+                                kougeki_bairitu = (100.0 + skillvalue + tuigeki_value) / 100.0;
                     }
                 }
             }
@@ -1114,7 +1117,10 @@ namespace VBV_calc
                     {
                         var valueBox = (TextBox)this.FindName($"final{i}_fig");
                         if (double.TryParse(valueBox.Text, out skillvalue))
-                            kougeki_bairitu = (100.0 + skillvalue + tuigeki_value - unmei_value) / 100.0;
+                            if (tuigeki_value > 1.0)
+                                kougeki_bairitu = (100.0 + skillvalue + tuigeki_value - unmei_value) / 100.0;
+                            else
+                                kougeki_bairitu = (100.0 + skillvalue + tuigeki_value) / 100.0;
                     }
                 }
             }
