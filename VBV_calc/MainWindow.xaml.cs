@@ -3,9 +3,11 @@ using Newtonsoft.Json;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Shapes;
 using VBV_calc.Helpers;
@@ -189,11 +191,8 @@ namespace VBV_calc
                 level = 100;
             }
             double buko = 75 / 2 / (Math.Sqrt(double.Parse(cost)));
-            Debug.WriteLine("buko=" + buko);
             double level1 = 1 + Math.Sqrt(keikenti) / 1000;
-            Debug.WriteLine("level1=" + level1);
             double level2 = Math.Sqrt(keikenti) / 50;
-            Debug.WriteLine("level2=" + level2);
 
             //int hp_status = (int)(double.Parse(hp) * ((double)(level)/4.0) + 1.0);
             int hp_status = (int)(double.Parse(hp) * ((double)(level) + 1.0) / 4.0);
@@ -202,7 +201,6 @@ namespace VBV_calc
             int kou_status = (int)((double.Parse(kou) + buko) * level1 + level2) + soubi1_status.kougeki + soubi2_status.kougeki + ryoshoku_status.kougeki;
             int bou_status = (int)((double.Parse(kou) + buko) * level1 + level2) + soubi1_status.bougyo + soubi2_status.bougyo + ryoshoku_status.bougyo;
 
-            Debug.WriteLine("character_kou=" + kou);
             levelbox.Text = level.ToString();
             hpbox.Text = hp_status.ToString();
             sokudobox.Text = soku_status.ToString();
@@ -248,16 +246,10 @@ namespace VBV_calc
                 level = 100;
             }
             double buko = 75.0 / 2.0 / (Math.Sqrt(cost));
-            Debug.WriteLine("buko=" + buko);
             double level1 = 1.0 + Math.Sqrt(keikenti) / 1000.0;
-            Debug.WriteLine("level1=" + level1);
             double level2 = Math.Sqrt(keikenti) / 50.0;
-            Debug.WriteLine("level2=" + level2);
 
-            Debug.WriteLine("character_kou=" + kou);
-            Debug.WriteLine("soubi1_status.kougeki=" + soubi1_status.kougeki + "soubi2_soubi1_status.kougeki=" + soubi2_status.kougeki);
             double temp = (level - 1.0) / 4.0 + 1.0;
-            Debug.WriteLine("te,@:" + temp * hp);
             int hp_status = (int)(hp * ((level - 1.0) / 4.0 + 1.0));
             int soku_status = (int)((soku + shogo1_status.sokudo + shogo2_status.sokudo) * level1 + level2) + soubi1_status.sokudo + soubi2_status.sokudo + ryoshoku_status.sokudo;
             int chi_status = (int)((chiryoku + shogo1_status.tiryoku + shogo2_status.tiryoku) * level1 + level2) + soubi1_status.tiryoku + soubi2_status.tiryoku + ryoshoku_status.tiryoku;
@@ -494,7 +486,6 @@ namespace VBV_calc
             using (var sr = new StreamReader(@"./json/units/units_ippan.json", System.Text.Encoding.UTF8))
             {
                 var jsonReadData = sr.ReadToEnd();
-                Debug.WriteLine("jsonReadData=" + jsonReadData);
 
                 characters = JsonConvert.DeserializeObject<List<CharacterJson>>(jsonReadData);
                 for (int i = 0; i < characters.Count; i++)
@@ -508,7 +499,6 @@ namespace VBV_calc
             using (var sr = new StreamReader(@"./json/units/units_busho.json", System.Text.Encoding.UTF8))
             {
                 var jsonReadData = sr.ReadToEnd();
-                Debug.WriteLine("jsonReadData=" + jsonReadData);
 
                 var bushoCharacters = JsonConvert.DeserializeObject<List<CharacterJson>>(jsonReadData);
                 for (int i = 0; i < bushoCharacters.Count; i++)
@@ -571,7 +561,6 @@ namespace VBV_calc
             using (var sr = new StreamReader(filename, System.Text.Encoding.UTF8))
             {
                 var jsonReadData = sr.ReadToEnd();
-                Debug.WriteLine("jsonReadData=" + jsonReadData);
 
                 equipments = JsonConvert.DeserializeObject<List<EquipmentJson>>(jsonReadData);
                 all_equipments.Add(equipmentname, equipments);
@@ -584,9 +573,9 @@ namespace VBV_calc
             string enemy_shokugyo = enemy_shokugyo_box.SelectedItem as string;
             //ItemSet tmp = (enemy_shokugyo_box.SelectedItem);//表示名はキャストして取りだす
 
-            if (shokugyo !="" && enemy_shokugyo != "")
+            if (shokugyo != "" && enemy_shokugyo != "")
             {
-                if(shokugyo=="ブレイダー" && enemy_shokugyo == "デストロイヤー")
+                if (shokugyo == "ブレイダー" && enemy_shokugyo == "デストロイヤー")
                 {
                     return 1.5;
                 }
@@ -676,7 +665,6 @@ namespace VBV_calc
             using (var sr = new StreamReader(filename, System.Text.Encoding.UTF8))
             {
                 var jsonReadData = sr.ReadToEnd();
-                Debug.WriteLine("jsonReadData=" + jsonReadData);
 
                 shogo = JsonConvert.DeserializeObject<List<ShogoJson>>(jsonReadData);
                 all_shogo.Add(medalname, shogo);
@@ -743,11 +731,16 @@ namespace VBV_calc
             public string assist1 { get; set; }
             public string assist2 { get; set; }
             public string assist3 { get; set; }
+
+            public string assist1_chiryoku { get; set; }
+            public string assist2_chiryoku { get; set; }
+            public string assist3_chiryoku { get; set; }
+            public string unmei { get; set; }
             public bool leader_flag { get; set; }
         }
         public bool asist_flag = false;
         ObservableCollection<savedata> all_save_data = new ObservableCollection<savedata>();
-        List<string> STANCE_LIST = new List<string> { "","防備", "計略", "進撃", "乱戦" };
+        List<string> STANCE_LIST = new List<string> { "", "防備", "計略", "進撃", "乱戦" };
         List<string> SHOKUGYO_LIST = new List<string> { "", "ブレイダー", "ランサー", "シューター", "キャスター", "ガーダー", "デストロイヤー", "ヒーラー" };
 
         public MainWindow()
@@ -1428,9 +1421,12 @@ namespace VBV_calc
         int ibeido_mushi = 0;
         private void calc_damage()
         {
+            if (isLoad)
+            {
+                return;
+            }
+
             // ここに計算ロジックを追加
-            // 例: int finalAttack = int.Parse(passive1_fig.Text) + int.Parse(passive2_fig.Text);
-            // Debug.WriteLine("最終攻撃力: " + finalAttack);
             double kougeki_bairitu = 1.0, bougyo_bairitu = 1.0;
             double temp_kougeki_bairitu = 1.0, temp_bougyo_bairitu = 1.0;
             double enermy_bougyo = 1.0;
@@ -1579,7 +1575,7 @@ namespace VBV_calc
             {
                 // 変換できなかった場合はデフォルト値（1.0）のまま
             }
-            if(int.TryParse(enemy_waisho_box.Text,out enemy_waisho_value))
+            if (int.TryParse(enemy_waisho_box.Text, out enemy_waisho_value))
             {
             }
 
@@ -1782,7 +1778,6 @@ namespace VBV_calc
                 }
             }
             tokko_bairitu = 1.0 + (tokko_bairitu - 1.0) * (100 - enemy_tokkou_value) / 100.0;
-            Debug.WriteLine("特攻倍率: " + tokko_bairitu);
             DebugTextBox_damage.Text += "特攻倍率:" + tokko_bairitu + "\n";
             int block_value = 0;
             double block_bairitu = 1.0;
@@ -1808,7 +1803,6 @@ namespace VBV_calc
                     //ブロックが入っている場合は、ブロック値を使う
                     if (block_value > 75) block_value = 75;
                     block_bairitu = 1.0 * (100.0 - block_value) / 100.0 + 0.25 * (block_value) / 100.0;
-                    Debug.WriteLine("ブロック倍率: " + block_bairitu);
                     DebugTextBox_damage.Text += "ブロック倍率:" + block_bairitu + "\n";
                 }
                 else
@@ -1915,7 +1909,7 @@ namespace VBV_calc
             DebugTextBox_damage.Text += "聖戦補正値:" + temp_seisen_bairitu + "\n";
             DebugTextBox_damage.Text += "凍傷補正値:" + temp_toushou_bairitu + "\n";
             double enemy_bougyo_value = 1;
-            kougeki_bairitu = bairitu * toushou_bairitu * seisen_bairitu ;
+            kougeki_bairitu = bairitu * toushou_bairitu * seisen_bairitu;
             bougyo_skill_bairitu = bougyo_skill_bairitu * enemy_toushou_bairitu * enemy_seisen_bairitu;
 
             //矮小値の計算
@@ -1935,17 +1929,16 @@ namespace VBV_calc
             //職業とスタンスの計算
             double shokugyo_bairitu = calc_shokugyo_bairitu();
             double stance_bairitu = calc_stance_bairitu();
-            if(shokugyo_bairitu > 1.0)
+            if (shokugyo_bairitu > 1.0)
             {
                 DebugTextBox_damage.Text += "職業補正:" + shokugyo_bairitu + "\n";
             }
-            if(stance_bairitu > 1.0)
+            if (stance_bairitu > 1.0)
             {
                 DebugTextBox_damage.Text += "スタンス補正:" + stance_bairitu + "\n";
             }
             kougeki_bairitu = bairitu * shokugyo_bairitu * stance_bairitu;
 
-            Debug.WriteLine("防御スキル倍率：" + bougyo_skill_bairitu);
             DebugTextBox_damage.Text += "防御スキル倍率:" + bougyo_skill_bairitu + "\n";
 
             if (double.TryParse(enemy_bougyo_box.Text, out enemy_bougyo_value))
@@ -1962,7 +1955,6 @@ namespace VBV_calc
             }
             //遠隔攻撃がオンのとき、イベイドの確率で0になる。
 
-            Debug.WriteLine("イベイド確率：" + ibeido_value);
             //クリティカルなしのダメージ
             temp_bougyo_bairitu = kabuto_jigen_chimei_bairitu;
             double enemy_bougyo_value_temp = enemy_bougyo_value * temp_bougyo_bairitu;
@@ -2037,13 +2029,16 @@ namespace VBV_calc
             damage_kaisu_min_box.Text = tuigeki.ToString();
             damage_min_box.Text = Math.Truncate(min_damage_value).ToString();
 
-            Debug.WriteLine("最終攻撃倍率: " + bairitu + "  最終防御倍率:" + bougyo_bairitu + "最終防御スキル倍率：" + bougyo_skill_bairitu);
-            Debug.WriteLine("ダメージ予測値: " + damage_value);
 
         }
 
         private void calc_final_attack_mag()
         {
+            if (isLoad)
+            {
+                return;
+            }
+
             double bairitu = 1.0;
             double status_bairitu = 1.0;
             double kougeki_kaisu = 1.0;
@@ -2229,7 +2224,6 @@ namespace VBV_calc
                     tokko_bairitu += parse_enemy_shuzoku.Count;
                 }
             }
-            Debug.WriteLine("特攻倍率: " + tokko_bairitu);
             DebugTextBox.Text += "特攻倍率: " + tokko_bairitu + "\n";
             double tuigeki = 1.0;
             if (get_kenkon_value(kougeki_kaisu, unmei_value) != 1.0)
@@ -2244,12 +2238,15 @@ namespace VBV_calc
             bairitu_kaisu_kitaiti_box.Text = tuigeki.ToString();
             bairitu_kitaiti_box.Text = (Math.Truncate(bairitu * 100) / 100).ToString();
 
-            Debug.WriteLine("最終攻撃倍率: " + Math.Truncate(bairitu * 100) / 100);
         }
         Boolean leader_flag;
         // 修正内容: Resync_finalskil メソッドの構文エラーと Dictionary の使い方の誤りを修正
         private void Resync_finalskil()
         {
+            if (isLoad)
+            {
+                return;
+            }
             // Dictionary の宣言と初期化
             Dictionary<string, int> finalskills = new Dictionary<string, int>();
 
@@ -2685,18 +2682,15 @@ namespace VBV_calc
         private void equipment_tokko_plus(string skillname, string skillvalue)
         {
             //装備のスキル名に特攻があれば、tokko_boxに追加する
-            Debug.WriteLine("装備のスキル名: " + skillname);
             if (skillname.Contains("特攻") && !skillname.Contains("特攻防御"))
             {
                 int temp_tokko_value = 0;
                 string temp_tokko = skillname[0].ToString();
-                Debug.WriteLine("特攻装備のスキル名: " + temp_tokko);
                 //:で分割
                 temp_tokko_value = int.Parse(skillvalue);
                 for (int i = 0; i < temp_tokko_value; i++)
                 {
                     tokko_box.Text += temp_tokko;
-                    Debug.WriteLine("Add　特攻装備のスキル名: " + tokko_box.Text);
                 }
             }
         }
@@ -2764,7 +2758,6 @@ namespace VBV_calc
                     string[] temp_skillname = tmp.ItemValue.Split(',');
                     string[] temp_skill1 = temp_skillname[0].Split(':');
                     equipment1_skill1.Text = temp_skill1[0];
-                    Debug.WriteLine("装備1のスキル1: " + tmp.ItemValue);
                     if (temp_skill1.Length > 1)
                     {
                         equipment1_skill1_fig.Text = temp_skill1[1];
@@ -2787,7 +2780,6 @@ namespace VBV_calc
                             equipment1_skill2_fig.Text = null;
                         }
                         soubi1_status.change_status(int.Parse(temp_skillname[2]), int.Parse(temp_skillname[3]), int.Parse(temp_skillname[4]), int.Parse(temp_skillname[5]));
-                        Debug.WriteLine("soubi1_status: " + soubi1_status.kougeki + "," + soubi1_status.bougyo + "," + soubi1_status.sokudo + "," + soubi1_status.tiryoku);
                     }
                     else
                     {
@@ -2876,7 +2868,6 @@ namespace VBV_calc
                         ryoshoku_name.Text = temp_skillname[0];
                         ryoshoku_fig_box.Text = temp_skillname[1];
                         ryoshoku_status.change_status(int.Parse(temp_status[1]), int.Parse(temp_status[2]), int.Parse(temp_status[3]), int.Parse(temp_status[4]));
-                        Debug.WriteLine("ryoshoku_status: " + ryoshoku_status.kougeki + "," + ryoshoku_status.bougyo + "," + ryoshoku_status.sokudo + "," + ryoshoku_status.tiryoku);
                     }
 
                 }
@@ -2988,7 +2979,6 @@ namespace VBV_calc
         {
             var clicked = sender as CheckBox;
             if (clicked == null) return;
-
             foreach (var cb in ((Panel)clicked.Parent).Children.OfType<CheckBox>())
             {
                 if (cb != clicked)
@@ -2999,21 +2989,175 @@ namespace VBV_calc
                            .FirstOrDefault(cb => cb.IsChecked == true);
 
             var view = CollectionViewSource.GetDefaultView(CharacterBox.ItemsSource);
-
             if (selected != null)
             {
                 filter_shokugyo = selected.Content.ToString();
-                view.Filter = item => ((CharacterJson)item).職業 == filter_shokugyo;
+                //view.Filter = item => ((CharacterJson)item).職業 == filter_shokugyo;
             }
             else
             {
                 filter_shokugyo = "";
-                view.Filter = null;
-                CharacterBox.SelectedIndex = 0; // 解除時に選択リセット
+                //view.Filter = null;
+                //CharacterBox.SelectedIndex = -1; // 解除時に選択リセット
             }
-
             // 非同期でRefresh
+            //Dispatcher.BeginInvoke(() => view.Refresh());
+        }
+        private void CharacterBox_DropDownOpened(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(CharacterBox.ItemsSource);
+
+            if (string.IsNullOrEmpty(filter_shokugyo))
+            {
+                if (string.IsNullOrEmpty(character_search_box.Text))
+                {
+                    view.Filter = null;
+                    //CharacterBox.SelectedIndex = -1; // 解除時に選択リセット
+                }
+                else
+                {
+
+                    view.Filter = item =>
+                    {
+                        var cj = (CharacterJson)item;
+                        return cj.名称 != null &&
+                               cj.名称.IndexOf(character_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    };
+                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(character_search_box.Text))
+                {
+                    view.Filter = item => ((CharacterJson)item).職業 == filter_shokugyo;
+                }
+                else
+                {
+                    view.Filter = item =>
+                    {
+                        var cj = (CharacterJson)item;
+                        return cj.名称 != null &&
+                               cj.名称.IndexOf(character_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0 && cj.職業 == filter_shokugyo;
+                    };
+                }
+            }
             Dispatcher.BeginInvoke(() => view.Refresh());
+            //ItemsView.Refresh(); // 開いたときにだけフィルタ適用
+        }
+
+        private void ShogoBox_DropDownOpened(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(CharacterBox.ItemsSource);
+
+            if (string.IsNullOrEmpty(shogo_search_box.Text))
+            {
+                view.Filter = null;
+                //shogo1Box.SelectedIndex = -1; // 解除時に選択リセット
+            }
+            else
+            {
+                view = CollectionViewSource.GetDefaultView(src_shogo1);
+
+                // フィルタ設定（部分一致・大文字小文字無視）
+                view.Filter = item =>
+                {
+                    if (item is ItemSet i && i.ItemDisp != null)
+                        return i.ItemDisp.IndexOf(shogo_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    return false;
+                };
+            }
+            Dispatcher.BeginInvoke(() => view.Refresh());
+            //ItemsView.Refresh(); // 開いたときにだけフィルタ適用
+        }
+        private void Shogo2Box_DropDownOpened(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(CharacterBox.ItemsSource);
+
+            if (string.IsNullOrEmpty(shogo_search_box.Text))
+            {
+                view.Filter = null;
+                //shogo1Box.SelectedIndex = -1; // 解除時に選択リセット
+            }
+            else
+            {
+                view = CollectionViewSource.GetDefaultView(src_shogo2);
+
+                // フィルタ設定（部分一致・大文字小文字無視）
+                view.Filter = item =>
+                {
+                    if (item is ItemSet i && i.ItemDisp != null)
+                        return i.ItemDisp.IndexOf(shogo_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    return false;
+                };
+            }
+            Dispatcher.BeginInvoke(() => view.Refresh());
+            //ItemsView.Refresh(); // 開いたときにだけフィルタ適用
+        }
+        private void EquipmentBox_DropDownOpened(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(EquipmentBox1.ItemsSource);
+            if (string.IsNullOrEmpty(equipment_search_box.Text))
+            {
+                view.Filter = null;
+                //EquipmentBox1.SelectedIndex = -1; // 解除時に選択リセット
+            }
+            else
+            {
+                view = CollectionViewSource.GetDefaultView(src_equipment1);
+                // フィルタ設定（部分一致・大文字小文字無視）
+                view.Filter = item =>
+                {
+                    if (item is ItemSet i && i.ItemDisp != null)
+                        return i.ItemDisp.IndexOf(equipment_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    return false;
+                };
+            }
+            Dispatcher.BeginInvoke(() => view.Refresh());
+            //ItemsView.Refresh(); // 開いたときにだけフィルタ適用
+        }
+        private void Equipment2Box_DropDownOpened(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(EquipmentBox2.ItemsSource);
+            if (string.IsNullOrEmpty(equipment_search_box.Text))
+            {
+                view.Filter = null;
+                //EquipmentBox2.SelectedIndex = -1; // 解除時に選択リセット
+            }
+            else
+            {
+                view = CollectionViewSource.GetDefaultView(src_equipment2);
+                // フィルタ設定（部分一致・大文字小文字無視）
+                view.Filter = item =>
+                {
+                    if (item is ItemSet i && i.ItemDisp != null)
+                        return i.ItemDisp.IndexOf(equipment_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    return false;
+                };
+            }
+            Dispatcher.BeginInvoke(() => view.Refresh());
+            //ItemsView.Refresh(); // 開いたときにだけフィルタ適用
+        }
+        private void RyoshokuBox_DropDownOpened(object sender, EventArgs e)
+        {
+            var view = CollectionViewSource.GetDefaultView(ryoshokuBox.ItemsSource);
+            if (string.IsNullOrEmpty(equipment_search_box.Text))
+            {
+                view.Filter = null;
+                //EquipmentBox2.SelectedIndex = -1; // 解除時に選択リセット
+            }
+            else
+            {
+                view = CollectionViewSource.GetDefaultView(src_ryoshoku);
+                // フィルタ設定（部分一致・大文字小文字無視）
+                view.Filter = item =>
+                {
+                    if (item is ItemSet i && i.ItemDisp != null)
+                        return i.ItemDisp.IndexOf(equipment_search_box.Text, StringComparison.OrdinalIgnoreCase) >= 0;
+                    return false;
+                };
+            }
+            Dispatcher.BeginInvoke(() => view.Refresh());
+            //ItemsView.Refresh(); // 開いたときにだけフィルタ適用
         }
 
         private void status_TextChanged(object sender, TextChangedEventArgs e)
@@ -3142,17 +3286,70 @@ namespace VBV_calc
                         tempdata.assist3 = "";
                     }
                 }
+                if (assistskill1_chiryoku_box.Text != null)
+                {
+                    tempdata.assist1_chiryoku = assistskill1_chiryoku_box.Text;
+                }
+                else
+                {
+                    tempdata.assist1_chiryoku = "";
+                }
+                if (assistskill2_chiryoku_box.Text != null)
+                {
+                    tempdata.assist2_chiryoku = assistskill2_chiryoku_box.Text;
+                }
+                else
+                {
+                    tempdata.assist2_chiryoku = "";
+                }
+                if (assistskill3_chiryoku_box.Text != null)
+                {
+                    tempdata.assist3_chiryoku = assistskill3_chiryoku_box.Text;
+                }
+                else
+                {
+                    tempdata.assist3_chiryoku = "";
+                }
+                if (unmei_box.Text != null)
+                {
+                    tempdata.unmei = unmei_box.Text;
+                }
+                else
+                {
+                    tempdata.unmei = "";
+                }
+
                 tempdata.leader_flag = leader_flag;
                 all_save_data.Add(tempdata);
+
             }
         }
+        public bool isLoad = false;
 
         private void Load_Button_Click(object sender, RoutedEventArgs e)
         {
             // saved_list.SelectedItem から選択された savedata を取得
             var selected = saved_list.SelectedItem as savedata;
+            isLoad = true;
+
             if (selected != null)
             {
+
+                //this.Visibility = Visibility.Collapsed; // 画面を一時非表示
+                var sw = Stopwatch.StartNew();
+                shogo1Box.SelectionChanged -= shogo1_SelectionChanged;
+                shogo2Box.SelectionChanged -= shogo2_SelectionChanged;
+                EquipmentBox1.SelectionChanged -= ComboBox_SelectionChanged_EquipmentBox1;
+                EquipmentBox2.SelectionChanged -= ComboBox_SelectionChanged_EquipmentBox2;
+                ryoshokuBox.SelectionChanged -= ComboBox_SelectionChanged_ryoshokuBox;
+                assistskill1_box.SelectionChanged -= assistskill1_box_SelectionChanged;
+                assistskill2_box.SelectionChanged -= assistskill2_box_SelectionChanged;
+                assistskill3_box.SelectionChanged -= assistskill3_box_SelectionChanged;
+                assistskill1_chiryoku_box.TextChanged -= assistskill1_chiryoku_box_TextChanged;
+                assistskill2_chiryoku_box.TextChanged -= assistskill2_chiryoku_box_TextChanged;
+                assistskill3_chiryoku_box.TextChanged -= assistskill3_chiryoku_box_TextChanged;
+                unmei_box.TextChanged -= unmei_box_TextChanged;
+
                 //まずキャラクター選択のフィルターを解除する
                 var view = CollectionViewSource.GetDefaultView(CharacterBox.ItemsSource);
 
@@ -3167,6 +3364,7 @@ namespace VBV_calc
                 shokugyo_lancer.IsChecked = false;
                 shokugyo_shooter.IsChecked = false;
                 // 非同期でRefresh
+
                 Dispatcher.BeginInvoke(() => view.Refresh());
 
                 // キャラクター選択
@@ -3175,6 +3373,8 @@ namespace VBV_calc
                 {
                     CharacterBox.SelectedItem = characterObj;
                 }
+
+                Debug.WriteLine($"キャラクター: {sw.ElapsedMilliseconds}ms"); sw.Restart();
                 // 装備1選択
                 if (!string.IsNullOrEmpty(selected.equipment1))
                 {
@@ -3240,6 +3440,9 @@ namespace VBV_calc
                 {
                     shogo2Box.SelectedIndex = -1; // 称号2が空の場合、選択を解除
                 }
+                assistskill1_box.SelectedIndex = -1;
+                assistskill2_box.SelectedIndex = -1;
+                assistskill3_box.SelectedIndex = -1;
                 if (!string.IsNullOrEmpty(selected.assist1))
                 {
                     ItemSet assist1 = src_asistskills.ToList().Find(a => a != null && a.ItemValue == selected.assist1);
@@ -3247,6 +3450,14 @@ namespace VBV_calc
                     {
                         assistskill1_box.SelectedItem = assist1;
                     }
+                    else
+                    {
+                        assistskill1_box.SelectedIndex = -1; // アシストスキル1が空の場合、選択を解除
+                    }
+                }
+                else
+                {
+                    assistskill1_box.SelectedIndex = -1; // アシストスキル1が空の場合、選択を解除
                 }
                 if (!string.IsNullOrEmpty(selected.assist2))
                 {
@@ -3255,6 +3466,14 @@ namespace VBV_calc
                     {
                         assistskill2_box.SelectedItem = assist2;
                     }
+                    else
+                    {
+                        assistskill2_box.SelectedIndex = -1; // アシストスキル2が空の場合、選択を解除
+                    }
+                }
+                else
+                {
+                    assistskill2_box.SelectedIndex = -1; // アシストスキル2が空の場合、選択を解除
                 }
                 if (!string.IsNullOrEmpty(selected.assist3))
                 {
@@ -3263,10 +3482,69 @@ namespace VBV_calc
                     {
                         assistskill3_box.SelectedItem = assist3;
                     }
+                    else
+                    {
+                        assistskill3_box.SelectedIndex = -1; // アシストスキル3が空の場合、選択を解除
+                    }
                 }
+                else
+                {
+                    assistskill3_box.SelectedIndex = -1; // アシストスキル3が空の場合、選択を解除
+                }
+                if (!string.IsNullOrEmpty(selected.assist1_chiryoku))
+                {
+                    assistskill1_chiryoku_box.Text = selected.assist1_chiryoku;
+                }
+                else
+                {
+                    assistskill1_chiryoku_box.Text = "";
+                }
+                if (!string.IsNullOrEmpty(selected.assist2_chiryoku))
+                {
+                    assistskill2_chiryoku_box.Text = selected.assist2_chiryoku;
+                }
+                else
+                {
+                    assistskill2_chiryoku_box.Text = "";
+                }
+                if (!string.IsNullOrEmpty(selected.assist3_chiryoku))
+                {
+                    assistskill3_chiryoku_box.Text = selected.assist3_chiryoku;
+                }
+                else
+                {
+                    assistskill3_chiryoku_box.Text = "";
+                }
+                if (!string.IsNullOrEmpty(selected.unmei))
+                {
+                    unmei_box.Text = selected.unmei;
+                }
+                else
+                {
+                    unmei_box.Text = "";
+                }
+                Debug.WriteLine($"その他: {sw.ElapsedMilliseconds}ms"); sw.Restart();
+
                 // リーダーフラグ設定
                 leader_flag = selected.leader_flag;
                 leaderflag.IsChecked = leader_flag;
+                shogo1Box.SelectionChanged += shogo1_SelectionChanged;
+                shogo2Box.SelectionChanged += shogo2_SelectionChanged;
+                EquipmentBox1.SelectionChanged += ComboBox_SelectionChanged_EquipmentBox1;
+                EquipmentBox2.SelectionChanged += ComboBox_SelectionChanged_EquipmentBox2;
+                ryoshokuBox.SelectionChanged += ComboBox_SelectionChanged_ryoshokuBox;
+                assistskill1_box.SelectionChanged += assistskill1_box_SelectionChanged;
+                assistskill2_box.SelectionChanged += assistskill2_box_SelectionChanged;
+                assistskill3_box.SelectionChanged += assistskill3_box_SelectionChanged;
+                unmei_box.TextChanged += unmei_box_TextChanged;
+                assistskill1_chiryoku_box.TextChanged += assistskill1_chiryoku_box_TextChanged;
+                assistskill2_chiryoku_box.TextChanged += assistskill2_chiryoku_box_TextChanged;
+                assistskill3_chiryoku_box.TextChanged += assistskill3_chiryoku_box_TextChanged;
+
+                //this.Visibility = Visibility.Visible; // 画面を再表示
+
+                isLoad = false;
+                Debug.WriteLine($"ステータス: {sw.ElapsedMilliseconds}ms"); sw.Restart();
                 // ステータス再計算
                 Resync_finalskil();
                 calc_final_attack_mag();
@@ -3498,6 +3776,20 @@ namespace VBV_calc
         private void enemy_stance_boxChanged(object sender, SelectionChangedEventArgs e)
         {
             calc_damage();
+        }
+
+        private void Character_CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            character_search_box.Text = "";
+        }
+
+        private void shogo_CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            shogo_search_box.Text = "";
+        }
+        private void Equipment_CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            equipment_search_box.Text = "";
         }
     }
 }
