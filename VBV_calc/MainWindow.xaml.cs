@@ -728,6 +728,11 @@ namespace VBV_calc
             public string equipment1 { get; set; }
             public string equipment2 { get; set; }
             public string ryoshoku { get; set; }
+            public string shogo1_name { get; set; }
+            public string shogo2_name { get; set; }
+            public string equipment1_name { get; set; }
+            public string equipment2_name { get; set; }
+            public string ryoshoku_name { get; set; }
             public string assist1 { get; set; }
             public string assist2 { get; set; }
             public string assist3 { get; set; }
@@ -1700,7 +1705,9 @@ namespace VBV_calc
                 enemy_hissatu_taisei_value = enemy_hissatu_taisei_value + enemy_unmei_value;
             critical_kakuritu = hissatu_zouka_value + hissatu_param_kakuritu - enemy_hissatu_taisei_value;
             //ここは無形と心核の計算後に無形の上限で切り捨てるところ
-            int bougyo_mukei_sinkaku = (int)(enemy_mukei_value);
+            int bougyo_mukei_sinkaku = 0;
+            if (enemy_mukei_value > 0)
+                bougyo_mukei_sinkaku = (int)(enemy_mukei_value) + unmei_value;
             if (get_shinkaku_value() != 1.0)
             {
                 enemy_mukei_value -= 25;
@@ -2751,7 +2758,8 @@ namespace VBV_calc
         ShogoStatus shogo1_status = new ShogoStatus(0, 0, 0, 0, "");
         ShogoStatus shogo2_status = new ShogoStatus(0, 0, 0, 0, "");
         ShogoStatus ryoshoku_status = new ShogoStatus(0, 0, 0, 0, "");
-        private void ComboBox_SelectionChanged_EquipmentBox1(object sender, SelectionChangedEventArgs e)
+
+        private void exec_equipment1_box()
         {
             // labelに現在コンボ選択の内容を表示
             soubi1_status.change_status(0, 0, 0, 0);
@@ -2793,13 +2801,17 @@ namespace VBV_calc
                         equipment1_skill2_fig.Text = null;
                     }
                 }
+                Resync_finalskil();
+                calc_final_attack_mag();
+                calc_damage();
             }
-            Resync_finalskil();
-            calc_final_attack_mag();
-            calc_damage();
+        }
+        private void ComboBox_SelectionChanged_EquipmentBox1(object sender, SelectionChangedEventArgs e)
+        {
+            exec_equipment1_box();
         }
 
-        private void ComboBox_SelectionChanged_EquipmentBox2(object sender, SelectionChangedEventArgs e)
+        private void exec_equipment2_box()
         {
             // labelに現在コンボ選択の内容を表示
             ItemSet tmp = ((ItemSet)EquipmentBox2.SelectedItem);//表示名はキャストして取りだす
@@ -2848,6 +2860,10 @@ namespace VBV_calc
                 calc_damage();
             }
         }
+        private void ComboBox_SelectionChanged_EquipmentBox2(object sender, SelectionChangedEventArgs e)
+        {
+            exec_equipment2_box();
+        }
 
         private void TextBox_TextChanged_12(object sender, TextChangedEventArgs e)
         {
@@ -2858,7 +2874,7 @@ namespace VBV_calc
         {
 
         }
-        private void ComboBox_SelectionChanged_ryoshokuBox(object sender, SelectionChangedEventArgs e)
+        private void exec_ryoshoku_box()
         {
             // labelに現在コンボ選択の内容を表示
             ItemSet tmp = ((ItemSet)ryoshokuBox.SelectedItem);//表示名はキャストして取りだす
@@ -2886,11 +2902,15 @@ namespace VBV_calc
                 calc_final_attack_mag();
                 calc_damage();
             }
+
+        }
+        private void ComboBox_SelectionChanged_ryoshokuBox(object sender, SelectionChangedEventArgs e)
+        {
+            exec_ryoshoku_box();
         }
 
-        private void shogo1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void exec_shogo1_box()
         {
-
             ItemSet tmp = ((ItemSet)shogo1Box.SelectedItem);//表示名はキャストして取りだす
             if (tmp != null)
             {
@@ -2930,6 +2950,11 @@ namespace VBV_calc
                 calc_damage();
             }
         }
+        private void shogo1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            exec_shogo1_box();
+
+        }
         private void enemy_status_changed(object sender, TextChangedEventArgs e)
         {
             //敵のステータスが変更されたときに呼び出される
@@ -2938,7 +2963,7 @@ namespace VBV_calc
             calc_damage();
         }
 
-        private void shogo2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void exec_shogo2_box()
         {
             ItemSet tmp = ((ItemSet)shogo2Box.SelectedItem);//表示名はキャストして取りだす
             if (tmp != null)
@@ -2977,6 +3002,10 @@ namespace VBV_calc
                 calc_final_attack_mag();
                 calc_damage();
             }
+        }
+        private void shogo2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            exec_shogo2_box();
         }
 
         String filter_shokugyo = "";//職業フィルター
@@ -3053,7 +3082,7 @@ namespace VBV_calc
 
         private void ShogoBox_DropDownOpened(object sender, EventArgs e)
         {
-            var view = CollectionViewSource.GetDefaultView(CharacterBox.ItemsSource);
+            var view = CollectionViewSource.GetDefaultView(shogo1Box.ItemsSource);
 
             if (string.IsNullOrEmpty(shogo_search_box.Text))
             {
@@ -3077,7 +3106,7 @@ namespace VBV_calc
         }
         private void Shogo2Box_DropDownOpened(object sender, EventArgs e)
         {
-            var view = CollectionViewSource.GetDefaultView(CharacterBox.ItemsSource);
+            var view = CollectionViewSource.GetDefaultView(shogo2Box.ItemsSource);
 
             if (string.IsNullOrEmpty(shogo_search_box.Text))
             {
@@ -3202,10 +3231,12 @@ namespace VBV_calc
                     if (selectedEquipment1 != null)
                     {
                         tempdata.equipment1 = selectedEquipment1.ItemValue;
+                        tempdata.equipment1_name = selectedEquipment1.ItemDisp;
                     }
                     else
                     {
                         tempdata.equipment1 = "";
+                        tempdata.equipment1_name = "";
                     }
                 }
                 if (EquipmentBox2.ItemsSource != null && EquipmentBox2.SelectedItem != null)
@@ -3214,10 +3245,12 @@ namespace VBV_calc
                     if (selectedEquipment2 != null)
                     {
                         tempdata.equipment2 = selectedEquipment2.ItemValue;
+                        tempdata.equipment2_name = selectedEquipment2.ItemDisp;
                     }
                     else
                     {
                         tempdata.equipment2 = "";
+                        tempdata.equipment2_name = "";
                     }
                 }
                 if (ryoshokuBox.ItemsSource != null && ryoshokuBox.SelectedItem != null)
@@ -3226,10 +3259,12 @@ namespace VBV_calc
                     if (selectedryoshoku != null)
                     {
                         tempdata.ryoshoku = selectedryoshoku.ItemValue;
+                        tempdata.ryoshoku_name = selectedryoshoku.ItemDisp;
                     }
                     else
                     {
                         tempdata.ryoshoku = "";
+                        tempdata.ryoshoku_name = "";
                     }
                 }
                 if (shogo1Box.ItemsSource != null && shogo1Box.SelectedItem != null)
@@ -3238,10 +3273,12 @@ namespace VBV_calc
                     if (selectedshogo1 != null)
                     {
                         tempdata.shogo1 = selectedshogo1.ItemValue;
+                        tempdata.shogo1_name = selectedshogo1.ItemDisp;
                     }
                     else
                     {
                         tempdata.shogo1 = "";
+                        tempdata.shogo1_name = "";
                     }
                 }
                 if (shogo2Box.ItemsSource != null && shogo2Box.SelectedItem != null)
@@ -3250,10 +3287,12 @@ namespace VBV_calc
                     if (selectedshogo2 != null)
                     {
                         tempdata.shogo2 = selectedshogo2.ItemValue;
+                        tempdata.shogo2_name = selectedshogo2.ItemDisp;
                     }
                     else
                     {
                         tempdata.shogo2 = "";
+                        tempdata.shogo2_name = "";
                     }
                 }
                 if (assistskill1_box.ItemsSource != null && assistskill1_box.SelectedItem != null)
@@ -3388,6 +3427,7 @@ namespace VBV_calc
                     if (equipment1 != null)
                     {
                         EquipmentBox1.SelectedItem = equipment1;
+                        exec_equipment1_box();
                     }
                 }
                 else
@@ -3401,6 +3441,7 @@ namespace VBV_calc
                     if (equipment2 != null)
                     {
                         EquipmentBox2.SelectedItem = equipment2;
+                        exec_equipment2_box();
                     }
                 }
                 else
@@ -3414,6 +3455,7 @@ namespace VBV_calc
                     if (ryoshoku != null)
                     {
                         ryoshokuBox.SelectedItem = ryoshoku;
+                        exec_ryoshoku_box();
                     }
                 }
                 else
@@ -3427,6 +3469,7 @@ namespace VBV_calc
                     if (shogo1 != null)
                     {
                         shogo1Box.SelectedItem = shogo1;
+                        exec_shogo1_box();
                     }
                 }
                 else
@@ -3440,6 +3483,7 @@ namespace VBV_calc
                     if (shogo2 != null)
                     {
                         shogo2Box.SelectedItem = shogo2;
+                        exec_shogo2_box();
                     }
                 }
                 else
