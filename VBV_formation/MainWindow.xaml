@@ -7,13 +7,13 @@
         <!-- 師団編成タブ -->
         <TabItem Header="師団編成">
             <Canvas>
-                <Button Content="再読み込み" Width="100" Height="30" Canvas.Left="63" Canvas.Top="565" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <Button Content="再読み込み" Width="100" Height="30" Canvas.Left="80" Canvas.Top="564" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Button_Click" />
                 <Button Content="書き込み" Width="58" Height="30" Canvas.Left="258" Canvas.Top="250" HorizontalAlignment="Left" VerticalAlignment="Center" Click="Shidan_kakikomi_Button_Click" />
                 <Button Content="読み込み" Width="59" Height="30" Canvas.Left="321" Canvas.Top="250" HorizontalAlignment="Left" VerticalAlignment="Center" Click="shidan_yomikomi_Button_Click" />
                 <Button Content="削除" Width="59" Height="30" Canvas.Left="385" Canvas.Top="250" Click="shidan_sakujo_Button_Click" />
                 <Button Content="ファイルへ書き込み" Width="186" Height="30" Canvas.Left="258" Canvas.Top="285" Click="shidan_file_kakikomi_Button_Click"/>
-                <ListBox x:Name="saved_list" Height="517" Width="188"  DisplayMemberPath="character_id" SelectedValuePath="character_name" HorizontalAlignment="Center" VerticalAlignment="Top" Canvas.Left="19" Canvas.Top="11" />
-                <ListBox x:Name="shidan_saved_list" Height="236" Width="195" DisplayMemberPath="shidan_name" Canvas.Left="258" Canvas.Top="11" HorizontalAlignment="Center" VerticalAlignment="Top" SelectionChanged="shidan_saved_list_SelectionChanged" />
+                <ListBox x:Name="saved_list" Height="509" Width="222"  DisplayMemberPath="character_id" SelectedValuePath="character_name" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="19" Canvas.Top="40" />
+                <ListBox x:Name="shidan_saved_list" Height="207" Width="193" DisplayMemberPath="shidan_name" Canvas.Left="258" Canvas.Top="40" HorizontalAlignment="Left" VerticalAlignment="Top" SelectionChanged="shidan_saved_list_SelectionChanged" />
                 <TextBlock Canvas.Left="641" TextWrapping="Wrap" Text="1" Canvas.Top="13"/>
                 <TextBlock Canvas.Left="638" TextWrapping="Wrap" Text="2" Canvas.Top="211"/>
                 <TextBlock Canvas.Left="638" TextWrapping="Wrap" Text="3" Canvas.Top="404" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -26,22 +26,22 @@
                 <TextBox x:Name="character4_name_box" Canvas.Left="1094" TextWrapping="Wrap" Text="" Canvas.Top="12" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" />
                 <TextBox x:Name="character5_name_box" Canvas.Left="1098" TextWrapping="Wrap" Text="" Canvas.Top="212" Width="120" />
                 <TextBox x:Name="character6_name_box" Canvas.Left="1100" TextWrapping="Wrap" Text="" Canvas.Top="408" Width="120" />
-                <TextBox x:Name="character1_skill_box" Canvas.Left="620" TextWrapping="Wrap" Text="" Canvas.Top="40" Width="238" Height="155" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
+                <TextBox x:Name="character1_skill_box" Canvas.Left="630" TextWrapping="Wrap" Text="" Canvas.Top="40" Width="238" Height="155" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
                 <TextBox x:Name="character1_status_box" Canvas.Left="878" TextWrapping="Wrap" Text="" Canvas.Top="40" Width="155" Height="155" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
                 <TextBox x:Name="character4_skill_box" Canvas.Left="1055" TextWrapping="Wrap" Text="" Canvas.Top="40" Width="240" Height="155" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
                 <TextBox x:Name="character4_status_box" Canvas.Left="1300" TextWrapping="Wrap" Text="" Canvas.Top="40" Width="155" Height="155" HorizontalAlignment="Center" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
-                <TextBox x:Name="character2_skill_box" Canvas.Left="618" TextWrapping="Wrap" Text="" Canvas.Top="240" Width="240" Height="155" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
+                <TextBox x:Name="character2_skill_box" Canvas.Left="630" TextWrapping="Wrap" Text="" Canvas.Top="240" Width="240" Height="155" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
                 <TextBox x:Name="character2_status_box" Canvas.Left="877" TextWrapping="Wrap" Text="" Canvas.Top="240" Width="155" Height="155" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
                 <TextBox x:Name="character5_skill_box" Canvas.Left="1055" TextWrapping="Wrap" Text="" Canvas.Top="240" Width="240" Height="155" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
                 <TextBox x:Name="character5_status_box" Canvas.Left="1300" TextWrapping="Wrap" Text="" Canvas.Top="240" Width="155" Height="155" VerticalScrollBarVisibility="Auto"/>
-                <TextBox x:Name="character3_skill_box" Canvas.Left="618" TextWrapping="Wrap" Text="" Canvas.Top="440" Width="240" Height="155" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
+                <TextBox x:Name="character3_skill_box" Canvas.Left="630" TextWrapping="Wrap" Text="" Canvas.Top="440" Width="240" Height="155" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
                 <TextBox x:Name="character3_status_box" Canvas.Left="878" TextWrapping="Wrap" Text="" Canvas.Top="440" Width="154" Height="155" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
                 <TextBox x:Name="character6_skill_box" Canvas.Left="1055" TextWrapping="Wrap" Text="" Canvas.Top="439" Width="240" Height="155" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto"/>
                 <TextBox x:Name="character6_status_box" Canvas.Left="1300" TextWrapping="Wrap" Text="" Canvas.Top="440" Width="155" Height="155" VerticalScrollBarVisibility="Auto"/>
-                <TextBox x:Name="shidan_skill_box" Canvas.Left="258" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Auto" Canvas.Top="318" Width="196" Height="282" HorizontalAlignment="Center" VerticalAlignment="Top" />
-                <Button Content="load" Canvas.Left="772" Canvas.Top="11" Click="Character1_load_Button_Click"/>
-                <Button Content="load" Canvas.Left="772" Canvas.Top="211" Click="Character2_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="2.361,0.555"/>
-                <Button Content="load" Canvas.Left="772" Canvas.Top="408" Click="Character3_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="-1.328,0.455"/>
+                <TextBox x:Name="shidan_skill_box" Canvas.Left="258" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Auto" Canvas.Top="351" Width="194" Height="249" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                <Button Content="load" Canvas.Left="782" Canvas.Top="11" Click="Character1_load_Button_Click"/>
+                <Button Content="load" Canvas.Left="782" Canvas.Top="211" Click="Character2_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="2.361,0.555"/>
+                <Button Content="load" Canvas.Left="782" Canvas.Top="408" Click="Character3_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="-1.328,0.455"/>
                 <Button Content="load" Canvas.Left="1244" Canvas.Top="9" Click="Character4_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                 <Button Content="load" Canvas.Left="1244" Canvas.Top="211" Click="Character5_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 <Button Content="load" Canvas.Left="1244" Canvas.Top="406" Click="Character6_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
@@ -55,18 +55,26 @@
                 <CheckBox x:Name="leader4_flag" Content="リーダー" Canvas.Left="1302" Canvas.Top="13" Checked="leader1_flag_Checked" Unchecked="leader1_flag_UnChecked"/>
                 <CheckBox x:Name="leader5_flag" Content="リーダー" Canvas.Left="1302" Canvas.Top="213" Checked="leader1_flag_Checked" Unchecked="leader1_flag_UnChecked"/>
                 <CheckBox x:Name="leader6_flag" Content="リーダー" Canvas.Left="1302" Canvas.Top="413" Checked="leader1_flag_Checked" Unchecked="leader1_flag_UnChecked"/>
+                <TextBlock Canvas.Left="326" TextWrapping="Wrap" Text="師団一覧" Canvas.Top="20"/>
+                <TextBlock Canvas.Left="92" TextWrapping="Wrap" Text="キャラクター一覧" Canvas.Top="21"/>
+                <TextBlock Canvas.Left="316" TextWrapping="Wrap" Text="師団スキル一覧" Canvas.Top="330"/>
+                <RadioButton Content="昼" Canvas.Left="480" Canvas.Top="200" Checked="RadioButton_Checked"/>
+                <RadioButton Content="夜" Canvas.Left="537" Canvas.Top="200" Checked="RadioButton_Checked"/>
+                <CheckBox x:Name="kago1_flag" Content="火" Canvas.Left="480" Canvas.Top="250" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
+                <CheckBox x:Name="kago2_flag" Content="水" Canvas.Left="530" Canvas.Top="250" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
+                <CheckBox x:Name="kago3_flag" Content="風" Canvas.Left="580" Canvas.Top="250" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
+                <CheckBox x:Name="kago4_flag" Content="土" Canvas.Left="480" Canvas.Top="270" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
+                <CheckBox x:Name="kago5_flag" Content="光" Canvas.Left="530" Canvas.Top="270" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
+                <CheckBox x:Name="kago6_flag" Content="闇" Canvas.Left="580" Canvas.Top="270" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
             </Canvas>
         </TabItem>
 
         <!-- レギオン編成タブ -->
-        <TabItem Header="レギオン編成">
+        <!--<TabItem Header="レギオン編成">
             <Canvas>
-                <TextBlock Text="レギオンA" Canvas.Left="20" Canvas.Top="20" FontSize="16"/>
-                <Button Content="編成" Width="100" Height="30" Canvas.Left="150" Canvas.Top="15"/>
-
-                <TextBlock Text="レギオンB" Canvas.Left="20" Canvas.Top="70" FontSize="16"/>
-                <Button Content="編成" Width="100" Height="30" Canvas.Left="150" Canvas.Top="65"/>
+                <TextBlock Text="まだ" Canvas.Left="20" Canvas.Top="20" FontSize="16"/>
             </Canvas>
         </TabItem>
+        -->
     </TabControl>
 </Window>

@@ -1655,10 +1655,10 @@ namespace VBV_calc
             kougeki_kaisu = get_kakuritu_tuigeki_value(unmei_value);
 
             //次にほかの倍率を計算
-            //巨人狩りは神魔体躯がない場合のみ
+            //巨人狩りは神魔体躯がない場合のみではないらしい
 
-            if (enemy_shinma_value == 0)
-                bairitu *= get_kyojingari_value();
+            //if (enemy_shinma_value == 0)
+            bairitu *= get_kyojingari_value();
             bairitu *= get_sippuu_value(kougeki_kaisu * 100, unmei_value);
             bairitu *= get_kenkon_value(kougeki_kaisu * 100, unmei_value);
             bairitu *= get_mukougui_value(unmei_value);
@@ -2146,7 +2146,6 @@ namespace VBV_calc
             {
                 DebugTextBox.Text += "全力倍率:" + get_zenryoku_value() + "\n";
             }
-
             //カブト次元の計算
             double kabuto_value = get_kabutowari_value();
             if (kabuto_value > 75) kabuto_value = 75;

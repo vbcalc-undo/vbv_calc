@@ -605,6 +605,7 @@ namespace VBV_formation
                     character_Info.character_current_status.Add("攻撃", tempstatus.kougeki);
                     character_Info.character_current_status.Add("防御", tempstatus.bougyo);
                     character_Info.character_current_status.Add("速度", tempstatus.sokudo);
+                    character_Info.character_current_status.Add("知力", tempstatus.sokudo);
                     character_Info.character_shuzoku = characterObj.種族;
 
                     //キャラクターのパラメータを表示する
@@ -686,7 +687,8 @@ namespace VBV_formation
                     if (all_characters.ContainsKey(number))
                         all_characters.Remove(number);
                     all_characters.Add(number, character_Info);
-                    if (number == temp_leader_flag)
+                    var temp_leader_check = (CheckBox)this.FindName($"leader{number}_flag");
+                    if (temp_leader_check != null && temp_leader_check.IsChecked == true && character_Info.leader_skill.Count > 0)
                     {
                         add_leader_skill(number);
                     }
@@ -702,7 +704,6 @@ namespace VBV_formation
                             shidan_skill_box.Text += ":" + skill.Value.Item1;
                         shidan_skill_box.Text += "\n";
                     }
-
                 }
             }
         }
@@ -807,17 +808,17 @@ namespace VBV_formation
                             if (character.Value.character_skill.ContainsKey("武具研磨"))
                                 temp_self_kassei = character.Value.character_skill["武具研磨"];
 
-                            temp_kougeki += (int)((skill.Value.Item1 - temp_self_kassei) / 100.0) * character.Value.soubi_status.kougeki;
-                            temp_bougyo += (int)((skill.Value.Item1 - temp_self_kassei) / 100.0) * character.Value.soubi_status.bougyo;
-                            temp_sokudo += (int)((skill.Value.Item1 - temp_self_kassei) / 100.0) * character.Value.soubi_status.sokudo;
-                            temp_sokudo += (int)((skill.Value.Item1 - temp_self_kassei) / 100.0) * character.Value.soubi_status.chiryoku;
+                            temp_kougeki += (int)(((skill.Value.Item1 - temp_self_kassei) / 100.0) * character.Value.soubi_status.kougeki);
+                            temp_bougyo += (int)(((skill.Value.Item1 - temp_self_kassei) / 100.0) * character.Value.soubi_status.bougyo);
+                            temp_sokudo += (int)(((skill.Value.Item1 - temp_self_kassei) / 100.0) * character.Value.soubi_status.sokudo);
+                            temp_sokudo += (int)(((skill.Value.Item1 - temp_self_kassei) / 100.0) * character.Value.soubi_status.chiryoku);
                         }
                         else if(skill.Key == "死の軍勢")
                         {
                             int temp_self_kassei = 0;
                             if (character.Value.character_skill.ContainsKey("死の軍勢"))
                                 temp_self_kassei = character.Value.character_skill["死の軍勢"];
-                            if (character.Value.character_shuzoku.Contains("死"))
+                            if (character.Value.character_shuzoku.Contains("死")|| kigen_flag)
                             {
                                 temp_kougeki += skill.Value.Item1 - temp_self_kassei;
                                 temp_bougyo += skill.Value.Item1 - temp_self_kassei;
@@ -983,18 +984,21 @@ namespace VBV_formation
             change_character_box(1);
             character_kassei_update();
             character_shiki_update();
+            kago_calc();
         }
         private void Character2_load_Button_Click(object sender, RoutedEventArgs e)
         {
             change_character_box(2);
             character_kassei_update();
             character_shiki_update();
+            kago_calc();
         }
         private void Character3_load_Button_Click(object sender, RoutedEventArgs e)
         {
             change_character_box(3);
             character_kassei_update();
             character_shiki_update();
+            kago_calc();
         }
 
         private void Character4_load_Button_Click(object sender, RoutedEventArgs e)
@@ -1002,18 +1006,21 @@ namespace VBV_formation
             change_character_box(4);
             character_kassei_update();
             character_shiki_update();
+            kago_calc();
         }
         private void Character5_load_Button_Click(object sender, RoutedEventArgs e)
         {
             change_character_box(5);
             character_kassei_update();
             character_shiki_update();
+            kago_calc();
         }
         private void Character6_load_Button_Click(object sender, RoutedEventArgs e)
         {
             change_character_box(6);
             character_kassei_update();
             character_shiki_update();
+            kago_calc();
         }
 
         private void status_calc_fix(CharacterJson characterObj, param_status soubi_status, param_status shogo_status,param_status temp_status)
@@ -1337,8 +1344,6 @@ namespace VBV_formation
             else if (jakutai_skills_dict.ContainsKey(skillname))
                 return 8;
             else if (sonota_skills_dict.ContainsKey(skillname))
-                return 11;
-            else if (sonota_skills_dict.ContainsKey(skillname))
                 return 12;
             else return 0;
             
@@ -1569,7 +1574,9 @@ namespace VBV_formation
                 shidan_skill_box.Text = "";
                 set_shidan_skill();
                 character_kassei_update();
-                character_shiki_update();
+                character_shiki_update(); 
+                kago_calc();
+
             }
         }
         private void shidan_sakujo_Button_Click(object sender, RoutedEventArgs e)
@@ -1655,6 +1662,7 @@ namespace VBV_formation
             set_shidan_skill();
             character_kassei_update();
             character_shiki_update();
+            kago_calc();
         }
         private void del_leader_skill(int number)
         {
@@ -1693,6 +1701,7 @@ namespace VBV_formation
             set_shidan_skill();
             character_kassei_update();
             character_shiki_update();
+            kago_calc();
         }
 
         private void leader1_flag_Checked(object sender, RoutedEventArgs e)
@@ -1747,5 +1756,181 @@ namespace VBV_formation
             }
             del_leader_skill(number);
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (File.Exists("./json/saved.json"))
+            {
+                string loadedJson = File.ReadAllText("./json/saved.json");
+                //all_save_dataをすべて消す
+                all_save_data.Clear();
+                //all_save_dataに読み込んだjsonを追加する
+                all_save_data = JsonConvert.DeserializeObject<ObservableCollection<savedata>>(loadedJson);
+                if (all_save_data == null)
+                {
+                    all_save_data = new ObservableCollection<savedata>();
+                }
+                saved_list.ItemsSource = all_save_data;
+            }
+            else
+            {
+            }
+
+        }
+        string chuya = "";
+        public string kago = "";
+        public static int CountChar(string s, char c)
+        {
+            return s.Length - s.Replace(c.ToString(), "").Length;
+        }
+        private double kago_bairitu_calc(string chara_kago)
+        {
+            double kago_bairitu_calc = 1.0;
+            int yuri = 0;
+            int furi = 0;
+            //chara_kagoの中から単語の出現回数をとる
+            if (kago == "火")
+            {
+                yuri = CountChar(chara_kago, '火');
+                furi = CountChar(chara_kago, '水');
+            }
+            else if(kago == "水")
+            {
+                yuri = CountChar(chara_kago, '水');
+                furi = CountChar(chara_kago, '火');
+
+            }
+            else if (kago == "風")
+            {
+                yuri = CountChar(chara_kago, '風');
+                furi = CountChar(chara_kago, '土');
+            }
+            else if (kago == "土")
+            {
+                yuri = CountChar(chara_kago, '土');
+                furi = CountChar(chara_kago, '風');
+            }
+            else if (kago == "闇")
+            {
+                yuri = CountChar(chara_kago, '闇');
+                furi = CountChar(chara_kago, '光');
+            }
+            else if (kago == "光")
+            {
+                yuri = CountChar(chara_kago, '光');
+                furi = CountChar(chara_kago, '闇');
+            }
+            kago_bairitu_calc = 1.0 + 0.25 * yuri - 0.25 * furi;
+            return kago_bairitu_calc;
+        }
+
+        private void kago_calc()
+        {
+
+                //加護の計算
+            foreach (var character in all_characters)
+            {
+                var character1_status_box = (TextBox)this.FindName($"character{character.Key}_status_box");
+                string chara_kago = character.Value.character_kago;
+                double kago_bairitu = 1.0;
+                if (kago != "")
+                {
+                    kago_bairitu = kago_bairitu_calc(chara_kago);
+                }
+
+                double chuya_bairitu = 1.0;
+                if (chuya == "昼")
+                {
+                    if (character.Value.character_shuzoku.Contains("夜"))
+                    {
+                        foreach (var skill in character.Value.character_skill)
+                        {
+                            if (skill.Key == "日中適応"||shidan_skill.ContainsKey("日中赦免"))
+                            {
+                                chuya_bairitu = 1.0;
+                            }
+                            else
+                            {
+                                chuya_bairitu = 0.5;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        chuya_bairitu = 1.0;
+                    }
+                }
+                else if(chuya == "夜")
+                {
+                    if (character.Value.character_shuzoku.Contains("夜"))
+                    {
+                        chuya_bairitu = 1.0;
+                    }
+                    else {
+                        if (character.Value.character_skill.ContainsKey("夜戦適応")|| shidan_skill.ContainsKey("夜戦赦免")) { 
+                                chuya_bairitu = 1.0;
+                        }
+                        else
+                        {
+                            chuya_bairitu = 0.5;
+                        }
+                    }
+                }
+
+                character1_status_box.Text = "HP:" + character.Value.character_status["HP"] + "\n";
+                character1_status_box.Text += "攻撃:" + (int)(character.Value.character_current_status["攻撃"] * kago_bairitu) + "(" + character.Value.character_status["攻撃"] + ")" + "\n";
+                character1_status_box.Text += "防御:" + (int)(character.Value.character_current_status["防御"] * kago_bairitu * chuya_bairitu) + "(" + character.Value.character_status["防御"] + ")" + "\n";
+                character1_status_box.Text += "速度:" + (int)(character.Value.character_current_status["速度"] * kago_bairitu) + "(" + character.Value.character_status["速度"] + ")" + "\n";
+                character1_status_box.Text += "知力:" + (int)(character.Value.character_current_status["知力"] * kago_bairitu) + "(" + character.Value.character_status["知力"] + ")" + "\n";
+                character1_status_box.Text += "称号1:" + character.Value.character_shogo1 + "\n";
+                character1_status_box.Text += "称号2:" + character.Value.character_shogo2 + "\n";
+                character1_status_box.Text += "装備1:" + character.Value.character_equipment1 + "\n";
+                character1_status_box.Text += "装備2:" + character.Value.character_equipment2 + "\n";
+                character1_status_box.Text += "糧食:" + character.Value.character_ryoshoku + "\n";
+                character1_status_box.Text += "種族:" + character.Value.character_shuzoku + "\n";
+                character1_status_box.Text += "加護:" + character.Value.character_kago + "\n";
+            }
+        }
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        {
+            var radio = sender as RadioButton;
+            chuya = radio.Content.ToString(); //
+            kago_calc();
+        }
+
+        private void kago_Checked(object sender, RoutedEventArgs e)
+        {
+            var current = sender as CheckBox;
+            var parent = (current.Parent as Panel);
+            string number = current.Name.Contains("1") ? "火" :
+             current.Name.Contains("2") ? "水" :
+             current.Name.Contains("3") ? "風" :
+             current.Name.Contains("4") ? "土" :
+             current.Name.Contains("5") ? "光" :
+             current.Name.Contains("6") ? "闇" : "";
+
+            //呼び元チェックボックス名から呼ばれた番号を取得して投げる
+            foreach (var child in parent.Children)
+            {
+                if (child is CheckBox cb && cb != current && cb.Name.Contains("kago"))
+                {
+                    cb.IsChecked = false;
+                }
+            }
+            kago = number;
+            kago_calc();
+            current.IsChecked = true;
+
+        }
+        private void kago_UnChecked(object sender, RoutedEventArgs e)
+        {
+            kago = "";
+            var current = sender as CheckBox;
+            var parent = (current.Parent as Panel);
+            kago_calc();
+            current.IsChecked = false;
+
+        }
+
     }
 }
