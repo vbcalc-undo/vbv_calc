@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VBV_calc", "VBV_calc\VBV_ca
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目", "ソリューション項目", "{2022CB0F-8BAF-F49E-0C48-8EF4C96EC109}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VBV_formation", "VBV_formation\VBV_formation.csproj", "{DBEC925D-D998-4A7C-B171-BD2845A09964}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,10 @@ Global
 		{E4A59C50-7D1E-43EB-9C6D-FC2004686287}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4A59C50-7D1E-43EB-9C6D-FC2004686287}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4A59C50-7D1E-43EB-9C6D-FC2004686287}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBEC925D-D998-4A7C-B171-BD2845A09964}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBEC925D-D998-4A7C-B171-BD2845A09964}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBEC925D-D998-4A7C-B171-BD2845A09964}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBEC925D-D998-4A7C-B171-BD2845A09964}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

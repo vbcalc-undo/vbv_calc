@@ -6,3 +6,6 @@
 /.vs
 /VBV_calc/bin/Debug/net8.0-windows
 /VBV_calc/bin/Release/net8.0-windows
+/VBV_calc/bin/Release
+/VBV_formation/bin/Release/net8.0-windows
+/VBV_formation/obj
