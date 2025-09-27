@@ -13,7 +13,7 @@
                 <Button Content="削除" Width="59" Height="30" Canvas.Left="385" Canvas.Top="250" Click="shidan_sakujo_Button_Click" />
                 <Button Content="ファイルへ書き込み" Width="186" Height="30" Canvas.Left="258" Canvas.Top="285" Click="shidan_file_kakikomi_Button_Click"/>
                 <ListBox x:Name="saved_list" Height="509" Width="222"  DisplayMemberPath="character_id" SelectedValuePath="character_name" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="19" Canvas.Top="40" />
-                <ListBox x:Name="shidan_saved_list" Height="207" Width="193" DisplayMemberPath="shidan_name" Canvas.Left="258" Canvas.Top="40" HorizontalAlignment="Left" VerticalAlignment="Top" SelectionChanged="shidan_saved_list_SelectionChanged" />
+                <ListBox x:Name="shidan_saved_list" Height="207" Width="193" DisplayMemberPath="shidan_name" Canvas.Left="258" Canvas.Top="40" HorizontalAlignment="Left" VerticalAlignment="Top" />
                 <TextBlock Canvas.Left="641" TextWrapping="Wrap" Text="1" Canvas.Top="13"/>
                 <TextBlock Canvas.Left="638" TextWrapping="Wrap" Text="2" Canvas.Top="211"/>
                 <TextBlock Canvas.Left="638" TextWrapping="Wrap" Text="3" Canvas.Top="404" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -45,10 +45,10 @@
                 <Button Content="load" Canvas.Left="1244" Canvas.Top="9" Click="Character4_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                 <Button Content="load" Canvas.Left="1244" Canvas.Top="211" Click="Character5_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 <Button Content="load" Canvas.Left="1244" Canvas.Top="406" Click="Character6_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <ComboBox x:Name="assist_skill_box" Canvas.Left="476" Canvas.Top="40" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                <TextBlock Canvas.Left="504" TextWrapping="Wrap" Text="アシストスキル" Canvas.Top="18" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                <TextBox x:Name="shidan_name_box" Canvas.Left="476" TextWrapping="Wrap" Text="" Canvas.Top="129" Width="120"/>
-                <TextBlock Canvas.Left="476" TextWrapping="Wrap" Text="師団名" Canvas.Top="110"/>
+                <ComboBox x:Name="assist_skill_box" Canvas.Left="476" Canvas.Top="77" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" />
+                <TextBlock Canvas.Left="504" TextWrapping="Wrap" Text="アシストスキル" Canvas.Top="58" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <TextBox x:Name="shidan_name_box" Canvas.Left="476" TextWrapping="NoWrap" Text="" Canvas.Top="39" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" MaxLength="20" />
+                <TextBlock Canvas.Left="519" TextWrapping="Wrap" Text="師団名" Canvas.Top="18" HorizontalAlignment="Left" VerticalAlignment="Center" />
                 <CheckBox x:Name="leader1_flag" Content="リーダー" Canvas.Left="822" Canvas.Top="13" Checked="leader1_flag_Checked" Unchecked="leader1_flag_UnChecked"/>
                 <CheckBox x:Name="leader2_flag" Content="リーダー" Canvas.Left="822" Canvas.Top="213" Checked="leader1_flag_Checked" Unchecked="leader1_flag_UnChecked"/>
                 <CheckBox x:Name="leader3_flag" Content="リーダー" Canvas.Left="822" Canvas.Top="413" Checked="leader1_flag_Checked" Unchecked="leader1_flag_UnChecked"/>
@@ -58,14 +58,70 @@
                 <TextBlock Canvas.Left="326" TextWrapping="Wrap" Text="師団一覧" Canvas.Top="20"/>
                 <TextBlock Canvas.Left="92" TextWrapping="Wrap" Text="キャラクター一覧" Canvas.Top="21"/>
                 <TextBlock Canvas.Left="316" TextWrapping="Wrap" Text="師団スキル一覧" Canvas.Top="330"/>
-                <RadioButton Content="昼" Canvas.Left="480" Canvas.Top="200" Checked="RadioButton_Checked"/>
-                <RadioButton Content="夜" Canvas.Left="537" Canvas.Top="200" Checked="RadioButton_Checked"/>
-                <CheckBox x:Name="kago1_flag" Content="火" Canvas.Left="480" Canvas.Top="250" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
-                <CheckBox x:Name="kago2_flag" Content="水" Canvas.Left="530" Canvas.Top="250" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
-                <CheckBox x:Name="kago3_flag" Content="風" Canvas.Left="580" Canvas.Top="250" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
-                <CheckBox x:Name="kago4_flag" Content="土" Canvas.Left="480" Canvas.Top="270" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
-                <CheckBox x:Name="kago5_flag" Content="光" Canvas.Left="530" Canvas.Top="270" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
-                <CheckBox x:Name="kago6_flag" Content="闇" Canvas.Left="580" Canvas.Top="270" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
+                <RadioButton Content="昼" Canvas.Left="480" Canvas.Top="220" Checked="RadioButton_Checked" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <RadioButton Content="夜" Canvas.Left="537" Canvas.Top="220" Checked="RadioButton_Checked" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <CheckBox x:Name="kago1_flag" Content="火" Canvas.Left="480" Canvas.Top="260" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
+                <CheckBox x:Name="kago2_flag" Content="水" Canvas.Left="530" Canvas.Top="260" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
+                <CheckBox x:Name="kago3_flag" Content="風" Canvas.Left="580" Canvas.Top="260" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
+                <CheckBox x:Name="kago4_flag" Content="土" Canvas.Left="480" Canvas.Top="280" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
+                <CheckBox x:Name="kago5_flag" Content="光" Canvas.Left="530" Canvas.Top="280" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
+                <CheckBox x:Name="kago6_flag" Content="闇" Canvas.Left="580" Canvas.Top="280" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
+                <TextBox x:Name="buko1_fig" Canvas.Left="891" TextWrapping="Wrap" Text="" Canvas.Top="10" Width="52" TextChanged="buko_fig_TextChanged" />
+                <TextBox x:Name="buko2_fig" Canvas.Left="891" TextWrapping="Wrap" Text="" Canvas.Top="210" Width="52" TextChanged="buko_fig_TextChanged" />
+                <TextBox x:Name="buko3_fig" Canvas.Left="891" TextWrapping="Wrap" Text="" Canvas.Top="410" Width="52" TextChanged="buko_fig_TextChanged" />
+                <TextBox x:Name="buko4_fig" Canvas.Left="1371" TextWrapping="Wrap" Text="" Canvas.Top="10" Width="52" TextChanged="buko_fig_TextChanged" />
+                <TextBox x:Name="buko5_fig" Canvas.Left="1371" TextWrapping="Wrap" Text="" Canvas.Top="210" Width="52" TextChanged="buko_fig_TextChanged" />
+                <TextBox x:Name="buko6_fig" Canvas.Left="1371" TextWrapping="Wrap" Text="" Canvas.Top="410" Width="52" TextChanged="buko_fig_TextChanged" />
+                <TextBlock Canvas.Left="951" TextWrapping="Wrap" Text="武功" Canvas.Top="10"/>
+                <TextBlock Canvas.Left="951" TextWrapping="Wrap" Text="武功" Canvas.Top="210"/>
+                <TextBlock Canvas.Left="951" TextWrapping="Wrap" Text="武功" Canvas.Top="410"/>
+                <TextBlock Canvas.Left="1431" TextWrapping="Wrap" Text="武功" Canvas.Top="10"/>
+                <TextBlock Canvas.Left="1431" TextWrapping="Wrap" Text="武功" Canvas.Top="210"/>
+                <TextBlock Canvas.Left="1431" TextWrapping="Wrap" Text="武功" Canvas.Top="410"/>
+                <TextBlock Canvas.Left="520" TextWrapping="Wrap" Text="スタンス" Canvas.Top="104" />
+                <TextBox x:Name="stance_text_box" Canvas.Left="480" TextWrapping="Wrap" Text="" Canvas.Top="122" Width="120"/>
+                <TextBlock Canvas.Left="520" TextWrapping="Wrap" Text="総経験値" Canvas.Top="141" />
+                <TextBox x:Name="total_keikenti_box" Canvas.Left="480" TextWrapping="Wrap" Text="" Canvas.Top="162" Width="120" TextChanged="total_keikenti_box_TextChanged" MaxLength="12"/>
+                <TextBlock Canvas.Top="330" Canvas.Left="470" TextWrapping="Wrap" Text="人" />
+                <TextBlock Canvas.Top="330" Canvas.Left="520" TextWrapping="Wrap" Text="魔" />
+                <TextBlock Canvas.Top="330" Canvas.Left="570" TextWrapping="Wrap" Text="毒" />
+                <TextBlock Canvas.Top="360" Canvas.Left="470" TextWrapping="Wrap" Text="神" />
+                <TextBlock Canvas.Top="360" Canvas.Left="520" TextWrapping="Wrap" Text="獣" />
+                <TextBlock Canvas.Top="360" Canvas.Left="570" TextWrapping="Wrap" Text="星" />
+                <TextBlock Canvas.Top="390" Canvas.Left="470" TextWrapping="Wrap" Text="樹" />
+                <TextBlock Canvas.Top="390" Canvas.Left="520" TextWrapping="Wrap" Text="器" />
+                <TextBlock Canvas.Top="390" Canvas.Left="570" TextWrapping="Wrap" Text="蟲" />
+                <TextBlock Canvas.Top="420" Canvas.Left="470" TextWrapping="Wrap" Text="海" />
+                <TextBlock Canvas.Top="420" Canvas.Left="520" TextWrapping="Wrap" Text="竜" />
+                <TextBlock Canvas.Top="420" Canvas.Left="570" TextWrapping="Wrap" Text="炎" />
+                <TextBlock Canvas.Top="450" Canvas.Left="470" TextWrapping="Wrap" Text="雷" />
+                <TextBlock Canvas.Top="450" Canvas.Left="520" TextWrapping="Wrap" Text="氷" />
+                <TextBlock Canvas.Top="450" Canvas.Left="570" TextWrapping="Wrap" Text="飛" />
+                <TextBlock Canvas.Top="480" Canvas.Left="470" TextWrapping="Wrap" Text="騎" />
+                <TextBlock Canvas.Top="480" Canvas.Left="520" TextWrapping="Wrap" Text="夜" />
+                <TextBlock Canvas.Top="480" Canvas.Left="570" TextWrapping="Wrap" Text="超" />
+                <TextBox x:Name="hito_box" Canvas.Left="490" Canvas.Top="330" TextWrapping="Wrap" Text=""  Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="ma_box" Canvas.Left="540" Canvas.Top="330" TextWrapping="Wrap" Text="" Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="doku_box" Canvas.Left="590" Canvas.Top="330" TextWrapping="Wrap" Text="" Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="kami_box" Canvas.Left="490" Canvas.Top="360" TextWrapping="Wrap" Text=""  Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="juu_box" Canvas.Left="540" Canvas.Top="360" TextWrapping="Wrap" Text="" Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="hosi_box" Canvas.Left="590" Canvas.Top="360" TextWrapping="Wrap" Text="" Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="ju_box" Canvas.Left="490" Canvas.Top="390" TextWrapping="Wrap" Text=""  Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="utuwa_box" Canvas.Left="540" Canvas.Top="390" TextWrapping="Wrap" Text="" Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="mushi_box" Canvas.Left="590" Canvas.Top="390" TextWrapping="Wrap" Text="" Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="umi_box" Canvas.Left="490" Canvas.Top="420" TextWrapping="Wrap" Text=""  Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="ryu_box" Canvas.Left="540" Canvas.Top="420" TextWrapping="Wrap" Text="" Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="honoo_box" Canvas.Left="590" Canvas.Top="420" TextWrapping="Wrap" Text="" Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="kaminari_box" Canvas.Left="490" Canvas.Top="450" TextWrapping="Wrap" Text=""  Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="koori_box" Canvas.Left="540" Canvas.Top="450" TextWrapping="Wrap" Text="" Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="hi_box" Canvas.Left="590" Canvas.Top="450" TextWrapping="Wrap" Text="" Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="ki_box" Canvas.Left="490" Canvas.Top="480" TextWrapping="Wrap" Text=""  Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="yoru_box" Canvas.Left="540" Canvas.Top="480" TextWrapping="Wrap" Text="" Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBox x:Name="cho_box" Canvas.Left="590" Canvas.Top="480" TextWrapping="Wrap" Text="" Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
+                <TextBlock Canvas.Left="460" TextWrapping="Wrap" Text="昼夜" Canvas.Top="200"/>
+                <TextBlock Canvas.Left="460" TextWrapping="Wrap" Text="加護月" Canvas.Top="240"/>
+                <TextBlock Canvas.Left="460" TextWrapping="Wrap" Text="地形効果" Canvas.Top="305"/>
+                <Button Content="Button" Canvas.Left="1471" Canvas.Top="18" Click="Button_Click_1"/>
             </Canvas>
         </TabItem>
 

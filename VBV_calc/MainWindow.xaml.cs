@@ -146,10 +146,17 @@ namespace VBV_calc
 
         }
 
-        private void status_calc(string hp, string soku, string kou, string bou, string chiryoku, string cost, string rank)
+        private void status_calc(string hp, string kou, string bou, string soku, string chiryoku, string cost, string rank)
         {
             double keikenti = 0;
-            if (hp == "" || soku == "" || kou == "" || bou == "" || cost == "" || rank == "" || chiryoku == "")
+            // 空文字または数値でない場合は初期値をセットして終了
+            if (string.IsNullOrEmpty(hp) || !double.TryParse(hp, out _) ||
+                string.IsNullOrEmpty(soku) || !double.TryParse(soku, out _) ||
+                string.IsNullOrEmpty(kou) || !double.TryParse(kou, out _) ||
+                string.IsNullOrEmpty(bou) || !double.TryParse(bou, out _) ||
+                string.IsNullOrEmpty(chiryoku) || !double.TryParse(chiryoku, out _) ||
+                string.IsNullOrEmpty(cost) || !double.TryParse(cost, out _) ||
+                string.IsNullOrEmpty(rank))
             {
                 levelbox.Text = "1";
                 hpbox.Text = "1";
@@ -196,10 +203,10 @@ namespace VBV_calc
 
             //int hp_status = (int)(double.Parse(hp) * ((double)(level)/4.0) + 1.0);
             int hp_status = (int)(double.Parse(hp) * ((double)(level) + 1.0) / 4.0);
+            int kou_status = (int)((double.Parse(kou) + buko) * level1 + level2) + soubi1_status.kougeki + soubi2_status.kougeki + ryoshoku_status.kougeki;
+            int bou_status = (int)((double.Parse(bou) + buko) * level1 + level2) + soubi1_status.bougyo + soubi2_status.bougyo + ryoshoku_status.bougyo;
             int soku_status = (int)((double.Parse(soku)) * level1 + level2) + soubi1_status.sokudo + soubi2_status.sokudo + ryoshoku_status.sokudo;
             int chi_status = (int)((double.Parse(chiryoku)) * level1 + level2) + soubi1_status.tiryoku + soubi2_status.tiryoku + ryoshoku_status.tiryoku;
-            int kou_status = (int)((double.Parse(kou) + buko) * level1 + level2) + soubi1_status.kougeki + soubi2_status.kougeki + ryoshoku_status.kougeki;
-            int bou_status = (int)((double.Parse(kou) + buko) * level1 + level2) + soubi1_status.bougyo + soubi2_status.bougyo + ryoshoku_status.bougyo;
 
             levelbox.Text = level.ToString();
             hpbox.Text = hp_status.ToString();
@@ -251,10 +258,10 @@ namespace VBV_calc
 
             double temp = (level - 1.0) / 4.0 + 1.0;
             int hp_status = (int)(hp * ((level - 1.0) / 4.0 + 1.0));
+            int kou_status = (int)((kou + buko + shogo1_status.kougeki + shogo2_status.kougeki) * level1 + level2) + soubi1_status.kougeki + soubi2_status.kougeki + ryoshoku_status.kougeki;
+            int bou_status = (int)((bou + buko + shogo1_status.bougyo + shogo2_status.bougyo) * level1 + level2) + soubi1_status.bougyo + soubi2_status.bougyo + ryoshoku_status.bougyo;
             int soku_status = (int)((soku + shogo1_status.sokudo + shogo2_status.sokudo) * level1 + level2) + soubi1_status.sokudo + soubi2_status.sokudo + ryoshoku_status.sokudo;
             int chi_status = (int)((chiryoku + shogo1_status.tiryoku + shogo2_status.tiryoku) * level1 + level2) + soubi1_status.tiryoku + soubi2_status.tiryoku + ryoshoku_status.tiryoku;
-            int kou_status = (int)((kou + buko + shogo1_status.kougeki + shogo2_status.kougeki) * level1 + level2) + soubi1_status.kougeki + soubi2_status.kougeki + ryoshoku_status.kougeki;
-            int bou_status = (int)((kou + buko + shogo1_status.bougyo + shogo2_status.bougyo) * level1 + level2) + soubi1_status.bougyo + soubi2_status.bougyo + ryoshoku_status.bougyo;
 
             if (chi_status < 1) chi_status = 1;
             if (soku_status < 1) soku_status = 1;
@@ -335,19 +342,82 @@ namespace VBV_calc
                         leader2.Text = skill_name;
                         leader2_fig.Text = skill_value.ToString();
 
-                        status_calc(characters[i].基本パラメータ_HP, characters[i].基本パラメータ_速, characters[i].基本パラメータ_攻, characters[i].基本パラメータ_防, characters[i].基本パラメータ_知, characters[i].コスト, characters[i].ランク);
+                        int hp = 0, kou = 0, bou = 0, soku = 0, chi = 0, cost = 0;
+                        // HP
+                        if (!string.IsNullOrEmpty(characters[i].基本パラメータ_HP) && characters[i].基本パラメータ_HP != "-")
+                        {
+                            if (int.TryParse(characters[i].基本パラメータ_HP, out hp))
+                            {
+                                // hpを使う
+                            }
+                            else
+                            {
+                                hp = 0;
+                            }
+                        }
+                        // 攻
+                        if (!string.IsNullOrEmpty(characters[i].基本パラメータ_攻) && characters[i].基本パラメータ_攻 != "-")
+                        {
+                            if (int.TryParse(characters[i].基本パラメータ_攻, out kou))
+                            {
+                                // kouを使う
+                            }
+                            else
+                            {
+                                kou = 0;
+                            }
+                        }
+                        // 防
+                        if (!string.IsNullOrEmpty(characters[i].基本パラメータ_防) && characters[i].基本パラメータ_防 != "-")
+                        {
+                            if (int.TryParse(characters[i].基本パラメータ_防, out bou))
+                            {
+                                // bouを使う
+                            }
+                            else
+                            {
+                                bou = 0;
+                            }
+                        }
+                        // 速
+                        if (!string.IsNullOrEmpty(characters[i].基本パラメータ_速) && characters[i].基本パラメータ_速 != "-")
+                        {
+                            if (int.TryParse(characters[i].基本パラメータ_速, out soku))
+                            {
+                                // sokuを使う
+                            }
+                            else
+                            {
+                                soku = 0;
+                            }
+                        }
+                        // 知
+                        if (!string.IsNullOrEmpty(characters[i].基本パラメータ_知) && characters[i].基本パラメータ_知 != "-")
+                        {
+                            if (int.TryParse(characters[i].基本パラメータ_知, out chi))
+                            {
+                                // chiを使う
+                            }
+                            else
+                            {
+                                chi = 0;
+                            }
+                        }
+                        // コスト
+                        if (!string.IsNullOrEmpty(characters[i].コスト) && characters[i].コスト != "-")
+                        {
+                            if (int.TryParse(characters[i].コスト, out cost))
+                            {
+                                // costを使う
+                            }
+                            else
+                            {
+                                cost = 0;
+                            }
+                        }
+                        status_calc(characters[i].基本パラメータ_HP, characters[i].基本パラメータ_攻, characters[i].基本パラメータ_防, characters[i].基本パラメータ_速, characters[i].基本パラメータ_知, characters[i].コスト, characters[i].ランク);
                         //current_Character_Status.set_status(int.Parse(characters[i].基本パラメータ_HP),int.Parse(characters[i].基本パラメータ_攻),int.Parse(characters[i].基本パラメータ_防),int.Parse(characters[i].基本パラメータ_速), characters[i].基本パラメータ_知), int.Parse(characters[i].基本パラメータ_コスト),characters[i].ランク);
-
-                        if (characters[i].基本パラメータ_攻 != "" && characters[i].基本パラメータ_防 != "" && characters[i].基本パラメータ_速 != "" && characters[i].基本パラメータ_知 != "")
-                            current_Character_Status.set_status(int.Parse(characters[i].基本パラメータ_HP),
-                                int.Parse(characters[i].基本パラメータ_攻),
-                                int.Parse(characters[i].基本パラメータ_防),
-                                int.Parse(characters[i].基本パラメータ_速),
-                                int.Parse(characters[i].基本パラメータ_知),
-                                int.Parse(characters[i].コスト),
-                                characters[i].ランク,
-                                characters[i].種族,
-                                characters[i].特攻);
+                        current_Character_Status.set_status(hp, kou, bou, soku, chi, cost, characters[i].ランク, characters[i].種族, characters[i].特攻);
                         shuzoku_box.Text = characters[i].種族;
                         tokko_box.Text = characters[i].特攻;
                         shokugyo_box.Text = characters[i].職業;
@@ -714,7 +784,7 @@ namespace VBV_calc
             load_json_shogo_func(@"./json/medallion\meifu.json", "冥府");
             load_json_shogo_func(@"./json/medallion\kinki.json", "禁忌");
             load_json_shogo_func(@"./json/medallion\rakuen.json", "楽園");
-            load_json_shogo_func(@"./json/medallion\caracter_shogo.json", "キャラクター");
+            load_json_shogo_func(@"./json/medallion\character_shogo.json", "キャラクター");
 
         }
         private bool _isInitialized = false;
