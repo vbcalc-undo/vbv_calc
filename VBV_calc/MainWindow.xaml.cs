@@ -784,7 +784,7 @@ namespace VBV_calc
             load_json_shogo_func(@"./json/medallion\meifu.json", "冥府");
             load_json_shogo_func(@"./json/medallion\kinki.json", "禁忌");
             load_json_shogo_func(@"./json/medallion\rakuen.json", "楽園");
-            load_json_shogo_func(@"./json/medallion\caracter_shogo.json", "キャラクター");
+            load_json_shogo_func(@"./json/medallion\character_shogo.json", "キャラクター");
 
         }
         private bool _isInitialized = false;
