@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:av="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av"
-        Title="編成ウィンドウ" Height="700" Width="1550">
-    <TabControl Margin="0,0,0,-16">
+        Title="編成ウィンドウ" Height="720" Width="1550">
+    <TabControl Margin="0,0,0,-16" SelectionChanged="MyTabControl_SelectionChanged">
         <!-- 師団編成タブ -->
         <TabItem Header="師団編成">
             <Canvas>
@@ -124,10 +124,10 @@
                 <Button Content="Button" Canvas.Left="1471" Canvas.Top="18" Click="Button_Click_1"/>
             </Canvas>
         </TabItem>
-        <TabItem Header="レギオン編成">
-            <Canvas>
-                <ListBox x:Name="leg_hozon_shidan_list" Height="265" Width="197" DisplayMemberPath="shidan_name" HorizontalAlignment="Left" VerticalAlignment="Center" Canvas.Left="19" Canvas.Top="40" />
-                <ListBox x:Name="leg_hozon_leg_list" Height="183" Width="197" DisplayMemberPath="shidan_name" Canvas.Left="19" Canvas.Top="377" HorizontalAlignment="Center" VerticalAlignment="Top" />
+        <TabItem Header="レギオン編成" Height="22" Margin="-2,-2,-2,0" VerticalAlignment="Top">
+            <Canvas>                
+                <ListBox x:Name="leg_hozon_shidan_list" Height="265" Width="197" DisplayMemberPath="shidan_name" HorizontalAlignment="Center" VerticalAlignment="Top" Canvas.Left="19" Canvas.Top="28" />
+                <ListBox x:Name="leg_hozon_leg_list" Height="171" Width="197" DisplayMemberPath="legion_name" Canvas.Left="19" Canvas.Top="387" HorizontalAlignment="Center" VerticalAlignment="Top" />
                 <GroupBox Header="昼夜加護月" Width="200" Height="120" Canvas.Left="230" Canvas.Top="5">
                     <Canvas>
                         <RadioButton x:Name="leg_hiru_radio" Content="昼" Canvas.Left="10" Canvas.Top="10" Checked="Leg_RadioButton_Checked" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -243,6 +243,7 @@
                                  Canvas.Left="870" Canvas.Top="136"
                                  PreviewMouseLeftButtonDown="SmallBox_PreviewMouseLeftButtonDown" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                         <!-- Popup -->
+                        <!--
                         <Popup x:Name="BigPopup1" Placement="MousePoint" StaysOpen="False">
                             <Border Background="White" BorderBrush="Black" BorderThickness="1">
                                 <TextBox x:Name="BigTextBox1"
@@ -252,6 +253,31 @@
                                  MaxWidth="300"
                                  MaxHeight="400"
                                  VerticalAlignment="Top"/>
+                            </Border>
+                        </Popup>
+                        <Popup x:Name="BigPopup"
+                           Placement="MousePoint"
+                           StaysOpen="False"
+                           AllowsTransparency="True"
+                           PopupAnimation="Fade">
+                            <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="6">
+                                <ScrollViewer Width="500" Height="300">
+                                    <Grid x:Name="MultiColumnGrid"/>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                        -->
+                        <Popup x:Name="BigPopup"
+                           Placement="MousePoint"
+                           StaysOpen="False"
+                           AllowsTransparency="True"
+                           PopupAnimation="Fade">
+                            <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="6">
+                                <ScrollViewer x:Name="PopupScrollViewer"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto">
+                                    <Grid x:Name="MultiColumnGrid"/>
+                                </ScrollViewer>
                             </Border>
                         </Popup>
                         <TextBlock Canvas.Left="262" TextWrapping="Wrap" Text="師団スキル" Canvas.Top="9" HorizontalAlignment="Left" VerticalAlignment="Center"/>
@@ -326,7 +352,7 @@
                                  Text="" IsReadOnly="True"
                                  Canvas.Left="870" Canvas.Top="136"
                                  PreviewMouseLeftButtonDown="SmallBox_PreviewMouseLeftButtonDown" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                        <!-- Popup -->
+                        <!-- Popup
                         <Popup x:Name="BigPopup2" Placement="MousePoint" StaysOpen="False">
                             <Border Background="White" BorderBrush="Black" BorderThickness="1">
                                 <TextBox x:Name="BigTextBox2"
@@ -338,6 +364,7 @@
                                  VerticalAlignment="Top"/>
                             </Border>
                         </Popup>
+                         -->
                         <TextBlock Canvas.Left="262" TextWrapping="Wrap" Text="師団スキル" Canvas.Top="9" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         <TextBlock Canvas.Left="84" TextWrapping="Wrap" Text="スタンス" Canvas.Top="59" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                         <TextBox x:Name="leg_shidan2_stance" Canvas.Left="18" TextWrapping="Wrap" Text="" Canvas.Top="81" Width="168" HorizontalAlignment="Center" VerticalAlignment="Top" Height="26"/>
@@ -410,7 +437,7 @@
                                  Text="" IsReadOnly="True"
                                  Canvas.Left="870" Canvas.Top="136"
                                  PreviewMouseLeftButtonDown="SmallBox_PreviewMouseLeftButtonDown" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                        <!-- Popup -->
+                        <!-- Popup 
                         <Popup x:Name="BigPopup3" Placement="MousePoint" StaysOpen="False">
                             <Border Background="White" BorderBrush="Black" BorderThickness="1">
                                 <TextBox x:Name="BigTextBox3"
@@ -422,6 +449,7 @@
                                  VerticalAlignment="Top"/>
                             </Border>
                         </Popup>
+                        -->
                         <TextBlock Canvas.Left="262" TextWrapping="Wrap" Text="師団スキル" Canvas.Top="9" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         <TextBlock Canvas.Left="84" TextWrapping="Wrap" Text="スタンス" Canvas.Top="59" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                         <TextBox x:Name="leg_shidan3_stance" Canvas.Left="18" TextWrapping="Wrap" Text="" Canvas.Top="81" Width="168" HorizontalAlignment="Center" VerticalAlignment="Top" Height="26"/>
@@ -434,10 +462,18 @@
                 <Button x:Name="leg_load_shidan1" Content="読み込み" Height="100" Canvas.Left="453" Canvas.Top="20" Width="62" HorizontalAlignment="Left" VerticalAlignment="Top" Click="leg_load_shidan1_Click"/>
                 <Button x:Name="leg_load_shidan2" Content="読み込み" Height="100" Canvas.Left="453" Canvas.Top="226" Width="62" HorizontalAlignment="Left" VerticalAlignment="Top" Click="leg_load_shidan2_Click"/>
                 <Button x:Name="leg_load_shidan3" Content="読み込み" Height="100" Canvas.Left="458" Canvas.Top="447" Width="62" HorizontalAlignment="Left" VerticalAlignment="Center" Click="leg_load_shidan3_Click"/>
-                <TextBox x:Name="legion_skill_box" Height="235" Width="187" Canvas.Left="238" Canvas.Top="379" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                <TextBlock Canvas.Left="305" TextWrapping="Wrap" Text="軍団スキル" Canvas.Top="358" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <TextBlock Canvas.Left="81" TextWrapping="Wrap" Text="保存師団リスト" Canvas.Top="19"/>
-                <TextBlock Canvas.Left="75" TextWrapping="Wrap" Text="保存レギオンリスト" Canvas.Top="356"/>
+                <TextBox x:Name="legion_skill_box" Height="181" Width="187" Canvas.Left="238" Canvas.Top="427" HorizontalAlignment="Center" VerticalAlignment="Top" />
+                <TextBlock Canvas.Left="305" TextWrapping="Wrap" Text="軍団スキル" Canvas.Top="404" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <TextBlock Canvas.Left="305" TextWrapping="Wrap" Text="総経験値" Canvas.Top="354" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <TextBlock Canvas.Left="81" TextWrapping="Wrap" Text="保存師団リスト" Canvas.Top="7" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <TextBlock Canvas.Left="75" TextWrapping="Wrap" Text="保存レギオンリスト" Canvas.Top="364" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <TextBox x:Name="leg_total_keikenti" Canvas.Left="238" TextWrapping="Wrap" Text="" Canvas.Top="377" Width="187" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="leg_total_keikenti_TextChanged"/>
+                <Button x:Name="legion_save" Content="保存" Canvas.Left="19" Canvas.Top="566" Height="30" Width="61" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion_save_Click"/>
+                <Button x:Name="legion_load" Content="読み込み" Canvas.Left="90" Canvas.Top="566" Height="30" Width="59" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion_load_Click"/>
+                <Button x:Name="legion_del" Content="削除" Canvas.Left="157" Canvas.Top="566" Height="30" Width="59" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion_load_Click"/>
+                <Button x:Name="legion_file_save" Content="ファイルに保存" Canvas.Left="19" Canvas.Top="604" Height="30" Width="197" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion_file_save_Click"/>
+                <TextBox x:Name="legion_name_box" Canvas.Left="19" TextWrapping="Wrap" Text="" Canvas.Top="329" Width="197" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <TextBlock x:Name="legion_name" Canvas.Left="90" TextWrapping="Wrap" Text="レギオン名" Canvas.Top="305" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             </Canvas>
         </TabItem>
     </TabControl>
