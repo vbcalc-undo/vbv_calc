@@ -3101,6 +3101,11 @@ namespace VBV_formation
             }
             return bairitu;
         }
+        private void tikei_group_changed(object sender, TextChangedEventArgs e)
+        {
+            leg_kago_calc();
+        }
+
         private double leg_kago_bairitu_calc(string chara_kago)
         {
             double kago_bairitu_calc = 1.0;
@@ -3154,6 +3159,8 @@ namespace VBV_formation
             foreach (var characters in region_character_list)
             {
                 (stance_kou, stance_bougyo, stance_soku, stance_chi) = leg_stance_calc(number);
+                otori_number = 0;
+                otori_bougyo = 999999999;
                 foreach (var character in characters)
                 {
                     var character1_status_box = (TextBox)this.FindName($"shidan{number}_chara{character.Key}_status");
@@ -3256,7 +3263,7 @@ namespace VBV_formation
             int temp_self_kassei = 0;
             if (character.character_skill.ContainsKey(skillname))
                 temp_self_kassei = character.character_skill[skillname];
-            if (legion_shidan.Count() != 0)
+            if (legion_shidan.Count() != 0 && legion_shidan.ContainsKey("英雄覇気"))
             {
                 temp_kougeki *= (100.0 + legion_shidan[skillname].Item1 - temp_self_kassei) / 100.0;
                 temp_bougyo *= (100.0 + legion_shidan[skillname].Item1 - temp_self_kassei) / 100.0;
@@ -3629,9 +3636,9 @@ namespace VBV_formation
 }
         private void MyTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (sender is TabControl tabControl)
+            if (e.Source is TabControl tabControl && tabControl.SelectedItem is TabItem tabItem)
             {
-/*                
+               
                 // 選択されたタブ
                 var selectedTab = tabControl.SelectedItem as TabItem;
                 if (selectedTab != null)
@@ -3654,44 +3661,14 @@ namespace VBV_formation
                             leg_hozon_shidan_list.ItemsSource = leg_all_shidan_savedata;
                         }
                     }
-                }*/
+                }
             }
         }
-
-        /*
-         *  shidan_savedata tempdata;
-            tempdata = new shidan_savedata();
-            tempdata.shidan_name = shidan_name_box.Text;
-            //もしnullなら”師団_年月日時分秒”
-            if (tempdata.shidan_name == "")
-            {
-                tempdata.shidan_name = "師団_" + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
-            }
-            // 師団のメンバーを保存する
-            tempdata.character = new Dictionary<int, character_info>();
-            int temp_leader = 0;
-            foreach (var kv in all_characters)
-            {
-                if (kv.Value.leader_flag == true)
-                {
-                    del_leader_skill(kv.Key);
-                    kv.Value.leader_flag = true;
-                    temp_leader = kv.Key;
-                }
-                Debug.WriteLine(kv.Key + " leaderflag:"  + kv.Value.leader_flag);
-            }
-            tempdata.character = all_characters.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value.DeepCopy());
-            all_shidan_savedata.Add(tempdata);
-            add_leader_skill(temp_leader);
-
-         */
         private void legion_save_Click(object sender, RoutedEventArgs e)
         {
             legion_savedata tempdata;
             tempdata = new legion_savedata();
-            tempdata.legion_name = shidan_name_box.Text;
+            tempdata.legion_name = legion_name_box.Text;
             
             //もしnullなら”師団_年月日時分秒”
             if (tempdata.legion_name == "")
@@ -3894,10 +3871,7 @@ namespace VBV_formation
                     }
                     leg_num++;
                 }
-                //load_legion_shidan1 = selected.shidan[0];
-                //load_legion_shidan2 = selected.shidan[1];
-                //load_legion_shidan3 = selected.shidan[2];
-                shidan_name_box.Text = selected.legion_name;
+                legion_name_box.Text = selected.legion_name;
                 leg_set_shidan_skill(leg_shidan1_characters, 1);
                 leg_set_shidan_skill(leg_shidan2_characters, 2);
                 leg_set_shidan_skill(leg_shidan3_characters, 3);
@@ -3910,6 +3884,130 @@ namespace VBV_formation
 
         private void legion_file_save_Click(object sender, RoutedEventArgs e)
         {
+            //現在のall_save_dataをjsonにして保存する
+            try
+            {
+                string json = JsonConvert.SerializeObject(all_legion_savedata, Formatting.Indented);
+                // 保存先のフォルダが無ければ作る
+                File.WriteAllText("./json/legion.json", json);
+                MessageBox.Show("保存しました。");
+                return; // 成功
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine("権限が無いため保存できません: " + ex.Message);
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                Console.WriteLine("ディレクトリが見つかりません: " + ex.Message);
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine("入出力エラー: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("不明なエラー: " + ex.Message);
+            }
+        }
+
+        private void legion_del_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = leg_hozon_leg_list.SelectedItem as legion_savedata;
+            if (selected != null)
+            {
+                int removedIndex = leg_hozon_leg_list.SelectedIndex;
+
+                // コレクションから削除
+                all_legion_savedata.Remove(selected);
+
+                // 削除後に選択を復元
+                if (all_legion_savedata.Count == 0)
+                {
+                    leg_hozon_leg_list.SelectedIndex = -1; // 何も選択しない
+                }
+                else if (removedIndex < all_shidan_savedata.Count)
+                {
+                    leg_hozon_leg_list.SelectedIndex = removedIndex; // 同じ位置を選ぶ
+                }
+                else
+                {
+                    leg_hozon_leg_list.SelectedIndex = all_legion_savedata.Count - 1; // 1つ前を選ぶ
+                }
+            }
+
+        }
+
+        private void legion1_clear_button_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 1; i < 7; i++)
+            {
+                var allbox = (TextBox)this.FindName($"shidan1_chara{i}_name");
+                var status = (TextBox)this.FindName($"shidan1_chara{i}_status");
+
+                allbox.ClearValue(TextBox.BackgroundProperty);
+                allbox.Text = "";
+                status.Text = "";
+            }
+            leg_shidan1_name.Text="";
+            leg_shidan1_stance.Text = "";
+            leg_shidan1_skillBox.Text = "";
+            leg_shidan1_characters.Clear();
+            //all_legion_savedata[0].shidan[0] = null;
+            leg_set_shidan_skill(leg_shidan1_characters, 1);
+            leg_set_shidan_skill(leg_shidan2_characters, 2);
+            leg_set_shidan_skill(leg_shidan3_characters, 3);
+            set_legion_skill();
+            leg_character_kassei_update();
+            leg_character_shiki_update();
+            leg_kago_calc();
+        }
+        private void legion2_clear_button_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 1; i < 7; i++)
+            {
+                var allbox = (TextBox)this.FindName($"shidan2_chara{i}_name");
+                var status = (TextBox)this.FindName($"shidan2_chara{i}_status");
+                allbox.ClearValue(TextBox.BackgroundProperty);
+                allbox.Text = "";
+                status.Text = "";
+            }
+            leg_shidan2_name.Text = "";
+            leg_shidan2_stance.Text = "";
+            leg_shidan2_skillBox.Text = "";
+            leg_shidan2_characters.Clear();
+            //all_legion_savedata[0].shidan[1] = null;
+            leg_set_shidan_skill(leg_shidan1_characters, 1);
+            leg_set_shidan_skill(leg_shidan2_characters, 2);
+            leg_set_shidan_skill(leg_shidan3_characters, 3);
+            set_legion_skill();
+            leg_character_kassei_update();
+            leg_character_shiki_update();
+            leg_kago_calc();
+
+        }
+        private void legion3_clear_button_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 1; i < 7; i++)
+            {
+                var allbox = (TextBox)this.FindName($"shidan3_chara{i}_name");
+                var status = (TextBox)this.FindName($"shidan3_chara{i}_status");
+                allbox.ClearValue(TextBox.BackgroundProperty);
+                allbox.Text = "";
+                status.Text = "";
+            }
+            leg_shidan3_name.Text = "";
+            leg_shidan3_stance.Text = "";
+            leg_shidan3_skillBox.Text = "";
+            leg_shidan3_characters.Clear();
+            //all_legion_savedata[0].shidan[2] = null;
+            leg_set_shidan_skill(leg_shidan1_characters, 1);
+            leg_set_shidan_skill(leg_shidan2_characters, 2);
+            leg_set_shidan_skill(leg_shidan3_characters, 3);
+            set_legion_skill();
+            leg_character_kassei_update();
+            leg_character_shiki_update();
+            leg_kago_calc();
 
         }
     }

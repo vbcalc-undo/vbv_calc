@@ -125,7 +125,7 @@
             </Canvas>
         </TabItem>
         <TabItem Header="レギオン編成" Height="22" Margin="-2,-2,-2,0" VerticalAlignment="Top">
-            <Canvas>                
+            <Canvas>
                 <ListBox x:Name="leg_hozon_shidan_list" Height="265" Width="197" DisplayMemberPath="shidan_name" HorizontalAlignment="Center" VerticalAlignment="Top" Canvas.Left="19" Canvas.Top="28" />
                 <ListBox x:Name="leg_hozon_leg_list" Height="171" Width="197" DisplayMemberPath="legion_name" Canvas.Left="19" Canvas.Top="387" HorizontalAlignment="Center" VerticalAlignment="Top" />
                 <GroupBox Header="昼夜加護月" Width="200" Height="120" Canvas.Left="230" Canvas.Top="5">
@@ -141,7 +141,7 @@
 
                     </Canvas>
                 </GroupBox>
-                <GroupBox Header="地形効果" Width="200" Height="210" Canvas.Left="230" Canvas.Top="135">
+                <GroupBox Header="地形効果" Width="200" Height="210" Canvas.Left="230" Canvas.Top="135" TextBox.TextChanged="tikei_group_changed">
                     <Canvas>
                         <TextBlock Canvas.Top="10" Canvas.Left="10" TextWrapping="Wrap" Text="人" />
                         <TextBlock Canvas.Top="10" Canvas.Left="65" TextWrapping="Wrap" Text="魔" />
@@ -461,7 +461,7 @@
                 </GroupBox>
                 <Button x:Name="leg_load_shidan1" Content="読み込み" Height="100" Canvas.Left="453" Canvas.Top="20" Width="62" HorizontalAlignment="Left" VerticalAlignment="Top" Click="leg_load_shidan1_Click"/>
                 <Button x:Name="leg_load_shidan2" Content="読み込み" Height="100" Canvas.Left="453" Canvas.Top="226" Width="62" HorizontalAlignment="Left" VerticalAlignment="Top" Click="leg_load_shidan2_Click"/>
-                <Button x:Name="leg_load_shidan3" Content="読み込み" Height="100" Canvas.Left="458" Canvas.Top="447" Width="62" HorizontalAlignment="Left" VerticalAlignment="Center" Click="leg_load_shidan3_Click"/>
+                <Button x:Name="leg_load_shidan3" Content="読み込み" Height="100" Canvas.Left="454" Canvas.Top="438" Width="62" HorizontalAlignment="Center" VerticalAlignment="Top" Click="leg_load_shidan3_Click"/>
                 <TextBox x:Name="legion_skill_box" Height="181" Width="187" Canvas.Left="238" Canvas.Top="427" HorizontalAlignment="Center" VerticalAlignment="Top" />
                 <TextBlock Canvas.Left="305" TextWrapping="Wrap" Text="軍団スキル" Canvas.Top="404" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <TextBlock Canvas.Left="305" TextWrapping="Wrap" Text="総経験値" Canvas.Top="354" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -470,10 +470,13 @@
                 <TextBox x:Name="leg_total_keikenti" Canvas.Left="238" TextWrapping="Wrap" Text="" Canvas.Top="377" Width="187" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="leg_total_keikenti_TextChanged"/>
                 <Button x:Name="legion_save" Content="保存" Canvas.Left="19" Canvas.Top="566" Height="30" Width="61" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion_save_Click"/>
                 <Button x:Name="legion_load" Content="読み込み" Canvas.Left="90" Canvas.Top="566" Height="30" Width="59" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion_load_Click"/>
-                <Button x:Name="legion_del" Content="削除" Canvas.Left="157" Canvas.Top="566" Height="30" Width="59" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion_load_Click"/>
+                <Button x:Name="legion_del" Content="削除" Canvas.Left="157" Canvas.Top="566" Height="30" Width="59" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion_del_Click"/>
                 <Button x:Name="legion_file_save" Content="ファイルに保存" Canvas.Left="19" Canvas.Top="604" Height="30" Width="197" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion_file_save_Click"/>
                 <TextBox x:Name="legion_name_box" Canvas.Left="19" TextWrapping="Wrap" Text="" Canvas.Top="329" Width="197" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <TextBlock x:Name="legion_name" Canvas.Left="90" TextWrapping="Wrap" Text="レギオン名" Canvas.Top="305" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <Button x:Name="legion1_clear_button" Content="クリア" Canvas.Left="453" Canvas.Top="135" Height="61" Width="62" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion1_clear_button_Click"/>
+                <Button x:Name="legion2_clear_button" Content="クリア" Canvas.Left="453" Canvas.Top="345" Height="61" Width="62" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion2_clear_button_Click"/>
+                <Button x:Name="legion3_clear_button" Content="クリア" Canvas.Left="454" Canvas.Top="555" Height="61" Width="62" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion3_clear_button_Click"/>
             </Canvas>
         </TabItem>
     </TabControl>
