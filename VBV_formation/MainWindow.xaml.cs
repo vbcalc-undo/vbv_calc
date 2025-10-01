@@ -1212,8 +1212,8 @@ namespace VBV_formation
             double keikenti = 0;
             int hp, soku, kou, bou, chiryoku, cost;
             int level = 0;
-            int.TryParse(level_shitei_box.Text, out level_shitei);
-            int.TryParse(keikenti_shitei_box.Text, out keikenti_shitei);
+            //int.TryParse(level_shitei_box.Text, out level_shitei);
+            //int.TryParse(keikenti_shitei_box.Text, out keikenti_shitei);
             level = level_shitei;
             keikenti = keikenti_shitei;
             string rank = characterObj.ランク;
@@ -2426,8 +2426,8 @@ namespace VBV_formation
             int hp, soku, kou, bou, chiryoku, cost;
             int level = 0;
             string rank = characterObj.rank;
-            int.TryParse(level_shitei_box.Text, out level_shitei);
-            int.TryParse(keikenti_shitei_box.Text, out keikenti_shitei);
+            //int.TryParse(level_shitei_box.Text, out level_shitei);
+            //int.TryParse(keikenti_shitei_box.Text, out keikenti_shitei);
             level = level_shitei;
             keikenti = keikenti_shitei;
             if (level_shitei == 0)
@@ -3660,6 +3660,7 @@ namespace VBV_formation
                     leg_character.Value.character_current_status["知力"] = (int)(leg_character.Value.character_current_status["知力"] * ((temp_chiryoku + 400.0) / 400.0)); ;
                     i++;
                 }
+                number++;
             }
             //leg_statusup_skill_calc();
         }
@@ -3806,7 +3807,7 @@ namespace VBV_formation
                                     {
                                         leg_shidan1_characters[i].character_skill[skill.Key] = skill.Value;
                                     }
-                                    leg_shidan1_stance.Text = leg_shidan1_characters[i].stance;
+                                    leg_shidan1_stance.Text = leg_shidan1_characters[i].stance.Replace("&br;", "");
                                 }
                             }
                             skillBox.Text += leg_shidan1_characters[i].character_name + "\n";
