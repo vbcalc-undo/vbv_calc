@@ -122,6 +122,8 @@
                 <TextBlock Canvas.Left="460" TextWrapping="Wrap" Text="加護月" Canvas.Top="240"/>
                 <TextBlock Canvas.Left="460" TextWrapping="Wrap" Text="地形効果" Canvas.Top="305"/>
                 <Button Content="Button" Canvas.Left="1471" Canvas.Top="18" Click="Button_Click_1"/>
+                <TextBox x:Name="level_shitei_box" Canvas.Left="1471" TextWrapping="Wrap" Text="" Canvas.Top="56" Width="52" TextChanged="level_fig_TextChanged" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                <TextBox x:Name="keikenti_shitei_box" Canvas.Left="1471" TextWrapping="Wrap" Text="" Canvas.Top="81" Width="52" TextChanged="level_fig_TextChanged" HorizontalAlignment="Center" VerticalAlignment="Top" />
             </Canvas>
         </TabItem>
         <TabItem Header="レギオン編成" Height="22" Margin="-2,-2,-2,0" VerticalAlignment="Top">

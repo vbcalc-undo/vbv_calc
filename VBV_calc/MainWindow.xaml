@@ -136,7 +136,7 @@
             <CheckBox x:Name ="shokugyo_destroyer" Content="デストロイヤー" Canvas.Left="93" Canvas.Top="112" Click="RadioButton_Checked" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <CheckBox x:Name ="shokugyo_healer" Content="ヒーラー" Canvas.Left="183" Canvas.Top="112" Click="RadioButton_Checked" HorizontalAlignment="Center" VerticalAlignment="Top"/>
             <TextBlock Canvas.Left="23" TextWrapping="Wrap" Text="職業フィルター" Canvas.Top="70" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-            <TextBox x:Name="levelbox" Canvas.Left="1109" TextWrapping="Wrap" Text="0" Canvas.Top="62" Width="68" HorizontalAlignment="Left" VerticalAlignment="Center" />
+            <TextBox x:Name="levelbox" Canvas.Left="1109" TextWrapping="Wrap" Text="0" Canvas.Top="62" Width="68" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="levelbox_TextChanged" />
             <TextBox x:Name="hpbox" Canvas.Left="1109" TextWrapping="Wrap" Text="0" Canvas.Top="101" Width="68" HorizontalAlignment="Left" VerticalAlignment="Top" TextChanged="status_TextChanged" />
             <TextBox x:Name="kougekibox" Canvas.Left="1109" TextWrapping="Wrap" Text="0" Canvas.Top="141" Width="68" HorizontalAlignment="Left" VerticalAlignment="Top"  TextChanged="status_TextChanged"/>
             <TextBox x:Name="bougyobox" Canvas.Left="1109" TextWrapping="Wrap" Text="0" Canvas.Top="182" Width="68" HorizontalAlignment="Left" VerticalAlignment="Top"  TextChanged="status_TextChanged"/>
@@ -242,7 +242,34 @@
             <TextBlock Height="23" Canvas.Left="33" TextWrapping="Wrap" Text="職業" Width="28" Canvas.Top="162" RenderTransformOrigin="0.886,1.464" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         </Canvas>
         <Canvas Height="654" Canvas.Left="-226" Width="221" HorizontalAlignment="Left" VerticalAlignment="Center">
-            <ListBox Height="496" x:Name="saved_list" Canvas.Left="10" Canvas.Top="31" Width="201" SelectionMode="Single" HorizontalAlignment="Center" VerticalAlignment="Top" DisplayMemberPath="character_id" SelectedValuePath="character_name">
+            <!-- <ListBox AlternationCount="9999" Height="496" x:Name="saved_list" Canvas.Left="10" Canvas.Top="48" Width="201" SelectionMode="Single" HorizontalAlignment="Center" VerticalAlignment="Top" DisplayMemberPath="character_id" SelectedValuePath="character_name">
+                </ListBox>
+             -->
+            <ListBox x:Name="saved_list"
+         AlternationCount="9999"
+         Height="496"
+         Width="201"
+         Canvas.Left="10"
+         Canvas.Top="48"
+         SelectionMode="Single"
+         HorizontalAlignment="Center"
+         VerticalAlignment="Top"
+         SelectedValuePath="character_name">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <!-- 番号 + ドット -->
+                            <TextBlock 
+                    Text="{Binding 
+                           RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
+                           Path=(ItemsControl.AlternationIndex)}"
+                    Margin="0,0,2,0"/>
+                            <TextBlock Text=". " Margin="0,0,2,0"/>
+                            <!-- 本来の表示（character_idを表示） -->
+                            <TextBlock Text="{Binding character_id}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
             </ListBox>
             <Button Content="読み込み" Canvas.Left="86" Canvas.Top="545" Height="36" Width="56" HorizontalAlignment="Left" VerticalAlignment="Center" Click="Load_Button_Click"/>
             <Button Content="保存" Canvas.Left="11" Canvas.Top="546" Height="36" Width="47" HorizontalAlignment="Center" VerticalAlignment="Top" Click="Saved_Button_Click"/>

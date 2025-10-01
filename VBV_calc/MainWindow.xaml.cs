@@ -3910,5 +3910,9 @@ namespace VBV_calc
         {
             equipment_search_box.Text = "";
         }
+        int level_shitei = 0;
+        private void levelbox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+        }
     }
 }
