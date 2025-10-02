@@ -193,7 +193,7 @@ namespace VBV_formation
             load_json_shogo_func(@"./json/medallion\meifu.json", "冥府");
             load_json_shogo_func(@"./json/medallion\kinki.json", "禁忌");
             load_json_shogo_func(@"./json/medallion\rakuen.json", "楽園");
-            load_json_shogo_func(@"./json/medallion\character_shogo.json", "キャラクター");
+            load_json_shogo_func(@"./json/medallion\busho_shogo.json", "キャラクター");
 
         }
         private void load_json_character()
@@ -4384,6 +4384,7 @@ namespace VBV_formation
             leg_kago_calc();
 
         }
+        private Window1 popup = new Window1();
 
         private void legion_duplicate_check_Click(object sender, RoutedEventArgs e)
         {
@@ -4396,9 +4397,7 @@ namespace VBV_formation
             var equipment_rare = new Dictionary<string, int> { { "8", 10 }, { "9", 4 }, { "10", 4 }, { "11", 3 }, { "12", 3 }, { "13", 2 }, { "14", 1 }, };
             var ryoshoku_rare = new Dictionary<string, int> { { "8", 28 }, { "9", 24 }, { "10", 20 }, { "11", 16 }, { "12", 312 }, { "13", 8 }, { "14", 4 }, };
 
-            var popup = new Window1();
             string duplicate_message = "";
-            popup.Message=("");
 
             foreach (var leg_characters in legion_character_list)
             {
@@ -4539,7 +4538,7 @@ namespace VBV_formation
                             if (leg_character.Value.character_ryoshoku == kvp.Key)
                             {
                                 Debug.WriteLine("レギオン:" + i + " キャラクター:" + j + leg_character.Key.ToString() + " 糧食:" + equipmentObj.名称 + "(レア:" + equipmentObj.レア + ")");
-                                duplicate_message += "レギオン:" + i + " 糧食:" + equipmentObj.名称 + "(レア:" + equipmentObj.レア + ")" + " キャラクター:" + j + leg_character.Key.ToString() + "\n";
+                                duplicate_message += "レギオン:" + i + " 糧食:" + equipmentObj.名称 + "(レア:" + equipmentObj.レア + ")" + " キャラクター:" + leg_character.Key.ToString() + "\n";
                             }
                             j++;
                         }
@@ -4551,8 +4550,14 @@ namespace VBV_formation
             {
                 duplicate_message = "重複なし";
             }
+            if (popup == null || !popup.IsLoaded)  // まだ作られていない or 閉じられている
+            {
+                popup = new Window1();
+                popup.Message = duplicate_message;
+                popup.Show();
+            }
             popup.Message = duplicate_message;
-            popup.Show(); // モードレスで開く
+            popup.Activate();
         }
     }
 }
