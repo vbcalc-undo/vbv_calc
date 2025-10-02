@@ -12,8 +12,35 @@
                 <Button Content="読み込み" Width="59" Height="30" Canvas.Left="324" Canvas.Top="250" HorizontalAlignment="Left" VerticalAlignment="Center" Click="shidan_yomikomi_Button_Click" />
                 <Button Content="削除" Width="59" Height="30" Canvas.Left="389" Canvas.Top="250" Click="shidan_sakujo_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Center" />
                 <Button Content="ファイルへ書き込み" Width="190" Height="30" Canvas.Left="258" Canvas.Top="285" Click="shidan_file_kakikomi_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                <ListBox x:Name="saved_list" Height="560" Width="222"  DisplayMemberPath="character_id" SelectedValuePath="character_name" HorizontalAlignment="Center" VerticalAlignment="Top" Canvas.Left="19" Canvas.Top="40" />
-                <ListBox x:Name="shidan_saved_list" Height="207" Width="193" DisplayMemberPath="shidan_name" Canvas.Left="258" Canvas.Top="40" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                <!--<ListBox x:Name="saved_list" Height="560" Width="222"  DisplayMemberPath="character_id" SelectedValuePath="character_name" HorizontalAlignment="Center" VerticalAlignment="Top" Canvas.Left="19" Canvas.Top="40" />
+                -->
+                <ListBox x:Name="saved_list"
+                     AlternationCount="9999"
+                     Height="580"
+                     Width="222"
+                     Canvas.Left="10"
+                     Canvas.Top="26"
+                     SelectionMode="Single"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Top"
+                     SelectedValuePath="character_name">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <!-- 番号 + ドット -->
+                                <TextBlock 
+                                    Text="{Binding 
+                                    RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
+                                    Path=(ItemsControl.AlternationIndex)}"
+                                    Margin="0,0,2,0"/>
+                                <TextBlock Text=". " Margin="0,0,2,0"/>
+                                <!-- 本来の表示（character_idを表示） -->
+                                <TextBlock Text="{Binding character_id}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <ListBox x:Name="shidan_saved_list" Height="221" Width="193" DisplayMemberPath="shidan_name" Canvas.Left="258" Canvas.Top="26" HorizontalAlignment="Center" VerticalAlignment="Top" />
                 <GroupBox Header="キャラクター１" Width="430" Height="210" Canvas.Left="630" Canvas.Top="5" HorizontalAlignment="Left" VerticalAlignment="Center">
                     <Canvas>
                         <TextBox x:Name="character1_name_box" Canvas.Left="10" TextWrapping="Wrap" Text="" Canvas.Top="0" Width="120" />
@@ -66,7 +93,7 @@
                         <CheckBox x:Name="leader3_flag" Content="リーダー" Canvas.Left="180" Canvas.Top="0" Checked="leader1_flag_Checked" Unchecked="leader1_flag_UnChecked"/>
                         <TextBox x:Name="buko3_fig" Canvas.Left="280" TextWrapping="Wrap" Text="" Canvas.Top="0" Width="52" TextChanged="buko_fig_TextChanged" />
                         <TextBlock Canvas.Left="250" TextWrapping="Wrap" Text="武功" Canvas.Top="0"/>
-                        <Button Content="load" Canvas.Left="140" Canvas.Top="0" Click="Character6_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                        <Button Content="load" Canvas.Left="140" Canvas.Top="0" Click="Character3_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top" />
                     </Canvas>
                 </GroupBox>
                 <GroupBox Header="キャラクター６" Width="430" Height="210" Canvas.Left="1080" Canvas.Top="435" HorizontalAlignment="Left" VerticalAlignment="Center">
@@ -75,8 +102,8 @@
                         <TextBox x:Name="character6_skill_box" Canvas.Left="10" TextWrapping="Wrap" Text="" Canvas.Top="25" Width="240" Height="155" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalScrollBarVisibility="Auto"/>
                         <TextBox x:Name="character6_status_box" Canvas.Left="260" TextWrapping="Wrap" Text="" Canvas.Top="25" Width="155" Height="155" VerticalScrollBarVisibility="Auto"/>
                         <CheckBox x:Name="leader6_flag" Content="リーダー" Canvas.Left="180" Canvas.Top="0" Checked="leader1_flag_Checked" Unchecked="leader1_flag_UnChecked"/>
-                        <Button Content="load" Canvas.Left="140" Canvas.Top="0" Click="Character3_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top" />
                         <TextBox x:Name="buko6_fig" Canvas.Left="280" TextWrapping="Wrap" Text="" Canvas.Top="0" Width="52" TextChanged="buko_fig_TextChanged" />
+                        <Button Content="load" Canvas.Left="140" Canvas.Top="0" Click="Character6_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                         <TextBlock Canvas.Left="250" TextWrapping="Wrap" Text="武功" Canvas.Top="0"/>
                     </Canvas>
                 </GroupBox>
@@ -85,8 +112,8 @@
                 <TextBlock Canvas.Left="504" TextWrapping="Wrap" Text="アシストスキル" Canvas.Top="58" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <TextBox x:Name="shidan_name_box" Canvas.Left="476" TextWrapping="NoWrap" Text="" Canvas.Top="39" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" MaxLength="20" />
                 <TextBlock Canvas.Left="519" TextWrapping="Wrap" Text="師団名" Canvas.Top="18" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                <TextBlock Canvas.Left="326" TextWrapping="Wrap" Text="師団一覧" Canvas.Top="20"/>
-                <TextBlock Canvas.Left="92" TextWrapping="Wrap" Text="キャラクター一覧" Canvas.Top="21"/>
+                <TextBlock Canvas.Left="326" TextWrapping="Wrap" Text="師団一覧" Canvas.Top="5" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <TextBlock Canvas.Left="92" TextWrapping="Wrap" Text="キャラクター一覧" Canvas.Top="7" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <TextBlock Canvas.Left="316" TextWrapping="Wrap" Text="師団スキル一覧" Canvas.Top="330"/>
                 <GroupBox Header="昼夜加護月" Width="170" Height="120" Canvas.Left="457" Canvas.Top="189" HorizontalAlignment="Center" VerticalAlignment="Top">
                     <Canvas>
@@ -484,7 +511,7 @@
                 <Button x:Name="leg_load_shidan1" Content="読み込み" Height="100" Canvas.Left="453" Canvas.Top="20" Width="62" HorizontalAlignment="Left" VerticalAlignment="Top" Click="leg_load_shidan1_Click"/>
                 <Button x:Name="leg_load_shidan2" Content="読み込み" Height="100" Canvas.Left="453" Canvas.Top="226" Width="62" HorizontalAlignment="Left" VerticalAlignment="Top" Click="leg_load_shidan2_Click"/>
                 <Button x:Name="leg_load_shidan3" Content="読み込み" Height="100" Canvas.Left="454" Canvas.Top="438" Width="62" HorizontalAlignment="Center" VerticalAlignment="Top" Click="leg_load_shidan3_Click"/>
-                <TextBox x:Name="legion_skill_box" Height="181" Width="187" Canvas.Left="238" Canvas.Top="427" HorizontalAlignment="Center" VerticalAlignment="Top" />
+                <TextBox x:Name="legion_skill_box" Height="131" Width="187" Canvas.Left="238" Canvas.Top="427" HorizontalAlignment="Center" VerticalAlignment="Top" />
                 <TextBlock Canvas.Left="305" TextWrapping="Wrap" Text="軍団スキル" Canvas.Top="404" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <TextBlock Canvas.Left="305" TextWrapping="Wrap" Text="総経験値" Canvas.Top="354" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <TextBlock Canvas.Left="81" TextWrapping="Wrap" Text="保存師団リスト" Canvas.Top="7" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -499,6 +526,7 @@
                 <Button x:Name="legion1_clear_button" Content="クリア" Canvas.Left="453" Canvas.Top="135" Height="61" Width="62" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion1_clear_button_Click"/>
                 <Button x:Name="legion2_clear_button" Content="クリア" Canvas.Left="453" Canvas.Top="345" Height="61" Width="62" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion2_clear_button_Click"/>
                 <Button x:Name="legion3_clear_button" Content="クリア" Canvas.Left="454" Canvas.Top="555" Height="61" Width="62" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion3_clear_button_Click"/>
+                <Button x:Name="legion_duplicate_check" Content="レギオンチェック" Canvas.Left="238" Canvas.Top="576" Height="58" Width="187" Click="legion_duplicate_check_Click" />
             </Canvas>
         </TabItem>
     </TabControl>

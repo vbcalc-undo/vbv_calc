@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VBV_calc"
         mc:Ignorable="d"
-        Title="VBVダメージ倍率計算機" Height="775" Width="1629">
+        Title="VBVダメージ倍率計算機" Height="780" Width="1630">
     <Canvas Margin="242,0,10,309">
         <Canvas x:Name="maincanvas" Height="741" Width="1387" HorizontalAlignment="Center" VerticalAlignment="Top">
             <GroupBox Header="味方（攻撃）キャラクター" x:Name="attack_character_group" Width="1184" Height="480" Canvas.Left="00" Canvas.Top="5" HorizontalAlignment="Left" VerticalAlignment="Center" >
@@ -276,28 +276,25 @@
         <TextBox x:Name ="DebugTextBox" Height="283" Canvas.Left="1189" TextWrapping="Wrap" Text="" Canvas.Top="23" Width="167" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         <TextBox x:Name ="DebugTextBox_damage" Height="395" Canvas.Left="1189" TextWrapping="Wrap" Text="" Canvas.Top="322" Width="167" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" VerticalAlignment="Top"/>
         <Canvas Height="728" Canvas.Left="-226" Width="221" HorizontalAlignment="Center" VerticalAlignment="Top">
-            <!-- <ListBox AlternationCount="9999" Height="496" x:Name="saved_list" Canvas.Left="10" Canvas.Top="48" Width="201" SelectionMode="Single" HorizontalAlignment="Center" VerticalAlignment="Top" DisplayMemberPath="character_id" SelectedValuePath="character_name">
-                </ListBox>
-             -->
             <ListBox x:Name="saved_list"
-         AlternationCount="9999"
-         Height="600"
-         Width="201"
-         Canvas.Left="10"
-         Canvas.Top="26"
-         SelectionMode="Single"
-         HorizontalAlignment="Center"
-         VerticalAlignment="Top"
-         SelectedValuePath="character_name">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
+                     AlternationCount="9999"
+                     Height="600"
+                     Width="201"
+                     Canvas.Left="10"
+                     Canvas.Top="26"
+                     SelectionMode="Single"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Top"
+                     SelectedValuePath="character_name">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
                             <!-- 番号 + ドット -->
                             <TextBlock 
-                    Text="{Binding 
-                           RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
-                           Path=(ItemsControl.AlternationIndex)}"
-                    Margin="0,0,2,0"/>
+                                    Text="{Binding 
+                                    RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
+                                    Path=(ItemsControl.AlternationIndex)}"
+                                    Margin="0,0,2,0"/>
                             <TextBlock Text=". " Margin="0,0,2,0"/>
                             <!-- 本来の表示（character_idを表示） -->
                             <TextBlock Text="{Binding character_id}" />
