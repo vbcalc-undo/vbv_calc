@@ -108,7 +108,7 @@
                     </Canvas>
                 </GroupBox>
                 <TextBox x:Name="shidan_skill_box" Canvas.Left="258" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Auto" Canvas.Top="351" Width="194" Height="249" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                <ComboBox x:Name="assist_skill_box" Canvas.Left="476" Canvas.Top="77" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" />
+                <ComboBox x:Name="assist_skill_box" Canvas.Left="476" Canvas.Top="77" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" SelectionChanged="assist_skill_box_SelectionChanged" />
                 <TextBlock Canvas.Left="504" TextWrapping="Wrap" Text="アシストスキル" Canvas.Top="58" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <TextBox x:Name="shidan_name_box" Canvas.Left="476" TextWrapping="NoWrap" Text="" Canvas.Top="39" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" MaxLength="20" />
                 <TextBlock Canvas.Left="519" TextWrapping="Wrap" Text="師団名" Canvas.Top="18" HorizontalAlignment="Left" VerticalAlignment="Center" />
@@ -335,7 +335,7 @@
                         <TextBlock Canvas.Left="84" TextWrapping="Wrap" Text="師団名" Canvas.Top="9" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                         <TextBox x:Name="leg_shidan1_name" Canvas.Left="18" TextWrapping="Wrap" Text="" Canvas.Top="29" Width="168" HorizontalAlignment="Center" VerticalAlignment="Top" Height="26"/>
                         <TextBlock Canvas.Left="70" TextWrapping="Wrap" Text="アシストスキル" Canvas.Top="114" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                        <TextBox x:Name="shidan1_assist_skill" Canvas.Left="18" TextWrapping="Wrap" Text="" Canvas.Top="129" Width="168" HorizontalAlignment="Center" VerticalAlignment="Top" Height="26"/>
+                        <TextBox x:Name="shidan1_assist_skill" Canvas.Left="18" TextWrapping="Wrap" Text="" Canvas.Top="129" Width="168" HorizontalAlignment="Center" VerticalAlignment="Top" Height="26" />
                     </Canvas>
                 </GroupBox>
                 <GroupBox Header="師団2" Width="1000" Height="200" Canvas.Left="520" Canvas.Top="215">

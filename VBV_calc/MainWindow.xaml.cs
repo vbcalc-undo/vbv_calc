@@ -1,9 +1,11 @@
 ﻿using JsonFileIO.Jsons;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -823,6 +825,9 @@ namespace VBV_calc
         public MainWindow()
         {
             InitializeComponent();
+            var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+            this.Title = $"vbv_calc VBVダメージ計算器 v{version}";
+
             // Dictionary<string, string> single_line = new Dictionary<int, string>();
             all_equipments = new Dictionary<string, List<EquipmentJson>>();
             all_shogo = new Dictionary<string, List<ShogoJson>>();
