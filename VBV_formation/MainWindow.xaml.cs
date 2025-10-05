@@ -335,7 +335,10 @@ namespace VBV_formation
         public MainWindow()
         {
             InitializeComponent();
-            var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+            var version = Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion?
+            .Split('+')[0]; // "+" 以降をカット
             this.Title = $"vbv_formation VBV師団・レギオン編成アプリ v{version}";
 
             all_equipments = new Dictionary<string, List<EquipmentJson>>();
@@ -1303,6 +1306,10 @@ namespace VBV_formation
         {
             ItemSet tmp_ItemValue = (ItemSet)assist_skill_box.SelectedItem;
             string tmp = null;
+            if(number == 0)
+            {
+                return;
+            }
             if (tmp_ItemValue == null)
             {
                 string temp = all_characters[number].assist_skill;
@@ -2218,8 +2225,14 @@ namespace VBV_formation
             shidan_savedata tempdata;
             tempdata = new shidan_savedata();
             tempdata.shidan_name = shidan_name_box.Text;
-            //もしnullなら”師団_年月日時分秒”
-            if (tempdata.shidan_name == "")
+            bool exists = shidan_saved_list.Items.Cast<object>()
+            .Any(x => {
+                var prop = x.GetType().GetProperty(shidan_saved_list.DisplayMemberPath);
+                var text = prop?.GetValue(x)?.ToString();
+                return text == tempdata.shidan_name;  // 完全一致
+            });
+            //もしnullか同じ名前があるなら”師団_年月日時分秒”
+            if (tempdata.shidan_name == "" || exists)
             {
                 tempdata.shidan_name = "師団_" + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
             }
@@ -2251,6 +2264,7 @@ namespace VBV_formation
             all_shidan_savedata.Add(tempdata);            
             add_leader_skill(temp_leader);
             add_assist_skill(temp_assist);
+            shidan_name_box.Text = tempdata.shidan_name;
         }
         private void shidan_yomikomi_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -4220,6 +4234,8 @@ namespace VBV_formation
                 // selected.character は Dictionary<int, character_info> なので、これをループする
                 //セーブされているリーダーフラグがあるか確認。もし変わっていたら戻す
                 legion_del_assist_skill(1);
+                legion_del_assist_skill(2);
+                legion_del_assist_skill(3);
                 leg_shidan1_characters.Clear();
                 leg_shidan1_skill.Clear();
                 leg_shidan1_name.Text = selected.shidan_name.ToString();
@@ -4277,6 +4293,8 @@ namespace VBV_formation
                 leg_set_shidan_skill(leg_shidan1_characters, 1);
                 set_legion_skill();
                 legion_add_assist_skill(1);
+                legion_add_assist_skill(2);
+                legion_add_assist_skill(3);
                 leg_character_kassei_update();
                 leg_character_shiki_update();
                 leg_kago_calc();
@@ -4290,7 +4308,9 @@ namespace VBV_formation
             {
                 // selected.character は Dictionary<int, character_info> なので、これをループする
                 //セーブされているリーダーフラグがあるか確認。もし変わっていたら戻す
+                legion_del_assist_skill(1);
                 legion_del_assist_skill(2);
+                legion_del_assist_skill(3);
                 leg_shidan2_characters.Clear();
                 leg_shidan2_skill.Clear();
                 leg_shidan2_name.Text = selected.shidan_name.ToString();
@@ -4328,7 +4348,7 @@ namespace VBV_formation
                                     {
                                         leg_shidan2_characters[i].character_skill[skill.Key] = skill.Value;
                                     }
-                                    leg_shidan2_stance.Text = leg_shidan2_characters[i].stance;
+                                    leg_shidan2_stance.Text = leg_shidan2_characters[i].stance.Replace("&br;", "");
                                 }
                             }
                             skillBox.Text += leg_shidan2_characters[i].character_name + "\n";
@@ -4347,7 +4367,9 @@ namespace VBV_formation
                 shidan2_assist_skill.Text = selected.shidan_assist_skill;
                 leg_set_shidan_skill(leg_shidan2_characters, 2);
                 set_legion_skill();
+                legion_add_assist_skill(1);
                 legion_add_assist_skill(2);
+                legion_add_assist_skill(3);
                 leg_character_kassei_update();
                 leg_character_shiki_update();
                 leg_kago_calc();
@@ -4362,6 +4384,8 @@ namespace VBV_formation
             {
                 // selected.character は Dictionary<int, character_info> なので、これをループする
                 //セーブされているリーダーフラグがあるか確認。もし変わっていたら戻す
+                legion_del_assist_skill(1);
+                legion_del_assist_skill(2);
                 legion_del_assist_skill(3);
                 leg_shidan3_characters.Clear();
                 leg_shidan3_skill.Clear();
@@ -4400,7 +4424,7 @@ namespace VBV_formation
                                     {
                                         leg_shidan3_characters[i].character_skill[skill.Key] = skill.Value;
                                     }
-                                    leg_shidan3_stance.Text = leg_shidan3_characters[i].stance;
+                                    leg_shidan3_stance.Text = leg_shidan3_characters[i].stance.Replace("&br;", "");
                                 }
                             }
                             skillBox.Text += leg_shidan3_characters[i].character_name + "\n";
@@ -4419,6 +4443,8 @@ namespace VBV_formation
                 shidan3_assist_skill.Text = selected.shidan_assist_skill;
                 leg_set_shidan_skill(leg_shidan3_characters, 3);
                 set_legion_skill();
+                legion_add_assist_skill(1);
+                legion_add_assist_skill(2);
                 legion_add_assist_skill(3);
                 leg_character_kassei_update();
                 leg_character_shiki_update();
@@ -4572,7 +4598,7 @@ namespace VBV_formation
                 }
                 else
                 {
-                    legion_skill[skill_name] = (skill_value, legion_skill[skill_name].Item2);
+                    legion_skill[skill_name] = (skill_value, check_shidan_skill_type(skill_name));
                 }
                 legion_skill_box.Text = "";
                 foreach (var tempskill in legion_skill)
@@ -4603,7 +4629,7 @@ namespace VBV_formation
                     }
                     else
                     {
-                        shidan_skill[skill_name] = (skill_value, shidan_skill[skill_name].Item2);
+                        shidan_skill[skill_name] = (skill_value, check_shidan_skill_type(skill_name));
                     }
                 }
                 int leg_number = 1;
@@ -4717,9 +4743,15 @@ namespace VBV_formation
             legion_savedata tempdata;
             tempdata = new legion_savedata();
             tempdata.legion_name = legion_name_box.Text;
+            bool exists = leg_hozon_leg_list.Items.Cast<object>()
+            .Any(x => {
+                var prop = x.GetType().GetProperty(leg_hozon_leg_list.DisplayMemberPath);
+                var text = prop?.GetValue(x)?.ToString();
+                return text == tempdata.legion_name;  // 完全一致
+            });
 
             //もしnullなら”師団_年月日時分秒”
-            if (tempdata.legion_name == "")
+            if (tempdata.legion_name == "" || exists)
             {
                 tempdata.legion_name = "レギオン_" + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
             }
@@ -4728,6 +4760,9 @@ namespace VBV_formation
 
             tempdata.shidan = new Dictionary<int, shidan_savedata> { { 0, new shidan_savedata() }, { 1, new shidan_savedata() }, { 2, new shidan_savedata() } };
             int temp_leader = 0;
+            int leg_shidan1_leader = 0;
+            int leg_shidan2_leader = 0;
+            int leg_shidan3_leader = 0;
             foreach (var kv in leg_shidan1_characters)
             {
                 if (kv.Value.leader_flag == true)
@@ -4757,6 +4792,7 @@ namespace VBV_formation
                 }
                 Debug.WriteLine(kv.Key + " leaderflag:" + kv.Value.leader_flag);
             }
+            legion_del_assist_skill(1);
             foreach (var kv in leg_shidan2_characters)
             {
                 if (kv.Value.leader_flag == true)
@@ -4786,6 +4822,7 @@ namespace VBV_formation
                 }
                 Debug.WriteLine(kv.Key + " leaderflag:" + kv.Value.leader_flag);
             }
+            legion_del_assist_skill(2);
             foreach (var kv in leg_shidan3_characters)
             {
                 if (kv.Value.leader_flag == true)
@@ -4815,6 +4852,7 @@ namespace VBV_formation
                 }
                 Debug.WriteLine(kv.Key + " leaderflag:" + kv.Value.leader_flag);
             }
+            legion_del_assist_skill(3);
             tempdata.shidan[0].shidan_name = leg_shidan1_name.Text;
             tempdata.shidan[0].character = leg_shidan1_characters.ToDictionary(
                 kvp => kvp.Key,
@@ -4827,7 +4865,14 @@ namespace VBV_formation
             tempdata.shidan[2].character = leg_shidan3_characters.ToDictionary(
                 kvp => kvp.Key,
                 kvp => kvp.Value.DeepCopy());
+            tempdata.shidan[0].shidan_assist_skill = shidan1_assist_skill.Text;
+            tempdata.shidan[1].shidan_assist_skill = shidan2_assist_skill.Text;
+            tempdata.shidan[2].shidan_assist_skill = shidan3_assist_skill.Text;
             all_legion_savedata.Add(tempdata);
+            legion_add_assist_skill(1);
+            legion_add_assist_skill(2);
+            legion_add_assist_skill(3);
+            legion_name_box.Text = tempdata.legion_name;
         }
         private void legion_load_Click(object sender, RoutedEventArgs e)
         {
@@ -4921,6 +4966,12 @@ namespace VBV_formation
                     leg_num++;
                 }
                 legion_name_box.Text = selected.legion_name;
+                shidan1_assist_skill.Text = selected.shidan[0].shidan_assist_skill;
+                shidan2_assist_skill.Text = selected.shidan[1].shidan_assist_skill;
+                shidan3_assist_skill.Text = selected.shidan[2].shidan_assist_skill;
+                legion_add_assist_skill(1);
+                legion_add_assist_skill(2);
+                legion_add_assist_skill(3);
                 leg_set_shidan_skill(leg_shidan1_characters, 1);
                 leg_set_shidan_skill(leg_shidan2_characters, 2);
                 leg_set_shidan_skill(leg_shidan3_characters, 3);

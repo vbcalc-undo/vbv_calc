@@ -825,7 +825,10 @@ namespace VBV_calc
         public MainWindow()
         {
             InitializeComponent();
-            var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+            var version = Assembly.GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+            .InformationalVersion?
+            .Split('+')[0]; // "+" 以降をカット
             this.Title = $"vbv_calc VBVダメージ計算器 v{version}";
 
             // Dictionary<string, string> single_line = new Dictionary<int, string>();
@@ -1733,7 +1736,6 @@ namespace VBV_calc
 
             //次にほかの倍率を計算
             //巨人狩りは神魔体躯がない場合のみではないらしい
-
             //if (enemy_shinma_value == 0)
             bairitu *= get_kyojingari_value();
             bairitu *= get_sippuu_value(kougeki_kaisu * 100, unmei_value);
@@ -1781,16 +1783,15 @@ namespace VBV_calc
             if (enemy_hissatu_taisei_value > 0)
                 enemy_hissatu_taisei_value = enemy_hissatu_taisei_value + enemy_unmei_value;
             critical_kakuritu = hissatu_zouka_value + hissatu_param_kakuritu - enemy_hissatu_taisei_value;
+
             //ここは無形と心核の計算後に無形の上限で切り捨てるところ
+            //心核は無形の必殺上限をどうにかする機能はない模様
+            //運命値も無視
             int bougyo_mukei_sinkaku = 0;
             if (enemy_mukei_value > 0)
-                bougyo_mukei_sinkaku = (int)(enemy_mukei_value) + unmei_value;
-            if (get_shinkaku_value() != 1.0)
-            {
-                enemy_mukei_value -= 25;
-            }
-            if (enemy_mukei_value < 0) enemy_mukei_value = 0;
+                bougyo_mukei_sinkaku = (int)(enemy_mukei_value) ;
             if (enemy_mukei_value > 60) enemy_mukei_value = 60;
+
             //必殺の上限値から無形体躯の値を減算
             hissatu_jougen -= (int)enemy_mukei_value;
             if (hissatu_jougen < 5) hissatu_jougen = 5;
@@ -1810,6 +1811,14 @@ namespace VBV_calc
             DebugTextBox_damage.Text += "クリティカルダメージ確率:" + critical_kakuritu + "\n";
             DebugTextBox_damage.Text += "致命値:" + chimei_value + "\n";
             DebugTextBox_damage.Text += "最終クリダメ倍率:" + critical_damage_bairitu_with_kakuritu + "\n";
+            //クリティカル計算が終わったら無形の倍率を減らす
+            if (get_shinkaku_value() != 1.0)
+            {
+                enemy_mukei_value -= 25;
+            }
+            if (enemy_mukei_value < 0) enemy_mukei_value = 0;
+
+
             //城壁による防御計算
             double joheki = 0.0;
             if (double.TryParse(enemy_joheki_box.Text, out joheki))
