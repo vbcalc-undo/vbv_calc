@@ -1,16 +1,26 @@
 ﻿using JsonFileIO.Jsons;
+using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.Tensors;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
+using System.Drawing;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.IO;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -345,6 +355,9 @@ namespace VBV_formation
             all_shogo = new Dictionary<string, List<ShogoJson>>();
             all_asistskills = new List<string>();
 
+            // WindowのコンストラクタやLoadedイベントで
+            capture_shidan_numBox.ItemsSource = Enumerable.Range(1, 6).ToList();
+            capture_shidan_numBox.SelectedIndex = 0; // 初期値は1
 
             load_json_character();
             load_json_equipment();
@@ -425,7 +438,7 @@ namespace VBV_formation
             }
             else
             {
-            }            
+            }
         }
 
         private int ExtractNumberFromBracket(string input)
@@ -742,7 +755,8 @@ namespace VBV_formation
                     character_Info.character_skill = temp_skills;
 
                     //アシストスキルが設定されていて個人に加算されるなら処理
-                    if (current_assist_select != 0) {
+                    if (current_assist_select != 0)
+                    {
                         if (assist_skill_Dict[current_assist_skill_name] == 3)
                         {
                             if (temp_skills.ContainsKey(current_assist_skill_name))
@@ -821,7 +835,7 @@ namespace VBV_formation
                     {
                         shidan_assist.Remove(shidan_assist.First(item => item.Id == number));
                     }
-                    shidan_assist.Add(new ItemSet { Id = number, Name = characterObj.アシストスキル[0]});
+                    shidan_assist.Add(new ItemSet { Id = number, Name = characterObj.アシストスキル[0] });
                     //character_infoにすべて登録する
                     character_Info.soubi_status = soubi_status;
                     //いったんデバッグ。character1に格納されているスキルをcharacter1_skill_boxへ表示する
@@ -993,6 +1007,10 @@ namespace VBV_formation
                             temp_bougyo += skill.Value.Item1 - temp_self_kassei;
                             temp_sokudo += skill.Value.Item1 - temp_self_kassei;
                             temp_chiryoku += (skill.Value.Item1 - temp_self_kassei) / 4;
+                            temp_kougeki += skill.Value.Item1 - temp_self_kassei;
+                            temp_bougyo += skill.Value.Item1 - temp_self_kassei;
+                            temp_sokudo += skill.Value.Item1 - temp_self_kassei;
+                            temp_chiryoku += (skill.Value.Item1 - temp_self_kassei) / 4;
                         }
                         else if (skill.Key == "死の軍勢")
                         {
@@ -1132,11 +1150,10 @@ namespace VBV_formation
 
                         }
                     }
-                    /*                    if (skill.Key == "英雄覇気")
-                                        {
-                                            (temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku) = shidan_shiki_skill(character.Value, "英雄覇気", temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku);
-                                        }
-                    */
+                    if (skill.Key == "英雄覇気")
+                        {
+                            (temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku) = shidan_shiki_skill(character.Value, "英雄覇気", temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku);
+                        }                    
                     else if (skill.Key == "竜歌覚醒" || skill.Key == "竜歌共鳴")
                     {
                         int kakusei_value = 0;
@@ -1191,14 +1208,15 @@ namespace VBV_formation
             //指揮計算が終わったらステータスも計算
         }
 
-        int current_assist_select=0;
-        string current_assist_skill_name="";
+        int current_assist_select = 0;
+        string current_assist_skill_name = "";
         int current_assist_skill_value = 0;
         private void del_assist_skill()
         {
             //shidan_assist.Add(new ItemSet { Id = number, Name = characterObj.アシストスキル[0] });
             //まずはチェック
-            if (current_assist_select != 0 && all_characters.ContainsKey(current_assist_select)) {
+            if (current_assist_select != 0 && all_characters.ContainsKey(current_assist_select))
+            {
                 ItemSet tempset = new ItemSet();
                 string assist_name = "";
                 int assist_value = 0;
@@ -1206,9 +1224,10 @@ namespace VBV_formation
                 if (shidan_assist.Any(item => item.Id == current_assist_select))
                 {
                     tempset = shidan_assist.First(item => item.Id == current_assist_select);
-                    (assist_name , assist_value)= SkillParser.Div_Skill_Name_Value(tempset.Name);
+                    (assist_name, assist_value) = SkillParser.Div_Skill_Name_Value(tempset.Name);
                 }
-                if (assist_skill_Dict.ContainsKey(assist_name)) {
+                if (assist_skill_Dict.ContainsKey(assist_name))
+                {
                     assist_num = assist_skill_Dict[assist_name];
                 }
                 all_characters[current_assist_select].assist_skill_flag = false;
@@ -1217,7 +1236,7 @@ namespace VBV_formation
                     shidan_skill_box.Text = "";
                     set_shidan_skill();
                 }
-                else if(assist_num == 2)
+                else if (assist_num == 2)
                 {
                     shidan_skill_box.Text = "";
                     set_shidan_skill();
@@ -1258,7 +1277,7 @@ namespace VBV_formation
                 current_assist_select = 0;
                 current_assist_skill_name = "";
                 current_assist_skill_value = 0;
-                
+
                 shidan_skill_box.Text = "";
                 stance_text_box.Text = "";
                 set_shidan_skill();
@@ -1273,7 +1292,7 @@ namespace VBV_formation
 
             if (skillvalue != "")
             {
-                if (assist_skill_Dict[skillname] == 1 ||assist_skill_Dict[skillname] == 2 || assist_skill_Dict[skillname] == 3)
+                if (assist_skill_Dict[skillname] == 1 || assist_skill_Dict[skillname] == 2 || assist_skill_Dict[skillname] == 3)
                 {
                     foreach (var character in all_characters.Values)
                     {
@@ -1298,7 +1317,7 @@ namespace VBV_formation
         {
             int temp = current_assist_select;
             del_assist_skill();
-            if(temp!=0)
+            if (temp != 0)
                 add_assist_skill(temp);
         }
 
@@ -1306,7 +1325,7 @@ namespace VBV_formation
         {
             ItemSet tmp_ItemValue = (ItemSet)assist_skill_box.SelectedItem;
             string tmp = null;
-            if(number == 0)
+            if (number == 0)
             {
                 return;
             }
@@ -1326,21 +1345,23 @@ namespace VBV_formation
             }
             if (tmp != null)
             {
-                string skill_name="";
+                string skill_name = "";
                 int skill_value = 0;
                 (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(tmp);
                 int shidan_chiryoku = 0;
                 current_assist_select = number;
                 current_assist_skill_name = skill_name;
-                if (skill_value > 0) {
+                if (skill_value > 0)
+                {
                     calc_shidan_chiryoku(skill_name, skill_value.ToString());
                 }
-                else if(skill_value ==0){
+                else if (skill_value == 0)
+                {
                     calc_shidan_chiryoku(skill_name, "");
                 }
                 int assist_skill_num = assist_skill_Dict[skill_name];
                 current_assist_select = number;
-                if (assist_skill_num == 1||assist_skill_num == 2)
+                if (assist_skill_num == 1 || assist_skill_num == 2)
                 {
                     all_characters[number].assist_skill_flag = true;
                     set_shidan_skill();
@@ -1348,7 +1369,7 @@ namespace VBV_formation
                     character_shiki_update();
                     kago_calc();
                 }
-                else if(assist_skill_num == 3)
+                else if (assist_skill_num == 3)
                 {
                     foreach (var kvp in all_characters)
                     {
@@ -1858,7 +1879,7 @@ namespace VBV_formation
             { "超強酸陣", 1 },
             { "竜の吐息", 1 }
         };
-        Dictionary<string, int> assist_skill_Dict= new Dictionary<string, int>
+        Dictionary<string, int> assist_skill_Dict = new Dictionary<string, int>
         {
     // 分類1 軍団に付与
     { "開幕砲弾", 1 },
@@ -2155,7 +2176,7 @@ namespace VBV_formation
             //コピーコード、どうにかする
             if (current_assist_select != 0)
             {
-                if (assist_skill_Dict[current_assist_skill_name] == 1|| assist_skill_Dict[current_assist_skill_name] == 2)
+                if (assist_skill_Dict[current_assist_skill_name] == 1 || assist_skill_Dict[current_assist_skill_name] == 2)
                 {
                     int value = check_shidan_skill_type(current_assist_skill_name);
                     if (value == (int)SkillType.hanni)
@@ -2226,7 +2247,8 @@ namespace VBV_formation
             tempdata = new shidan_savedata();
             tempdata.shidan_name = shidan_name_box.Text;
             bool exists = shidan_saved_list.Items.Cast<object>()
-            .Any(x => {
+            .Any(x =>
+            {
                 var prop = x.GetType().GetProperty(shidan_saved_list.DisplayMemberPath);
                 var text = prop?.GetValue(x)?.ToString();
                 return text == tempdata.shidan_name;  // 完全一致
@@ -2248,12 +2270,12 @@ namespace VBV_formation
                     kv.Value.leader_flag = true;
                     temp_leader = kv.Key;
                 }
-                if(kv.Value.assist_skill_flag == true)
+                if (kv.Value.assist_skill_flag == true)
                 {
                     del_assist_skill();
                     kv.Value.assist_skill_flag = true;
-                    Debug.WriteLine("assistskil kakikomi="+kv.Key);
-                    temp_assist= kv.Key;
+                    Debug.WriteLine("assistskil kakikomi=" + kv.Key);
+                    temp_assist = kv.Key;
                 }
                 Debug.WriteLine(kv.Key + " leaderflag:" + kv.Value.leader_flag);
             }
@@ -2261,7 +2283,7 @@ namespace VBV_formation
                 kvp => kvp.Key,
                 kvp => kvp.Value.DeepCopy());
             tempdata.shidan_assist_skill = (string)assist_skill_box.Text;
-            all_shidan_savedata.Add(tempdata);            
+            all_shidan_savedata.Add(tempdata);
             add_leader_skill(temp_leader);
             add_assist_skill(temp_assist);
             shidan_name_box.Text = tempdata.shidan_name;
@@ -2323,7 +2345,7 @@ namespace VBV_formation
                     {
                         leader_flag.IsChecked = false;
                     }
-                    if(kv.Value.assist_skill_flag == true)
+                    if (kv.Value.assist_skill_flag == true)
                     {
                         temp_assist_num = kv.Key;
                         Debug.WriteLine("yomikomi:" + kv.Key);
@@ -2476,7 +2498,7 @@ namespace VBV_formation
             kago_calc();
         }
 
- 
+
 
         private void leader1_flag_Checked(object sender, RoutedEventArgs e)
         {
@@ -2545,7 +2567,7 @@ namespace VBV_formation
             //呼び元チェックボックス名から呼ばれた番号を取得して投げる
             ItemSet selectedassist1 = (ItemSet)assist_skill_box.SelectedItem;
             del_assist_skill();
-            if(selectedassist1!=null)
+            if (selectedassist1 != null)
                 add_assist_skill(selectedassist1.Id);
         }
 
@@ -2729,8 +2751,8 @@ namespace VBV_formation
                         eiyuu = shidan_skill["英雄覇気"].Item1;
                     else
                         eiyuu = shidan_skill["英雄覇気"].Item1 - character.Value.character_skill["英雄覇気"]; ;
-
                 }
+                eiyuu = 0;
                 //もし兵士運搬含む地形無効系がなければ地形効果を計算
                 if (!shidan_skill.ContainsKey("地形無効") && !shidan_skill.ContainsKey("決戦領域") && !shidan_skill.ContainsKey("兵士運搬"))
                 {
@@ -2821,7 +2843,7 @@ namespace VBV_formation
                     allbox.ClearValue(TextBox.BackgroundProperty);
                 }
                 var status_box = (TextBox)this.FindName($"character{otori_number}_name_box");
-                status_box.Background = new SolidColorBrush(Color.FromRgb(255, 200, 200)); // 薄い赤
+                status_box.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 200, 200)); // 薄い赤
             }
         }
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
@@ -3499,7 +3521,7 @@ namespace VBV_formation
                             legion_skill[skill.Key] = (skill.Value.Item1, check_shidan_skill_type(skill.Key));
                         }
                     }
-                    if (skill.Key == "地形無効"  || skill.Key == "決戦領域" || skill.Key == "正々堂々")
+                    if (skill.Key == "地形無効" || skill.Key == "決戦領域" || skill.Key == "正々堂々")
                     {
                         legion_skill[skill.Key] = (skill.Value.Item1, check_shidan_skill_type(skill.Key));
                     }
@@ -3658,6 +3680,10 @@ namespace VBV_formation
                                 int temp_self_kassei = 0;
                                 if (character.Value.character_skill.ContainsKey("英雄覇気"))
                                     temp_self_kassei = character.Value.character_skill["英雄覇気"];
+                                temp_kougeki += skill.Value.Item1 - temp_self_kassei;
+                                temp_bougyo += skill.Value.Item1 - temp_self_kassei;
+                                temp_sokudo += skill.Value.Item1 - temp_self_kassei;
+                                temp_chiryoku += (skill.Value.Item1 - temp_self_kassei) / 4;
                                 temp_kougeki += skill.Value.Item1 - temp_self_kassei;
                                 temp_bougyo += skill.Value.Item1 - temp_self_kassei;
                                 temp_sokudo += skill.Value.Item1 - temp_self_kassei;
@@ -3900,6 +3926,7 @@ namespace VBV_formation
                             eiyuu = legion_shidan_list[number - 1]["英雄覇気"].Item1 - character.Value.character_skill["英雄覇気"]; ;
 
                     }
+                    eiyuu = 0;
 
                     if (!legion_skill.ContainsKey("地形無効") && !legion_skill.ContainsKey("決戦領域") && !legion_shidan_list[number - 1].ContainsKey("兵士運搬"))
                     {
@@ -3987,7 +4014,7 @@ namespace VBV_formation
                         allbox.ClearValue(TextBox.BackgroundProperty);
                     }
                     var status_box = (TextBox)this.FindName($"shidan{number}_chara{otori_number}_name");
-                    status_box.Background = new SolidColorBrush(Color.FromRgb(255, 200, 200)); // 薄い赤
+                    status_box.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 200, 200)); // 薄い赤
                 }
                 number++;
             }
@@ -4014,6 +4041,10 @@ namespace VBV_formation
                     temp_self_kassei = character.character_skill[skillname];
                 if (legion_shidan.Count() != 0 && legion_shidan.ContainsKey("英雄覇気"))
                 {
+                    temp_kougeki += legion_shidan[skillname].Item1 - temp_self_kassei;
+                    temp_bougyo += legion_shidan[skillname].Item1 - temp_self_kassei;
+                    temp_sokudo += legion_shidan[skillname].Item1 - temp_self_kassei;
+                    temp_chiryoku += legion_shidan[skillname].Item1 - temp_self_kassei;
                     temp_kougeki += legion_shidan[skillname].Item1 - temp_self_kassei;
                     temp_bougyo += legion_shidan[skillname].Item1 - temp_self_kassei;
                     temp_sokudo += legion_shidan[skillname].Item1 - temp_self_kassei;
@@ -4107,7 +4138,7 @@ namespace VBV_formation
                         }
                         if (skill.Key == "英雄覇気")
                         {
-                            //(temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku) = leg_shidan_shiki_skill(legion_shidan_list[number-1], leg_character.Value, "英雄覇気", temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku);
+                            (temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku) = leg_shidan_shiki_skill(legion_shidan_list[number-1], leg_character.Value, "英雄覇気", temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku);
                         }
                     }
                     if (leg_character.Value.character_skill.ContainsKey("狂戦士化"))
@@ -4465,7 +4496,7 @@ namespace VBV_formation
             string skill_name = "";
             int skill_value = 0;
             (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(assist_string);
-            skill_value = leg_calc_shidan_chiryoku(skill_name, skill_value,number);
+            skill_value = leg_calc_shidan_chiryoku(skill_name, skill_value, number);
 
             var legion_character_list = new List<Dictionary<int, character_info>> { leg_shidan1_characters, leg_shidan2_characters, leg_shidan3_characters };
             var legion_shidan_skill_list = new List<Dictionary<string, (int, int)>> { leg_shidan1_skill, leg_shidan2_skill, leg_shidan3_skill };
@@ -4477,7 +4508,7 @@ namespace VBV_formation
                 {
                     if (skill_value != 0)
                     {
-                        legion_skill[skill_name] = (legion_skill[skill_name].Item1-skill_value, legion_skill[skill_name].Item2);
+                        legion_skill[skill_name] = (legion_skill[skill_name].Item1 - skill_value, legion_skill[skill_name].Item2);
                         if (legion_skill[skill_name].Item1 <= 0)
                             legion_skill.Remove(skill_name);
                     }
@@ -4532,11 +4563,11 @@ namespace VBV_formation
                 }
             }
         }
-        private int leg_calc_shidan_chiryoku(string skillname, int skillvalue,int number)
+        private int leg_calc_shidan_chiryoku(string skillname, int skillvalue, int number)
         {
             int shidan_chiryoku = 0;
             var legion_character_list = new List<Dictionary<int, character_info>> { leg_shidan1_characters, leg_shidan2_characters, leg_shidan3_characters };
-            var legion_character = legion_character_list[number -1];
+            var legion_character = legion_character_list[number - 1];
             if (skillname != "")
             {
                 if (assist_skill_Dict[skillname] == 1 || assist_skill_Dict[skillname] == 2 || assist_skill_Dict[skillname] == 3)
@@ -4578,18 +4609,18 @@ namespace VBV_formation
             int skill_value = 0;
             (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(assist_string);
 
-            skill_value = leg_calc_shidan_chiryoku(skill_name, skill_value,number);
+            skill_value = leg_calc_shidan_chiryoku(skill_name, skill_value, number);
             var legion_character_list = new List<Dictionary<int, character_info>> { leg_shidan1_characters, leg_shidan2_characters, leg_shidan3_characters };
             var legion_shidan_skill_list = new List<Dictionary<string, (int, int)>> { leg_shidan1_skill, leg_shidan2_skill, leg_shidan3_skill };
             int assist_skill_num = assist_skill_Dict[skill_name];
-            if (assist_skill_num == 1 )
+            if (assist_skill_num == 1)
             {
                 //軍団スキルに付与
                 if (legion_skill.ContainsKey(skill_name))
                 {
                     if (skill_value != 0)
                     {
-                        legion_skill[skill_name] = (legion_skill[skill_name].Item1+skill_value, legion_skill[skill_name].Item2);
+                        legion_skill[skill_name] = (legion_skill[skill_name].Item1 + skill_value, legion_skill[skill_name].Item2);
                     }
                     else
                     {
@@ -4614,7 +4645,7 @@ namespace VBV_formation
             //全師団スキルに付与
             else if (assist_skill_num == 2)
             {
-                foreach(var shidan_skill in legion_shidan_skill_list)
+                foreach (var shidan_skill in legion_shidan_skill_list)
                 {
                     if (shidan_skill.ContainsKey(skill_name))
                     {
@@ -4654,14 +4685,14 @@ namespace VBV_formation
             else if (assist_skill_num == 3)
             {
                 //全キャラクターに付与
-                int shidan_num = 1;                
+                int shidan_num = 1;
                 foreach (var leg_characters in legion_character_list)
                 {
                     int chara_num = 0;
                     foreach (var leg_character in leg_characters)
                     {
-                        
-                        var chara_skill=leg_character.Value.character_skill;
+
+                        var chara_skill = leg_character.Value.character_skill;
                         if (chara_skill.ContainsKey(skill_name))
                         {
                             if (skill_value != 0)
@@ -4677,12 +4708,12 @@ namespace VBV_formation
                         {
                             chara_skill[skill_name] = skill_value;
                         }
-                        var skillBox = (TextBox)this.FindName($"shidan{shidan_num}_chara{chara_num+1}_name");
+                        var skillBox = (TextBox)this.FindName($"shidan{shidan_num}_chara{chara_num + 1}_name");
                         skillBox.Text = "";
                         skillBox.Text += leg_character.Value.character_name;
-                        foreach (var kv in leg_shidan1_characters[chara_num+1].character_skill)
+                        foreach (var kv in leg_shidan1_characters[chara_num + 1].character_skill)
                         {
-                            skillBox.Text += "\n"+kv.Key + ":" + kv.Value;
+                            skillBox.Text += "\n" + kv.Key + ":" + kv.Value;
                         }
                         chara_num++;
                     }
@@ -4744,7 +4775,8 @@ namespace VBV_formation
             tempdata = new legion_savedata();
             tempdata.legion_name = legion_name_box.Text;
             bool exists = leg_hozon_leg_list.Items.Cast<object>()
-            .Any(x => {
+            .Any(x =>
+            {
                 var prop = x.GetType().GetProperty(leg_hozon_leg_list.DisplayMemberPath);
                 var text = prop?.GetValue(x)?.ToString();
                 return text == tempdata.legion_name;  // 完全一致
@@ -5190,7 +5222,7 @@ namespace VBV_formation
                             if (leg_character.Value.character_name == kvp.Key)
                             {
                                 Debug.WriteLine("レギオン:" + i + " キャラクター:" + leg_character.Key.ToString() + " 名称:" + leg_character.Value.character_name);
-                                duplicate_message+= "レギオン:" + i + " キャラクター:" + leg_character.Key.ToString() + " 名称:" + leg_character.Value.character_name + "\n";
+                                duplicate_message += "レギオン:" + i + " キャラクター:" + leg_character.Key.ToString() + " 名称:" + leg_character.Value.character_name + "\n";
                             }
                             j++;
                         }
@@ -5201,12 +5233,12 @@ namespace VBV_formation
             foreach (KeyValuePair<string, int> kvp in temp_equipment_name)
             {
 
-                EquipmentJson equipmentObj=new EquipmentJson();
+                EquipmentJson equipmentObj = new EquipmentJson();
                 foreach (var list in all_equipments.Values)
                 {
                     foreach (var equipment in list)
                     {
-                        if(equipment.名称 == kvp.Key)
+                        if (equipment.名称 == kvp.Key)
                         {
                             equipmentObj = equipment;
                         }
@@ -5224,15 +5256,15 @@ namespace VBV_formation
                         int j = 0;
                         foreach (var leg_character in leg_characters)
                         {
-                            if(leg_character.Value.character_equipment1 == kvp.Key)
+                            if (leg_character.Value.character_equipment1 == kvp.Key)
                             {
-                                Debug.WriteLine("レギオン:" + i + " キャラクター:" +  leg_character.Key.ToString() + " 名称:" + leg_character.Value.character_name + " 装備1:" + equipmentObj.名称 + "(レア:" + equipmentObj.レア +")");
+                                Debug.WriteLine("レギオン:" + i + " キャラクター:" + leg_character.Key.ToString() + " 名称:" + leg_character.Value.character_name + " 装備1:" + equipmentObj.名称 + "(レア:" + equipmentObj.レア + ")");
                                 duplicate_message += "レギオン:" + i + " キャラクター:" + leg_character.Key.ToString() + " 装備1:" + equipmentObj.名称 + "(レア:" + equipmentObj.レア + ")" + " 名称:" + leg_character.Value.character_name + "\n";
                             }
                             if (leg_character.Value.character_equipment2 == kvp.Key)
                             {
-                                Debug.WriteLine("レギオン:" + i + " キャラクター:" +  leg_character.Key.ToString() + " 名称:" + leg_character.Value.character_name + " 装備2:" + equipmentObj.名称 + "(レア:" + equipmentObj.レア + ")");
-                                duplicate_message += "レギオン:" + i + " キャラクター:" + leg_character.Key.ToString() + " 装備2:" + equipmentObj.名称 + "(レア:" + equipmentObj.レア + ")" + " 名称:" + leg_character.Value.character_name +  "\n";
+                                Debug.WriteLine("レギオン:" + i + " キャラクター:" + leg_character.Key.ToString() + " 名称:" + leg_character.Value.character_name + " 装備2:" + equipmentObj.名称 + "(レア:" + equipmentObj.レア + ")");
+                                duplicate_message += "レギオン:" + i + " キャラクター:" + leg_character.Key.ToString() + " 装備2:" + equipmentObj.名称 + "(レア:" + equipmentObj.レア + ")" + " 名称:" + leg_character.Value.character_name + "\n";
                             }
                             j++;
                         }
@@ -5288,5 +5320,208 @@ namespace VBV_formation
             popup.Message = duplicate_message;
             popup.Activate();
         }
+        public static class CaptureWrapper
+        {
+            [DllImport("CaptureWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+            public static extern int CaptureWindowByTitle(string windowTitle, string outputPath);
+        }
+
+        // Bitmap → NHWC Tensor + Keras preprocess_input(Caffeモード)
+        static DenseTensor<float> BitmapToTensor_KerasCaffe(Bitmap bmp)
+        {
+            int height = bmp.Height;
+            int width = bmp.Width;
+            var tensor = new DenseTensor<float>(new int[] { 1, height, width, 3 });
+
+            // Keras preprocess_input(Caffeモード) の平均値(BGR)
+            float[] mean = { 103.939f, 116.779f, 123.68f }; // B, G, R
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    System.Drawing.Color c = bmp.GetPixel(x, y);
+                    tensor[0, y, x, 0] = c.B - mean[0]; // B
+                    tensor[0, y, x, 1] = c.G - mean[1]; // G
+                    tensor[0, y, x, 2] = c.R - mean[2]; // R
+                }
+            }
+            return tensor;
+        }
+
+        // L2正規化
+        static float[] Normalize(float[] vec)
+        {
+            double norm = Math.Sqrt(vec.Select(v => v * v).Sum());
+            return vec.Select(v => (float)(v / norm)).ToArray();
+        }
+
+        // 正しいコサイン類似度
+        static float Cosine(float[] a, float[] b)
+        {
+            float dot = 0;
+            float normA = 0;
+            float normB = 0;
+
+            for (int i = 0; i < a.Length; i++)
+            {
+                dot += a[i] * b[i];
+                normA += a[i] * a[i];
+                normB += b[i] * b[i];
+            }
+
+            return dot / ((float)Math.Sqrt(normA) * (float)Math.Sqrt(normB));
+        }
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            string path = @"C:\Temp\capture_shidan.png";
+            int hr = CaptureWrapper.CaptureWindowByTitle("VenusBloodVALKYRIE", path);
+            if (hr != 0)
+            {
+                MessageBox.Show($"キャプチャ失敗: {hr}");
+                return;
+            }
+            using Bitmap tempbmp = new Bitmap(path);
+            int selectedNumber = 1;
+            if (capture_shidan_numBox.SelectedItem != null)
+            {
+                selectedNumber = (int)capture_shidan_numBox.SelectedItem -1;
+            }
+            load_from_game(79, 400 + selectedNumber * 110, 83, 60,1);
+            load_from_game(229, 400 + selectedNumber * 110, 83, 60, 2);
+            load_from_game(379, 400 + selectedNumber * 110, 83, 60, 3);
+            load_from_game(539, 400 + selectedNumber * 110, 83, 60, 4);
+            load_from_game(679, 400 + selectedNumber * 110, 83, 60, 5);
+            load_from_game(829, 400 + selectedNumber * 110, 83, 60, 6);
+        }
+
+        private void load_from_game(int sw,int sh,int ew, int eh,int chara_num)
+        {
+            string path = @"C:\Temp\capture_shidan.png";
+            using Bitmap tempbmp = new Bitmap(path);
+            var cropRect = new System.Drawing.Rectangle(sw,sh,ew,eh);
+            using Bitmap bmp = tempbmp.Clone(cropRect, tempbmp.PixelFormat);
+            //using Bitmap bmp = new Bitmap("./data/ic0000.png");
+            string debugPath = @"C:\Temp\cropped_debug_shidan.png";
+            bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
+            string onnxPath = @"data/resnet50_features.onnx";   // Pythonで変換したONNXモデル
+            string jsonPath = @"data/features.json";              // Python特徴量DB
+            string csvPath = @"data/list.csv";                   // ID→名前
+
+            // 1. 画像ロード & 224x224 にリサイズ
+            //using Bitmap bmp = new Bitmap(inputPath);
+            using Bitmap resized = new Bitmap(bmp, 224, 224);
+
+            // 2. NHWC Tensor に変換 + Keras preprocess_input(Caffeモード)
+            var inputTensor = BitmapToTensor_KerasCaffe(resized);
+
+            // 3. ONNX 推論
+            using var session = new InferenceSession(onnxPath);
+            string inputName = session.InputMetadata.Keys.First(); // 入力名はONNXで確認
+            var result = session.Run(new List<NamedOnnxValue> {
+                NamedOnnxValue.CreateFromTensor(inputName, inputTensor)
+            });
+
+            float[] queryFeature = result.First().AsEnumerable<float>().ToArray();
+            queryFeature = Normalize(queryFeature);
+
+            // 4. 特徴量DB読み込み
+            string json = File.ReadAllText(jsonPath);
+            var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, float[]>>(json);
+
+            // CSV読み込み（ID→名称）
+            var csvLines = File.ReadAllLines(csvPath)
+                .Skip(1)
+                .Select(line => line.Split(','))
+                .Select(parts => new { Id = parts[1], Name = parts[2] })
+                .ToDictionary(x => x.Id, x => x.Name);
+
+            List<ImageFeature> features = dict.Select(kv => new ImageFeature { Id = kv.Key, Feature = kv.Value }).ToList();
+
+            // 5. 類似検索（コサイン類似度）
+            var top = features
+                .Select(f => new { f.Id, Name = csvLines[f.Id], Score = Cosine(f.Feature, queryFeature) })
+                .OrderByDescending(x => x.Score)
+                .FirstOrDefault();
+
+            if (top != null)
+            {
+                Debug.WriteLine($"最も近い画像: {top.Name} (ID: {top.Id}, Score: {top.Score:F3})");
+
+                var match = all_save_data.FirstOrDefault(c => c.character_name == top.Name);
+                if (match != null)
+                {
+                    saved_list.SelectedItem = match;
+                    saved_list.ScrollIntoView(match);
+                    string methodName = $"Character{chara_num}_load_Button_Click";
+                    var method = this.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                    if (method != null)
+                    {
+                        // イベントハンドラと同じ引数 (sender, e)
+                        method.Invoke(this, new object[] { null, null });
+                    }
+                }
+            }
+        }
+
+
+        class ImageFeature
+        {
+            public string Id { get; set; }
+            public float[] Feature { get; set; }
+        }
+        class Program
+        {
+            static float[] ExtractFeature(Bitmap bmp, InferenceSession session)
+            {
+                Bitmap resized = new Bitmap(bmp, new System.Drawing.Size(224, 224));
+                float[] input = new float[3 * 224 * 224];
+
+                for (int y = 0; y < 224; y++)
+                {
+                    for (int x = 0; x < 224; x++)
+                    {
+                        System.Drawing.Color c = resized.GetPixel(x, y);
+                        int idx = y * 224 + x;
+                        input[idx] = (c.R / 255f - 0.485f) / 0.229f;
+                        input[224 * 224 + idx] = (c.G / 255f - 0.456f) / 0.224f;
+                        input[2 * 224 * 224 + idx] = (c.B / 255f - 0.406f) / 0.225f;
+                    }
+                }
+
+                var tensor = new DenseTensor<float>(input, new int[] { 1, 3, 224, 224 });
+                var result = session.Run(new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor("input", tensor) });
+                return result.First().AsEnumerable<float>().ToArray();
+            }
+        }
+
+        private void Button_Click_Clear3(object sender, RoutedEventArgs e)
+        {
+            var selectedValue = assist_skill_box.SelectedValue;
+            var selectedItem = assist_skill_box.SelectedItem;
+            var selectedText = assist_skill_box.Text;
+
+            if (selectedValue == "3")
+            {
+                del_assist_skill();
+                //shidan_assist.Remove(shidan_assist.First(item => item.Id == 1));
+            }
+            character3_name_box.Text = "";
+                character3_skill_box.Text = "";
+            character3_status_box.Text = "";
+            buko3_fig.Text = "";
+            all_characters.Remove(3);
+            set_shidan_skill();
+            resync_assist_skill();
+            character_kassei_update();
+            character_shiki_update();
+            kago_calc();
+            character3_name_box.Text = "";
+            character3_skill_box.Text = "";
+            character3_status_box.Text = "";
+            buko3_fig.Text = "";
+        }
     }
+
 }

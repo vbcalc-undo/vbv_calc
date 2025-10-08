@@ -1,26 +1,25 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-    <!-- バージョン情報 -->
-    <AssemblyVersion>1.0.6.0</AssemblyVersion>
-    <FileVersion>1.0.6.0</FileVersion>
-    <InformationalVersion>1.0.6</InformationalVersion>
+	  <OutputType>WinExe</OutputType>
+	  <TargetFramework>net8.0-windows10.0.26100.0</TargetFramework>
+	  <UseWPF>true</UseWPF>
+	  <Nullable>enable</Nullable>
+	  <ImplicitUsings>enable</ImplicitUsings>
+	  <AssemblyVersion>1.0.6.0</AssemblyVersion>
+      <FileVersion>1.0.6.0</FileVersion>
+      <InformationalVersion>1.0.6</InformationalVersion>
+      <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
   </PropertyGroup>
-
   <ItemGroup>
-    <Compile Remove="新しいフォルダー\**" />
-    <EmbeddedResource Remove="新しいフォルダー\**" />
-    <None Remove="新しいフォルダー\**" />
-    <Page Remove="新しいフォルダー\**" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="FuzzySharp" Version="2.0.2" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.23.1" />
+    <PackageReference Include="Microsoft.Windows.CppWinRT" Version="2.0.250303.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NMeCab" Version="0.6.4" />
+    <PackageReference Include="NMeCabNetStandard" Version="0.7.3" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.9" />
+    <PackageReference Include="Tesseract" Version="5.2.0" />
   </ItemGroup>
 
   <ItemGroup>
