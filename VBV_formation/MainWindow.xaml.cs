@@ -3613,7 +3613,7 @@ namespace VBV_formation
                     {
                         if (skill.Key == "軍団活性")
                         {
-                            (temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku) = leg_leg_kassei_skill(character.Value, "師団支配", temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku);
+                            (temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku) = leg_leg_kassei_skill(character.Value, "軍団活性", temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku);
                         }
                         else if (skill.Key == "軍団支配")
                         {
