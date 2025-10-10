@@ -2,43 +2,20 @@
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.IO;
-using System.IO;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Numerics;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using VBV_calc;
 using VBV_calc.Helpers;
-using VBV_calc.Models;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using static VBV_calc.MainWindow;
-using static VBV_formation.MainWindow;
 
 namespace VBV_formation
 {
@@ -443,8 +420,8 @@ namespace VBV_formation
             else
             {
             }
-            string jsonPath = @"data/features.json";              // Python特徴量DB
-            string csvPath = @"data/list.csv";                   // ID→名前
+            string jsonPath = @"feature_extraction/features.json";              // Python特徴量DB
+            string csvPath = @"feature_extraction/list.csv";                   // ID→名前
 
             string json = File.ReadAllText(jsonPath);
             featureDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, float[]>>(json);
@@ -5425,7 +5402,7 @@ namespace VBV_formation
             popup.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             popup.ShowDialog();
         }
-        private static InferenceSession session = new InferenceSession(@"data/resnet50_features.onnx");
+        private static InferenceSession session = new InferenceSession(@"feature_extraction/resnet50_features.onnx");
         private static Dictionary<string, float[]> featureDict;
         private static Dictionary<string, string> idNameMap;
         public void load_from_game(int sw, int sh, int ew, int eh, int chara_num)
@@ -5436,7 +5413,7 @@ namespace VBV_formation
             using Bitmap bmp = tempbmp.Clone(cropRect, tempbmp.PixelFormat);
             //using Bitmap bmp = new Bitmap("./data/ic0000.png");
             string debugPath = @"C:\Temp\cropped_debug_shidan.png";
-            bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
+            //bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
             Stopwatch stopwa = Stopwatch.StartNew();
 
             // 1. 画像ロード & 224x224 にリサイズ

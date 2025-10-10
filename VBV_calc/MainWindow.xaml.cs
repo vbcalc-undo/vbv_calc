@@ -1,5 +1,4 @@
-﻿using FuzzySharp;
-using JsonFileIO.Jsons;
+﻿using JsonFileIO.Jsons;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using Newtonsoft.Json;
@@ -4466,12 +4465,11 @@ namespace VBV_calc
             using Bitmap tempbmp = new Bitmap(path);
             var cropRect = new System.Drawing.Rectangle(sw, sh, ew, eh);
             using Bitmap bmp = tempbmp.Clone(cropRect, tempbmp.PixelFormat);
-            //using Bitmap bmp = new Bitmap("./data/ic0000.png");
             string debugPath = @"C:\Temp\cropped_debug.png";
             bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
-            string onnxPath = @"data/resnet50_features.onnx";   // Pythonで変換したONNXモデル
-            string jsonPath = @"data/chara_features.json";              // Python特徴量DB
-            string csvPath = @"data/list.csv";                   // ID→名前
+            string onnxPath = @"feature_extraction/resnet50_features.onnx";   // Pythonで変換したONNXモデル
+            string jsonPath = @"feature_extraction/chara_features.json";              // Python特徴量DB
+            string csvPath = @"feature_extraction/list.csv";                   // ID→名前
 
             // 1. 画像ロード & 224x224 にリサイズ
             //using Bitmap bmp = new Bitmap(inputPath);
@@ -4547,50 +4545,6 @@ namespace VBV_calc
             popup.Owner = this;
             popup.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             popup.ShowDialog();
-
-            /*
-            Stopwatch sw = Stopwatch.StartNew();
-            load_from_game(315, 85, 190, 190);
-            sw.Stop();
-            Debug.WriteLine($"キャラ実行時間: {sw.ElapsedMilliseconds} ms");
-            /*noSpace = cropedAndselect(cropRect,3,175);
-            if (noSpace != "")
-                SelectMostSimilar(noSpace);*/
-            /*sw = Stopwatch.StartNew();
-            noSpace = cropedAndselect(cropRect_equip1,3,220);
-            if(noSpace!="")
-                SelectMostSimilarEquipment(noSpace,0);
-
-            sw.Stop();
-            Debug.WriteLine($"装備1実行時間: {sw.ElapsedMilliseconds} ms");
-            sw = Stopwatch.StartNew();
-            
-            noSpace = cropedAndselect(cropRect_equip2, 3, 220);
-            if (noSpace != "")
-                SelectMostSimilarEquipment(noSpace,1);
-
-            sw.Stop();
-            Debug.WriteLine($"装備2実行時間: {sw.ElapsedMilliseconds} ms");
-            sw = Stopwatch.StartNew();
-
-
-            noSpace = cropedAndselect(cropRect_ryoshoku, 3, 220);
-            if (noSpace != "")
-                SelectMostSimilarEquipment(noSpace, 2);
-
-            sw.Stop();
-            Debug.WriteLine($"糧食実行時間: {sw.ElapsedMilliseconds} ms");
-            sw = Stopwatch.StartNew();
-
-
-            noSpace = cropedAndselect(cropRect_shogo, 3, 220);
-            if (noSpace != "")
-            {
-                best_match_shogo(noSpace);
-            }
-            sw.Stop();
-            Debug.WriteLine($"称号実行時間: {sw.ElapsedMilliseconds} ms");
-            */
         }
 
         public void best_match_shogo(string noSpace)
