@@ -57,14 +57,13 @@ namespace VBV_calc
             string path = @"C:\Temp\capture.png";
             string noSpace = "";
 
-            using Bitmap bmp = new Bitmap(path);
+            //using Bitmap bmp = new Bitmap(path);
 
             var cropRect_chara = new System.Drawing.Rectangle(315, 85, 190, 190);//名前
             var cropRect_shogo = new System.Drawing.Rectangle(593, 75, 300, 27);//称号
             var cropRect_equip1 = new System.Drawing.Rectangle(558, 245, 231, 22);//装備1
             var cropRect_equip2 = new System.Drawing.Rectangle(558, 271, 231, 22);//装備2
             var cropRect_ryoshoku = new System.Drawing.Rectangle(558, 297, 231, 22);//糧食
-
 
             // --- 処理順に呼ぶ ---
             await NextAsync("キャラ 読み込み中...", () => _mainWindow.load_from_game(315, 85, 190, 190));

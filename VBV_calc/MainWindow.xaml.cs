@@ -2,6 +2,7 @@
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -14,6 +15,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Shapes;
 using Tesseract;
 using VBV_calc.Helpers;
 using VBV_calc.Models;
@@ -867,7 +869,9 @@ namespace VBV_calc
         ObservableCollection<savedata> all_save_data = new ObservableCollection<savedata>();
         List<string> STANCE_LIST = new List<string> { "", "防備", "計略", "進撃", "乱戦" };
         List<string> SHOKUGYO_LIST = new List<string> { "", "ブレイダー", "ランサー", "シューター", "キャスター", "ガーダー", "デストロイヤー", "ヒーラー" };
-
+        private static InferenceSession session = new InferenceSession(@"feature_extraction/resnet50_features.onnx");
+        private static Dictionary<string, float[]> featureDict;
+        private static Dictionary<string, string> idNameMap;
         public MainWindow()
         {
             InitializeComponent();
@@ -982,8 +986,22 @@ namespace VBV_calc
             else
             {
             }
+
+            //特徴量データの読み込
+            string jsonPath = @"feature_extraction/chara_features.json";              // Python特徴量DB
+            string csvPath = @"feature_extraction/list.csv";                   // ID→名前
+            string json = File.ReadAllText(jsonPath);
+            featureDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, float[]>>(json);
+            idNameMap = File.ReadAllLines(csvPath)
+            .Skip(1)
+            .Select(line => line.Split(','))
+            .ToDictionary(parts => parts[1], parts => parts[2]);
+            features = featureDict.Select(kv => new ImageFeature { Id = kv.Key, Feature = kv.Value }).ToList();
+            
             _isInitialized = true; // 初期化完了
         }
+        List<ImageFeature> features;
+
         private string _Passive1;
 
 
@@ -4219,9 +4237,9 @@ namespace VBV_calc
         }
         private static readonly TesseractEngine _engine = new TesseractEngine(@"./tessdata", "jpn", EngineMode.LstmOnly);
 
-        public string cropedAndselect(System.Drawing.Rectangle cropRect,int kakudai,int threathold)
+    public string cropedAndselect(System.Drawing.Rectangle cropRect,int kakudai,int threathold)
         {
-            string path = @"C:\Temp\capture.png";
+            string path = @".\Temp\capture.png";
             using Bitmap bmp = new Bitmap(path);
             using Bitmap cropped = bmp.Clone(cropRect, bmp.PixelFormat);
             // グレースケール
@@ -4240,7 +4258,7 @@ namespace VBV_calc
             string noSpace = text.Replace(" ", "");  // 半角スペースを削除
             Debug.WriteLine($"OCR結果: {noSpace}");
             string inputText = noSpace;
-            string debugPath = @"C:\Temp\cropped_debug.png";
+            string debugPath = @".\Temp\cropped_debug.png";
             //binarized.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
             return noSpace;
         }
@@ -4313,13 +4331,9 @@ namespace VBV_calc
             return s;
         }
 
-
         public static class ShogoMatcher
         {
-            /// <summary>
-            /// OCR文字列に最も近い (item1, item2) の組を返す。
-            /// minScore を指定すると、それ未満の最良解は null を返す。
-            /// </summary>
+
             public static (ItemSet? item1, ItemSet? item2, double score) FindBestPair(
                 string ocrText,
                 ObservableCollection<ItemSet> src_shogo1,
@@ -4331,34 +4345,51 @@ namespace VBV_calc
 
                 ocrText = ocrText.Trim();
 
-                // 事前にクリーン済みDispを作る（Null安全）
-                var list1 = src_shogo1.Select(s => (item: s, clean: CleanDisp(s?.ItemDisp))).ToList();
-                var list2 = src_shogo2.Select(s => (item: s, clean: CleanDisp(s?.ItemDisp))).ToList();
+                // 事前にクリーン済みDispを作る（ここでは要素sがnullの場合を除外してリスト化）
+                // ItemSet? sを想定して s != null のフィルタリングを追加推奨
+                var list1 = src_shogo1.Where(s => s != null).Select(s => (item: s!, clean: CleanDisp(s!.ItemDisp))).ToList();
+                var list2 = src_shogo2.Where(s => s != null).Select(s => (item: s!, clean: CleanDisp(s!.ItemDisp))).ToList();
 
-                double bestScore = 0.0;
-                ItemSet? best1 = null;
-                ItemSet? best2 = null;
+                // -------------------------------------------------------------------
+                // ここからが並列化された処理
+                // -------------------------------------------------------------------
 
-                foreach (var (item1, clean1) in list1)
-                {
-                    foreach (var (item2, clean2) in list2)
+                // 1. list1とlist2の要素をSelectManyで結合（クロス積）
+                // 2. AsParallel() で並列処理に切り替える
+                var bestMatch = list1.AsParallel()
+                    .SelectMany(t1 => list2.Select(t2 => new
                     {
-                        // null安全に結合（clean は空文字の可能性あり）
-                        string combined = string.Concat(clean1, clean2);
+                        // 処理に必要なデータだけを一時オブジェクトに格納
+                        item1 = t1.item,
+                        clean1 = t1.clean,
+                        item2 = t2.item,
+                        clean2 = t2.clean
+                    }))
+                    // スコア計算（最も重い処理）を並列実行
+                    .Select(p => {
+                        string combined = string.Concat(p.clean1, p.clean2);
                         double score = Similarity(ocrText, combined);
-                        if (score > bestScore)
+
+                        return new
                         {
-                            bestScore = score;
-                            best1 = item1;
-                            best2 = item2;
-                        }
-                    }
+                            p.item1,
+                            p.item2,
+                            score
+                        };
+                    })
+                    // 3. OrderByDescending で最高のスコアを持つペアを絞り込む (これは順次処理に戻る)
+                    .OrderByDescending(r => r.score)
+                    .FirstOrDefault(); // 最もスコアが高い要素を一つだけ取得
+
+                // -------------------------------------------------------------------
+
+                // 結果の処理
+                if (bestMatch == null || bestMatch.score < minScore)
+                {
+                    return (null, null, (bestMatch?.score ?? 0.0));
                 }
 
-                if (bestScore < minScore)
-                    return (null, null, bestScore);
-
-                return (best1, best2, bestScore);
+                return (bestMatch.item1, bestMatch.item2, bestMatch.score);
             }
 
             private static string CleanDisp(string? disp)
@@ -4461,12 +4492,13 @@ namespace VBV_calc
         }
         public void load_from_game(int sw, int sh, int ew, int eh)
         {
-            string path = @"C:\Temp\capture.png";
+            string path = @".\Temp\capture.png";
             using Bitmap tempbmp = new Bitmap(path);
+
             var cropRect = new System.Drawing.Rectangle(sw, sh, ew, eh);
             using Bitmap bmp = tempbmp.Clone(cropRect, tempbmp.PixelFormat);
-            string debugPath = @"C:\Temp\cropped_debug.png";
-            bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
+            string debugPath = @".\Temp\cropped_debug.png";
+            //bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
             string onnxPath = @"feature_extraction/resnet50_features.onnx";   // Pythonで変換したONNXモデル
             string jsonPath = @"feature_extraction/chara_features.json";              // Python特徴量DB
             string csvPath = @"feature_extraction/list.csv";                   // ID→名前
@@ -4479,7 +4511,7 @@ namespace VBV_calc
             var inputTensor = BitmapToTensor_KerasCaffe(resized);
 
             // 3. ONNX 推論
-            using var session = new InferenceSession(onnxPath);
+            //using var session = new InferenceSession(onnxPath);
             string inputName = session.InputMetadata.Keys.First(); // 入力名はONNXで確認
             var result = session.Run(new List<NamedOnnxValue> {
                 NamedOnnxValue.CreateFromTensor(inputName, inputTensor)
@@ -4488,22 +4520,10 @@ namespace VBV_calc
             float[] queryFeature = result.First().AsEnumerable<float>().ToArray();
             queryFeature = Normalize_chara(queryFeature);
 
-            // 4. 特徴量DB読み込み
-            string json = File.ReadAllText(jsonPath);
-            var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, float[]>>(json);
-
-            // CSV読み込み（ID→名称）
-            var csvLines = File.ReadAllLines(csvPath)
-                .Skip(1)
-                .Select(line => line.Split(','))
-                .Select(parts => new { Id = parts[1], Name = parts[2] })
-                .ToDictionary(x => x.Id, x => x.Name);
-
-            List<ImageFeature> features = dict.Select(kv => new ImageFeature { Id = kv.Key, Feature = kv.Value }).ToList();
 
             // 5. 類似検索（コサイン類似度）
             var top = features
-                .Select(f => new { f.Id, Name = csvLines[f.Id], Score = Cosine(f.Feature, queryFeature) })
+                .Select(f => new { f.Id, Name = idNameMap[f.Id], Score = Cosine(f.Feature, queryFeature) })
                 .OrderByDescending(x => x.Score)
                 .FirstOrDefault();
 
@@ -4521,7 +4541,7 @@ namespace VBV_calc
 
         private void CaptureAndOcrButton_Click(object sender, RoutedEventArgs e)
         {
-            string path = @"C:\Temp\capture.png";
+            string path = @".\Temp\capture.png";
             int hr = CaptureWrapper.CaptureWindowByTitle("VenusBloodVALKYRIE", path);
             if (hr != 0)
             {
@@ -4530,7 +4550,6 @@ namespace VBV_calc
             }
 
             using Bitmap bmp = new Bitmap(path);
-
             // 必要部分を切り抜き
             //var cropRect = new System.Drawing.Rectangle(593, 100, 250, 33);//名前
             var cropRect_chara = new System.Drawing.Rectangle(315, 85, 190, 190);//名前
@@ -4549,6 +4568,7 @@ namespace VBV_calc
 
         public void best_match_shogo(string noSpace)
         {
+            //var (best1, best2, score) = ShogoMatcher.FindBestPair(noSpace, src_shogo1, src_shogo2);
             var (best1, best2, score) = ShogoMatcher.FindBestPair(noSpace, src_shogo1, src_shogo2);
             if (best1 != null && best2 != null)
             {

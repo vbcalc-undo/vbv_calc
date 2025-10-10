@@ -5380,7 +5380,7 @@ namespace VBV_formation
             int selectedNumber = 0;
             int step = 0;
             all_characters.Clear();
-            string path = @"C:\Temp\capture_shidan.png";
+            string path = @".\Temp\capture_shidan.png";
             int hr = CaptureWrapper.CaptureWindowByTitle("VenusBloodVALKYRIE", path);
             if (hr != 0)
             {
@@ -5407,12 +5407,12 @@ namespace VBV_formation
         private static Dictionary<string, string> idNameMap;
         public void load_from_game(int sw, int sh, int ew, int eh, int chara_num)
         {
-            string path = @"C:\Temp\capture_shidan.png";
+            string path = @".\Temp\capture_shidan.png";
             using Bitmap tempbmp = new Bitmap(path);
             var cropRect = new System.Drawing.Rectangle(sw, sh, ew, eh);
             using Bitmap bmp = tempbmp.Clone(cropRect, tempbmp.PixelFormat);
             //using Bitmap bmp = new Bitmap("./data/ic0000.png");
-            string debugPath = @"C:\Temp\cropped_debug_shidan.png";
+            string debugPath = @".\Temp\cropped_debug_shidan.png";
             //bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
             Stopwatch stopwa = Stopwatch.StartNew();
 
