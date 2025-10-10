@@ -24,3 +24,4 @@
 /img2vec/resnet50_features.onnx
 /img2vec/resnet50_saved_model.keras
 /CaptureWrapper/x64/Debug
+/VBV_calc/bin/Debug/feature_extraction
