@@ -54,7 +54,7 @@ namespace VBV_calc
                 return result;
             }
 
-            string path = @"C:\Temp\capture.png";
+            //string path = @"C:\Temp\capture.png";
             string noSpace = "";
 
             //using Bitmap bmp = new Bitmap(path);

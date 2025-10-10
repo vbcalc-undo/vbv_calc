@@ -4520,13 +4520,12 @@ namespace VBV_calc
             float[] queryFeature = result.First().AsEnumerable<float>().ToArray();
             queryFeature = Normalize_chara(queryFeature);
 
-
-            // 5. 類似検索（コサイン類似度）
             var top = features
+                .AsParallel()
                 .Select(f => new { f.Id, Name = idNameMap[f.Id], Score = Cosine(f.Feature, queryFeature) })
+                // 並列処理された結果を OrderByDescending で順序付け
                 .OrderByDescending(x => x.Score)
                 .FirstOrDefault();
-
             if (top != null)
             {
                 Debug.WriteLine($"最も近い画像: {top.Name} (ID: {top.Id}, Score: {top.Score:F3})");
