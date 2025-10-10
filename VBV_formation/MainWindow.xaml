@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:av="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="av"
-        Title="編成ウィンドウ" Height="730" Width="1550">
+        Title="vbv_formation " Height="730" Width="1550" Closed="Window_Closed">
     <TabControl Margin="0,0,0,-16" SelectionChanged="MyTabControl_SelectionChanged">
         <!-- 師団編成タブ -->
         <TabItem Header="師団編成">
@@ -50,6 +50,7 @@
                         <TextBox x:Name="buko1_fig" Canvas.Left="280" TextWrapping="Wrap" Text="" Canvas.Top="0" Width="52" TextChanged="buko_fig_TextChanged" />
                         <TextBlock Canvas.Left="250" TextWrapping="Wrap" Text="武功" Canvas.Top="0"/>
                         <Button Content="load" Canvas.Left="140" Canvas.Top="0" Click="Character1_load_Button_Click"/>
+                        <Button Content="クリア" Canvas.Left="353" Canvas.Top="0" Click="Button_Click_Clear"/>
                     </Canvas>
                 </GroupBox>
                 <GroupBox Header="キャラクター４" Width="430" Height="210" Canvas.Left="1080" Canvas.Top="5" HorizontalAlignment="Left" VerticalAlignment="Center">
@@ -61,6 +62,7 @@
                         <TextBox x:Name="buko4_fig" Canvas.Left="280" TextWrapping="Wrap" Text="" Canvas.Top="0" Width="52" TextChanged="buko_fig_TextChanged" />
                         <CheckBox x:Name="leader4_flag" Content="リーダー" Canvas.Left="180" Canvas.Top="0" Checked="leader1_flag_Checked" Unchecked="leader1_flag_UnChecked"/>
                         <Button Content="load" Canvas.Left="140" Canvas.Top="0" Click="Character4_load_Button_Click" HorizontalAlignment="Center" VerticalAlignment="Center" Height="20"/>
+                        <Button Content="クリア" Canvas.Left="353" Canvas.Top="0" Click="Button_Click_Clear"/>
                     </Canvas>
                 </GroupBox>
                 <GroupBox Header="キャラクター２" Width="430" Height="210" Canvas.Left="630" Canvas.Top="220" HorizontalAlignment="Center" VerticalAlignment="Top">
@@ -72,6 +74,7 @@
                         <TextBox x:Name="character2_name_box" Canvas.Left="10" TextWrapping="Wrap" Text="" Canvas.Top="0" Width="120" />
                         <TextBox x:Name="character2_skill_box" Canvas.Left="10" TextWrapping="Wrap" Text="" Canvas.Top="25" Width="240" Height="155" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
                         <TextBox x:Name="character2_status_box" Canvas.Left="260" TextWrapping="Wrap" Text="" Canvas.Top="25" Width="155" Height="155" HorizontalAlignment="Left" VerticalAlignment="Center" VerticalScrollBarVisibility="Auto"/>
+                        <Button Content="クリア" Canvas.Left="353" Canvas.Top="0" Click="Button_Click_Clear"/>
                     </Canvas>
                 </GroupBox>
                 <GroupBox Header="キャラクター５" Width="430" Height="210" Canvas.Left="1080" Canvas.Top="220" HorizontalAlignment="Center" VerticalAlignment="Top">
@@ -83,6 +86,7 @@
                         <Button Content="load" Canvas.Left="140" Canvas.Top="0" Click="Character5_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                         <TextBox x:Name="buko5_fig" Canvas.Left="280" TextWrapping="Wrap" Text="" Canvas.Top="0" Width="52" TextChanged="buko_fig_TextChanged" />
                         <TextBlock Canvas.Left="250" TextWrapping="Wrap" Text="武功" Canvas.Top="0"/>
+                        <Button Content="クリア" Canvas.Left="353" Canvas.Top="0" Click="Button_Click_Clear"/>
                     </Canvas>
                 </GroupBox>
                 <GroupBox Header="キャラクター３" Width="430" Height="210" Canvas.Left="630" Canvas.Top="435" HorizontalAlignment="Left" VerticalAlignment="Center">
@@ -94,6 +98,7 @@
                         <TextBox x:Name="buko3_fig" Canvas.Left="280" TextWrapping="Wrap" Text="" Canvas.Top="0" Width="52" TextChanged="buko_fig_TextChanged" />
                         <TextBlock Canvas.Left="250" TextWrapping="Wrap" Text="武功" Canvas.Top="0"/>
                         <Button Content="load" Canvas.Left="140" Canvas.Top="0" Click="Character3_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                        <Button Content="クリア" Canvas.Left="353" Canvas.Top="0" Click="Button_Click_Clear"/>
                     </Canvas>
                 </GroupBox>
                 <GroupBox Header="キャラクター６" Width="430" Height="210" Canvas.Left="1080" Canvas.Top="435" HorizontalAlignment="Left" VerticalAlignment="Center">
@@ -105,17 +110,18 @@
                         <TextBox x:Name="buko6_fig" Canvas.Left="280" TextWrapping="Wrap" Text="" Canvas.Top="0" Width="52" TextChanged="buko_fig_TextChanged" />
                         <Button Content="load" Canvas.Left="140" Canvas.Top="0" Click="Character6_load_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                         <TextBlock Canvas.Left="250" TextWrapping="Wrap" Text="武功" Canvas.Top="0"/>
+                        <Button Content="クリア" Canvas.Left="353" Canvas.Top="0" Click="Button_Click_Clear"/>
                     </Canvas>
                 </GroupBox>
-                <TextBox x:Name="shidan_skill_box" Canvas.Left="258" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Auto" Canvas.Top="351" Width="194" Height="249" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                <ComboBox x:Name="assist_skill_box" Canvas.Left="476" Canvas.Top="77" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" SelectionChanged="assist_skill_box_SelectionChanged" />
-                <TextBlock Canvas.Left="504" TextWrapping="Wrap" Text="アシストスキル" Canvas.Top="58" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                <TextBox x:Name="shidan_name_box" Canvas.Left="476" TextWrapping="NoWrap" Text="" Canvas.Top="39" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" MaxLength="20" />
-                <TextBlock Canvas.Left="519" TextWrapping="Wrap" Text="師団名" Canvas.Top="18" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <TextBox x:Name="shidan_skill_box" Canvas.Left="258" TextWrapping="Wrap" Text="" VerticalScrollBarVisibility="Auto" Canvas.Top="351" Width="194" Height="294" HorizontalAlignment="Center" VerticalAlignment="Top" />
+                <ComboBox x:Name="assist_skill_box" Canvas.Left="477" Canvas.Top="70" Width="120" HorizontalAlignment="Left" VerticalAlignment="Top" SelectionChanged="assist_skill_box_SelectionChanged" />
+                <TextBlock Canvas.Left="506" TextWrapping="Wrap" Text="アシストスキル" Canvas.Top="49" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBox x:Name="shidan_name_box" Canvas.Left="476" TextWrapping="NoWrap" Text="" Canvas.Top="26" Width="120" HorizontalAlignment="Center" VerticalAlignment="Top" MaxLength="20" />
+                <TextBlock Canvas.Left="519" TextWrapping="Wrap" Text="師団名" Canvas.Top="4" HorizontalAlignment="Center" VerticalAlignment="Top" />
                 <TextBlock Canvas.Left="326" TextWrapping="Wrap" Text="師団一覧" Canvas.Top="5" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <TextBlock Canvas.Left="92" TextWrapping="Wrap" Text="キャラクター一覧" Canvas.Top="7" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <TextBlock Canvas.Left="316" TextWrapping="Wrap" Text="師団スキル一覧" Canvas.Top="330"/>
-                <GroupBox Header="昼夜加護月" Width="170" Height="120" Canvas.Left="457" Canvas.Top="189" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <GroupBox Header="昼夜加護月" Width="170" Height="120" Canvas.Left="457" Canvas.Top="266" HorizontalAlignment="Left" VerticalAlignment="Center">
                     <Canvas>
                         <RadioButton Content="昼" Canvas.Left="10" Canvas.Top="10" Checked="RadioButton_Checked" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                         <RadioButton Content="夜" Canvas.Left="80" Canvas.Top="10" Checked="RadioButton_Checked" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -127,11 +133,11 @@
                         <CheckBox x:Name="kago6_flag" Content="闇" Canvas.Left="110" Canvas.Top="80" Checked="kago_Checked" Unchecked="kago_UnChecked"/>
                     </Canvas>
                 </GroupBox>
-                <TextBlock Canvas.Left="520" TextWrapping="Wrap" Text="スタンス" Canvas.Top="104" />
-                <TextBox x:Name="stance_text_box" Canvas.Left="480" TextWrapping="Wrap" Text="" Canvas.Top="122" Width="120"/>
-                <TextBlock Canvas.Left="520" TextWrapping="Wrap" Text="総経験値" Canvas.Top="141" />
-                <TextBox x:Name="total_keikenti_box" Canvas.Left="480" TextWrapping="Wrap" Text="" Canvas.Top="162" Width="120" TextChanged="total_keikenti_box_TextChanged" MaxLength="12"/>
-                <GroupBox Header="地形効果" Width="170" Height="210" Canvas.Left="457" Canvas.Top="328" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <TextBlock Canvas.Left="520" TextWrapping="Wrap" Text="スタンス" Canvas.Top="97" HorizontalAlignment="Center" VerticalAlignment="Top" />
+                <TextBox x:Name="stance_text_box" Canvas.Left="476" TextWrapping="Wrap" Text="" Canvas.Top="115" Width="120" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBlock Canvas.Left="514" TextWrapping="Wrap" Text="総経験値" Canvas.Top="138" HorizontalAlignment="Center" VerticalAlignment="Top" />
+                <TextBox x:Name="total_keikenti_box" Canvas.Left="478" TextWrapping="Wrap" Text="" Canvas.Top="156" Width="120" TextChanged="total_keikenti_box_TextChanged" MaxLength="12" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <GroupBox Header="地形効果" Width="170" Height="210" Canvas.Left="457" Canvas.Top="390" HorizontalAlignment="Center" VerticalAlignment="Top">
                     <Canvas>
                         <TextBox x:Name="hito_box" Canvas.Left="20" Canvas.Top="10" TextWrapping="Wrap" Text=""  Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
                         <TextBox x:Name="ma_box" Canvas.Left="70" Canvas.Top="10" TextWrapping="Wrap" Text="" Width="28" HorizontalAlignment="Left" VerticalAlignment="Center" MaxLength="3" TextChanged="tikei_box_TextChanged"/>
@@ -171,6 +177,11 @@
                         <TextBlock Canvas.Top="160" Canvas.Left="105" TextWrapping="Wrap" Text="超" />
                     </Canvas>
                 </GroupBox>
+                <Button Content="画面から&#x0a;取り込み" Canvas.Left="465" Canvas.Top="186" Click="Start_Click" HorizontalAlignment="Left" VerticalAlignment="Center" Width="67" Height="66"/>
+                <ComboBox x:Name="capture_shidan_numBox" Canvas.Left="565" Canvas.Top="229" Width="34" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <TextBlock Canvas.Left="540" TextWrapping="Wrap" Text="師団番号&#x0a;（上からの番号）" Canvas.Top="187" HorizontalAlignment="Left" VerticalAlignment="Center" TextAlignment="Center"/>
+                <ComboBox x:Name="kyohon_box" Canvas.Left="494" Canvas.Top="623" Width="34" HorizontalAlignment="Left" VerticalAlignment="Center" SelectionChanged="kyohon_box_SelectionChanged"/>
+                <TextBlock Canvas.Left="464" TextWrapping="Wrap" Text="狂奔値(何人倒したか)" Canvas.Top="605" HorizontalAlignment="Center" VerticalAlignment="Top" TextAlignment="Center"/>
             </Canvas>
         </TabItem>
         <TabItem Header="レギオン編成" Height="22" Margin="-2,-2,-2,0" VerticalAlignment="Top">

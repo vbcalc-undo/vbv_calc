@@ -1,21 +1,25 @@
 ﻿using JsonFileIO.Jsons;
+using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.Tensors;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Shapes;
+using Tesseract;
 using VBV_calc.Helpers;
 using VBV_calc.Models;
-
+using static VBV_calc.MainWindow;
 
 namespace VBV_calc
 {
@@ -27,6 +31,7 @@ namespace VBV_calc
         public const int FINALSKILL_NUM = 21;
         // ComboBox1 プロパティの型を object から ComboBox に変更
         public ComboBox ComboBox1 { get; private set; }
+        private bool _isProgrammaticChange = false;
 
         public class ItemSet
         {
@@ -161,7 +166,9 @@ namespace VBV_calc
                 string.IsNullOrEmpty(cost) || !double.TryParse(cost, out _) ||
                 string.IsNullOrEmpty(rank))
             {
+                _isProgrammaticChange = true;
                 levelbox.Text = "1";
+                _isProgrammaticChange = false;
                 hpbox.Text = "1";
                 sokudobox.Text = "1";
                 kougekibox.Text = "1";
@@ -210,8 +217,9 @@ namespace VBV_calc
             int bou_status = (int)((double.Parse(bou) + buko) * level1 + level2) + soubi1_status.bougyo + soubi2_status.bougyo + ryoshoku_status.bougyo;
             int soku_status = (int)((double.Parse(soku)) * level1 + level2) + soubi1_status.sokudo + soubi2_status.sokudo + ryoshoku_status.sokudo;
             int chi_status = (int)((double.Parse(chiryoku)) * level1 + level2) + soubi1_status.tiryoku + soubi2_status.tiryoku + ryoshoku_status.tiryoku;
-
+            _isProgrammaticChange = true;
             levelbox.Text = level.ToString();
+            _isProgrammaticChange = false;
             hpbox.Text = hp_status.ToString();
             sokudobox.Text = soku_status.ToString();
             kougekibox.Text = kou_status.ToString();
@@ -271,12 +279,52 @@ namespace VBV_calc
             if (kou_status < 1) kou_status = 1;
             if (bou_status < 1) bou_status = 1;
 
+            _isProgrammaticChange = true;
             levelbox.Text = level.ToString();
+            _isProgrammaticChange = false;
             hpbox.Text = hp_status.ToString();
             sokudobox.Text = soku_status.ToString();
             kougekibox.Text = kou_status.ToString();
             bougyobox.Text = bou_status.ToString();
             chiryokubox.Text = chi_status.ToString();
+        }
+
+
+        private void status_calc_box(int level_value,int bukou_value)
+        {
+            int hp, soku, kou, bou, chiryoku, cost;
+            string rank;
+            if (bukou_value > 100) 
+                bukou_value = 100;
+            if (bukou_value < 1) 
+                bukou_value = 1;
+
+            current_Character_Status.get_status(out hp, out kou, out bou, out soku, out chiryoku, out cost, out rank);
+            double  keikenti = 50 * (level_value * level_value) - (100 * level_value) + 50;
+            double buko = (bukou_value - 25.0) / 2.0 / (Math.Sqrt(cost));
+            double level1 = 1.0 + Math.Sqrt(keikenti) / 1000.0;
+            double level2 = Math.Sqrt(keikenti) / 50.0;
+
+            double temp = (level_value - 1.0) / 4.0 + 1.0;
+            int hp_status = (int)(hp * ((level_value - 1.0) / 4.0 + 1.0));
+            int kou_status = (int)((kou + buko + shogo1_status.kougeki + shogo2_status.kougeki) * level1 + level2) + soubi1_status.kougeki + soubi2_status.kougeki + ryoshoku_status.kougeki;
+            int bou_status = (int)((bou + buko + shogo1_status.bougyo + shogo2_status.bougyo) * level1 + level2) + soubi1_status.bougyo + soubi2_status.bougyo + ryoshoku_status.bougyo;
+            int soku_status = (int)((soku + shogo1_status.sokudo + shogo2_status.sokudo) * level1 + level2) + soubi1_status.sokudo + soubi2_status.sokudo + ryoshoku_status.sokudo;
+            int chi_status = (int)((chiryoku + shogo1_status.tiryoku + shogo2_status.tiryoku) * level1 + level2) + soubi1_status.tiryoku + soubi2_status.tiryoku + ryoshoku_status.tiryoku;
+
+            if (chi_status < 1) chi_status = 1;
+            if (soku_status < 1) soku_status = 1;
+            if (kou_status < 1) kou_status = 1;
+            if (bou_status < 1) bou_status = 1;
+
+            if (hpbox != null && sokudobox != null && kougekibox != null && chiryokubox != null && bougyobox != null)
+            {
+                hpbox.Text = hp_status.ToString();
+                sokudobox.Text = soku_status.ToString();
+                kougekibox.Text = kou_status.ToString();
+                bougyobox.Text = bou_status.ToString();
+                chiryokubox.Text = chi_status.ToString();
+            }
         }
 
         /* デフォルトのキャラクターの能力 */
@@ -821,7 +869,9 @@ namespace VBV_calc
         ObservableCollection<savedata> all_save_data = new ObservableCollection<savedata>();
         List<string> STANCE_LIST = new List<string> { "", "防備", "計略", "進撃", "乱戦" };
         List<string> SHOKUGYO_LIST = new List<string> { "", "ブレイダー", "ランサー", "シューター", "キャスター", "ガーダー", "デストロイヤー", "ヒーラー" };
-
+        private static InferenceSession session = new InferenceSession(@"feature_extraction/resnet50_features.onnx");
+        private static Dictionary<string, float[]> featureDict;
+        private static Dictionary<string, string> idNameMap;
         public MainWindow()
         {
             InitializeComponent();
@@ -892,6 +942,7 @@ namespace VBV_calc
             ryoshokuBox.ItemsSource = src_ryoshoku;
             ryoshokuBox.DisplayMemberPath = "ItemDisp";
             ryoshokuBox.SelectedValuePath = "ItemValue";
+            // 番号付きラッパーに変換
             saved_list.ItemsSource = all_save_data;
 
             assistskill1_box.ItemsSource = src_asistskills;
@@ -935,8 +986,22 @@ namespace VBV_calc
             else
             {
             }
+
+            //特徴量データの読み込
+            string jsonPath = @"feature_extraction/chara_features.json";              // Python特徴量DB
+            string csvPath = @"feature_extraction/list.csv";                   // ID→名前
+            string json = File.ReadAllText(jsonPath);
+            featureDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, float[]>>(json);
+            idNameMap = File.ReadAllLines(csvPath)
+            .Skip(1)
+            .Select(line => line.Split(','))
+            .ToDictionary(parts => parts[1], parts => parts[2]);
+            features = featureDict.Select(kv => new ImageFeature { Id = kv.Key, Feature = kv.Value }).ToList();
+            
             _isInitialized = true; // 初期化完了
         }
+        List<ImageFeature> features;
+
         private string _Passive1;
 
 
@@ -3846,26 +3911,46 @@ namespace VBV_calc
 
         private void Delete_Button_Click(object sender, RoutedEventArgs e)
         {
-            // saved_list.SelectedItem から選択された savedata を取得
+            // 選択された savedata を取得
             var selected = saved_list.SelectedItem as savedata;
             if (selected != null)
             {
-                //まずキャラクター選択のフィルターを解除する
-                // キャラクター選択
+                // 削除前に現在のインデックスを取得
+                int index = saved_list.SelectedIndex;
+
+                // リストから削除
                 all_save_data.Remove(selected);
+
+                // 新しい選択を決める
+                if (all_save_data.Count > 0)
+                {
+                    // 下のアイテムがあれば選択
+                    if (index < all_save_data.Count)
+                    {
+                        saved_list.SelectedIndex = index; // 下のアイテム
+                    }
+                    else
+                    {
+                        saved_list.SelectedIndex = all_save_data.Count - 1; // 上のアイテム
+                    }
+                }
+                else
+                {
+                    // リストが空なら選択をクリア
+                    saved_list.SelectedIndex = -1;
+                }
             }
         }
 
         private void Write_File_Button_Click(object sender, RoutedEventArgs e)
         {
-            //現在のall_save_dataをjsonにして保存する
             try
             {
+                // all_save_data は ObservableCollection<savedata> を想定
                 string json = JsonConvert.SerializeObject(all_save_data, Formatting.Indented);
-                // 保存先のフォルダが無ければ作る
+                Directory.CreateDirectory("./json");
                 File.WriteAllText("./json/saved.json", json);
                 MessageBox.Show("保存しました。");
-                return; // 成功
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -3883,7 +3968,6 @@ namespace VBV_calc
             {
                 Console.WriteLine("不明なエラー: " + ex.Message);
             }
-
         }
 
         private void Read_File_Button_Click(object sender, RoutedEventArgs e)
@@ -3934,6 +4018,17 @@ namespace VBV_calc
         int level_shitei = 0;
         private void levelbox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            int level=1, buko=1;
+            if (levelbox != null && bukobox != null && _isProgrammaticChange == false)
+            {
+                if (int.TryParse(levelbox.Text, out level))
+                {
+                }
+                if (int.TryParse(bukobox.Text, out buko))
+                {
+                }
+                status_calc_box(level, buko);
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -3944,6 +4039,597 @@ namespace VBV_calc
         private void CharacterSkill_CloseButton_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        public static class CaptureWrapper
+        {
+            [DllImport("CaptureWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+            public static extern int CaptureWindowByTitle(string windowTitle, string outputPath);
+        }
+        private Pix BitmapToPix(Bitmap bmp)
+        {
+            using MemoryStream ms = new MemoryStream();
+            bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+            ms.Position = 0;
+            return Pix.LoadFromMemory(ms.ToArray());
+        }
+
+        // グレースケール変換
+        private Bitmap ToGrayscale(Bitmap original)
+        {
+            Bitmap gray = new Bitmap(original.Width, original.Height);
+            using (Graphics g = Graphics.FromImage(gray))
+            {
+                var cm = new ColorMatrix(new float[][]
+                {
+                    new float[]{0.299f, 0.299f, 0.299f, 0, 0},
+                    new float[]{0.587f, 0.587f, 0.587f, 0, 0},
+                    new float[]{0.114f, 0.114f, 0.114f, 0, 0},
+                    new float[]{0, 0, 0, 1, 0},
+                    new float[]{0, 0, 0, 0, 1}
+                });
+                using var ia = new ImageAttributes();
+                ia.SetColorMatrix(cm);
+                g.DrawImage(original, new System.Drawing.Rectangle(0, 0, gray.Width, gray.Height),
+                            0, 0, original.Width, original.Height,
+                            GraphicsUnit.Pixel, ia);
+            }
+            return gray;
+        }
+
+        // NearestNeighborでの拡大（線のぼやけ防止）
+        private Bitmap ResizeBitmap(Bitmap bmp, int scale)
+        {
+            Bitmap result = new Bitmap(bmp.Width * scale, bmp.Height * scale);
+            using (Graphics g = Graphics.FromImage(result))
+            {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+                g.DrawImage(bmp, new System.Drawing.Rectangle(0, 0, result.Width, result.Height));
+            }
+            return result;
+        }
+
+        // 線が太くなりすぎない軽い二値化
+        private Bitmap AdaptiveThreshold(Bitmap gray,int i_threshold)
+        {
+            Bitmap bin = new Bitmap(gray.Width, gray.Height, PixelFormat.Format24bppRgb);
+
+            for (int y = 0; y < gray.Height; y++)
+            {
+                for (int x = 0; x < gray.Width; x++)
+                {
+                    var c = gray.GetPixel(x, y);
+                    int v = c.R;
+                    // 周辺明度を考慮した軽めの閾値補正
+                    int threshold = i_threshold;
+                    byte val = (byte)(v > threshold ? 255 : 0);
+                    bin.SetPixel(x, y, Color.FromArgb(val, val, val));
+                }
+            }
+            return bin;
+        }
+        // 簡易的な文字列類似度（Levenshtein風スコア）
+        private double Similarity(string a, string b)
+        {
+            if (string.IsNullOrEmpty(a) || string.IsNullOrEmpty(b)) return 0;
+            int len = Math.Max(a.Length, b.Length);
+            int dist = Levenshtein(a, b);
+            return 1.0 - (double)dist / len;
+        }
+
+        private int Levenshtein(string a, string b)
+        {
+            int[,] dp = new int[a.Length + 1, b.Length + 1];
+            for (int i = 0; i <= a.Length; i++) dp[i, 0] = i;
+            for (int j = 0; j <= b.Length; j++) dp[0, j] = j;
+
+            for (int i = 1; i <= a.Length; i++)
+                for (int j = 1; j <= b.Length; j++)
+                {
+                    int cost = a[i - 1] == b[j - 1] ? 0 : 1;
+                    dp[i, j] = Math.Min(Math.Min(
+                        dp[i - 1, j] + 1,
+                        dp[i, j - 1] + 1),
+                        dp[i - 1, j - 1] + cost);
+                }
+
+            return dp[a.Length, b.Length];
+        }
+        private int LevenshteinDistance(string s, string t)
+        {
+            if (s == t) return 0;
+            if (s.Length == 0) return t.Length;
+            if (t.Length == 0) return s.Length;
+
+            var d = new int[s.Length + 1, t.Length + 1];
+
+            for (int i = 0; i <= s.Length; i++) d[i, 0] = i;
+            for (int j = 0; j <= t.Length; j++) d[0, j] = j;
+
+            for (int i = 1; i <= s.Length; i++)
+            {
+                for (int j = 1; j <= t.Length; j++)
+                {
+                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
+                    d[i, j] = Math.Min(
+                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                        d[i - 1, j - 1] + cost);
+                }
+            }
+
+            return d[s.Length, t.Length];
+        }
+        private void SelectMostSimilar(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input) || CharacterBox.ItemsSource is not IEnumerable<CharacterJson> items)
+                return;
+
+            // 最も近いNameを持つキャラを取得
+            var bestMatch = items
+                .OrderBy(c => LevenshteinDistance(c.名称, input))
+                .FirstOrDefault();
+
+            if (bestMatch != null)
+                CharacterBox.SelectedItem = bestMatch;
+        }
+        public void SelectMostSimilarEquipment(string input,int shurui)
+        {
+            System.Collections.IEnumerable target;
+            if (shurui == 0)
+            {
+                target = EquipmentBox1.ItemsSource;
+            }
+            else if (shurui == 1)
+            {
+                target = EquipmentBox2.ItemsSource;
+            }
+            else
+            {
+                target = ryoshokuBox.ItemsSource;
+
+            }
+            if (string.IsNullOrWhiteSpace(input) || target is not IEnumerable<ItemSet> items)
+                return;
+
+            input = Normalize(input);
+
+            var bestMatch = items
+                .Where(e => !string.IsNullOrWhiteSpace(e?.ItemDisp))
+                .Select(e => new
+                {
+                    Item = e,
+                    Score = JaroWinklerSimilarity(Normalize(e.ItemDisp), input)
+                })
+                .OrderByDescending(x => x.Score) // スコアが高いほど似ている
+                .FirstOrDefault()?.Item;
+
+            if (bestMatch != null)
+            {
+                if(shurui == 0)
+                    EquipmentBox1.SelectedItem = bestMatch;
+                else if (shurui == 1)
+                    EquipmentBox2.SelectedItem = bestMatch;
+                else if (shurui == 2)
+                    ryoshokuBox.SelectedItem = bestMatch;
+            }
+        }
+        bool IsBinarizedImageMostlyBlack(Bitmap binarized, double blackRatioThreshold = 0.98)
+        {
+            int blackPixels = 0;
+            int totalPixels = binarized.Width * binarized.Height;
+
+            for (int y = 0; y < binarized.Height; y++)
+            {
+                for (int x = 0; x < binarized.Width; x++)
+                {
+                    Color c = binarized.GetPixel(x, y);
+                    // 白か黒だけの画像を想定
+                    if (c.R < 128) // 0〜127を黒とみなす
+                        blackPixels++;
+                }
+            }
+
+            double blackRatio = (double)blackPixels / totalPixels;
+            return blackRatio > blackRatioThreshold;
+        }
+        private static readonly TesseractEngine _engine = new TesseractEngine(@"./tessdata", "jpn", EngineMode.LstmOnly);
+
+    public string cropedAndselect(System.Drawing.Rectangle cropRect,int kakudai,int threathold)
+        {
+            string path = @".\Temp\capture.png";
+            using Bitmap bmp = new Bitmap(path);
+            using Bitmap cropped = bmp.Clone(cropRect, bmp.PixelFormat);
+            // グレースケール
+            using Bitmap gray = ToGrayscale(cropped);
+            // 漢字対応：2倍拡大（3倍だと潰れる）
+            using Bitmap enlarged = ResizeBitmap(gray, kakudai);
+            // 軽め二値化（線を太らせない）
+            using Bitmap binarized = AdaptiveThreshold(enlarged, threathold);
+            if (IsBinarizedImageMostlyBlack(enlarged))
+                return "";
+            // OCR処理
+            using var pix = BitmapToPix(binarized);
+            _engine.DefaultPageSegMode = PageSegMode.SingleLine;
+            using var page = _engine.Process(pix);
+            string text = page.GetText();
+            string noSpace = text.Replace(" ", "");  // 半角スペースを削除
+            Debug.WriteLine($"OCR結果: {noSpace}");
+            string inputText = noSpace;
+            string debugPath = @".\Temp\cropped_debug.png";
+            //binarized.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
+            return noSpace;
+        }
+        private double JaroWinklerSimilarity(string s1, string s2)
+        {
+            if (string.IsNullOrEmpty(s1) || string.IsNullOrEmpty(s2))
+                return 0.0;
+
+            int len1 = s1.Length;
+            int len2 = s2.Length;
+
+            int matchDistance = Math.Max(len1, len2) / 2 - 1;
+
+            bool[] s1Matches = new bool[len1];
+            bool[] s2Matches = new bool[len2];
+
+            int matches = 0;
+            for (int i = 0; i < len1; i++)
+            {
+                int start = Math.Max(0, i - matchDistance);
+                int end = Math.Min(i + matchDistance + 1, len2);
+
+                for (int j = start; j < end; j++)
+                {
+                    if (s2Matches[j]) continue;
+                    if (s1[i] != s2[j]) continue;
+                    s1Matches[i] = s2Matches[j] = true;
+                    matches++;
+                    break;
+                }
+            }
+
+            if (matches == 0) return 0.0;
+
+            double t = 0;
+            int k = 0;
+            for (int i = 0; i < len1; i++)
+            {
+                if (!s1Matches[i]) continue;
+                while (!s2Matches[k]) k++;
+                if (s1[i] != s2[k]) t++;
+                k++;
+            }
+
+            t /= 2.0;
+            double jaro = ((matches / (double)len1) + (matches / (double)len2) + ((matches - t) / matches)) / 3.0;
+
+            // Winkler補正（先頭の一致を優遇）
+            int prefix = 0;
+            for (int i = 0; i < Math.Min(4, Math.Min(s1.Length, s2.Length)); i++)
+            {
+                if (s1[i] == s2[i]) prefix++;
+                else break;
+            }
+            return jaro + 0.1 * prefix * (1 - jaro);
+        }
+        private string Normalize(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return string.Empty;
+
+            // 全角→半角、カタカナ→ひらがな、英字→小文字
+            s = s.Trim().ToLowerInvariant();
+
+            s = s.Replace('　', ' '); // 全角スペース
+            s = new string(s
+                .Normalize(NormalizationForm.FormKC) // Unicode正規化
+                .Select(c => c == 'ヴ' ? 'う' : c)   // 簡易変換例
+                .ToArray());
+
+            return s;
+        }
+
+        public static class ShogoMatcher
+        {
+
+            public static (ItemSet? item1, ItemSet? item2, double score) FindBestPair(
+                string ocrText,
+                ObservableCollection<ItemSet> src_shogo1,
+                ObservableCollection<ItemSet> src_shogo2,
+                double minScore = 0.0)
+            {
+                if (string.IsNullOrWhiteSpace(ocrText) || src_shogo1 == null || src_shogo2 == null)
+                    return (null, null, 0.0);
+
+                ocrText = ocrText.Trim();
+
+                // 事前にクリーン済みDispを作る（ここでは要素sがnullの場合を除外してリスト化）
+                // ItemSet? sを想定して s != null のフィルタリングを追加推奨
+                var list1 = src_shogo1.Where(s => s != null).Select(s => (item: s!, clean: CleanDisp(s!.ItemDisp))).ToList();
+                var list2 = src_shogo2.Where(s => s != null).Select(s => (item: s!, clean: CleanDisp(s!.ItemDisp))).ToList();
+
+                // -------------------------------------------------------------------
+                // ここからが並列化された処理
+                // -------------------------------------------------------------------
+
+                // 1. list1とlist2の要素をSelectManyで結合（クロス積）
+                // 2. AsParallel() で並列処理に切り替える
+                var bestMatch = list1.AsParallel()
+                    .SelectMany(t1 => list2.Select(t2 => new
+                    {
+                        // 処理に必要なデータだけを一時オブジェクトに格納
+                        item1 = t1.item,
+                        clean1 = t1.clean,
+                        item2 = t2.item,
+                        clean2 = t2.clean
+                    }))
+                    // スコア計算（最も重い処理）を並列実行
+                    .Select(p => {
+                        string combined = string.Concat(p.clean1, p.clean2);
+                        double score = Similarity(ocrText, combined);
+
+                        return new
+                        {
+                            p.item1,
+                            p.item2,
+                            score
+                        };
+                    })
+                    // 3. OrderByDescending で最高のスコアを持つペアを絞り込む (これは順次処理に戻る)
+                    .OrderByDescending(r => r.score)
+                    .FirstOrDefault(); // 最もスコアが高い要素を一つだけ取得
+
+                // -------------------------------------------------------------------
+
+                // 結果の処理
+                if (bestMatch == null || bestMatch.score < minScore)
+                {
+                    return (null, null, (bestMatch?.score ?? 0.0));
+                }
+
+                return (bestMatch.item1, bestMatch.item2, bestMatch.score);
+            }
+
+            private static string CleanDisp(string? disp)
+            {
+                if (string.IsNullOrEmpty(disp)) return string.Empty;
+
+                // 正規化（全角/半角などの差を減らす）
+                try { disp = disp.Normalize(NormalizationForm.FormKC); } catch { /*ignore*/ }
+
+                // () 内を削除。前後の空白も取り除く。
+                // マッチング精度向上のため、( ... ) の前後の余白も削る
+                var cleaned = Regex.Replace(disp, @"\s*\(.*?\)\s*", "");
+                return cleaned.Trim();
+            }
+
+            private static double Similarity(string s1, string s2)
+            {
+                s1 ??= "";
+                s2 ??= "";
+                int distance = LevenshteinDistance(s1, s2);
+                int maxLen = Math.Max(s1.Length, s2.Length);
+                return maxLen == 0 ? 1.0 : 1.0 - (double)distance / maxLen;
+            }
+
+            private static int LevenshteinDistance(string s, string t)
+            {
+                if (s == null) s = "";
+                if (t == null) t = "";
+                int n = s.Length;
+                int m = t.Length;
+                if (n == 0) return m;
+                if (m == 0) return n;
+
+                var d = new int[n + 1, m + 1];
+
+                for (int i = 0; i <= n; i++) d[i, 0] = i;
+                for (int j = 0; j <= m; j++) d[0, j] = j;
+
+                for (int i = 1; i <= n; i++)
+                {
+                    for (int j = 1; j <= m; j++)
+                    {
+                        int cost = s[i - 1] == t[j - 1] ? 0 : 1;
+                        d[i, j] = Math.Min(
+                            Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                            d[i - 1, j - 1] + cost);
+                    }
+                }
+
+                return d[n, m];
+            }
+        }
+
+
+        static DenseTensor<float> BitmapToTensor_KerasCaffe(Bitmap bmp)
+        {
+            int height = bmp.Height;
+            int width = bmp.Width;
+            var tensor = new DenseTensor<float>(new int[] { 1, height, width, 3 });
+
+            // Keras preprocess_input(Caffeモード) の平均値(BGR)
+            float[] mean = { 103.939f, 116.779f, 123.68f }; // B, G, R
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    System.Drawing.Color c = bmp.GetPixel(x, y);
+                    tensor[0, y, x, 0] = c.B - mean[0]; // B
+                    tensor[0, y, x, 1] = c.G - mean[1]; // G
+                    tensor[0, y, x, 2] = c.R - mean[2]; // R
+                }
+            }
+            return tensor;
+        }
+        static float[] Normalize_chara(float[] vec)
+        {
+            double norm = Math.Sqrt(vec.Select(v => v * v).Sum());
+            return vec.Select(v => (float)(v / norm)).ToArray();
+        }
+        class ImageFeature
+        {
+            public string Id { get; set; }
+            public float[] Feature { get; set; }
+        }
+        static float Cosine(float[] a, float[] b)
+        {
+            float dot = 0;
+            float normA = 0;
+            float normB = 0;
+
+            for (int i = 0; i < a.Length; i++)
+            {
+                dot += a[i] * b[i];
+                normA += a[i] * a[i];
+                normB += b[i] * b[i];
+            }
+
+            return dot / ((float)Math.Sqrt(normA) * (float)Math.Sqrt(normB));
+        }
+        public void load_from_game(int sw, int sh, int ew, int eh)
+        {
+            string path = @".\Temp\capture.png";
+            using Bitmap tempbmp = new Bitmap(path);
+
+            var cropRect = new System.Drawing.Rectangle(sw, sh, ew, eh);
+            using Bitmap bmp = tempbmp.Clone(cropRect, tempbmp.PixelFormat);
+            string debugPath = @".\Temp\cropped_debug.png";
+            //bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
+            string onnxPath = @"feature_extraction/resnet50_features.onnx";   // Pythonで変換したONNXモデル
+            string jsonPath = @"feature_extraction/chara_features.json";              // Python特徴量DB
+            string csvPath = @"feature_extraction/list.csv";                   // ID→名前
+
+            // 1. 画像ロード & 224x224 にリサイズ
+            //using Bitmap bmp = new Bitmap(inputPath);
+            using Bitmap resized = new Bitmap(bmp, 224, 224);
+
+            // 2. NHWC Tensor に変換 + Keras preprocess_input(Caffeモード)
+            var inputTensor = BitmapToTensor_KerasCaffe(resized);
+
+            // 3. ONNX 推論
+            //using var session = new InferenceSession(onnxPath);
+            string inputName = session.InputMetadata.Keys.First(); // 入力名はONNXで確認
+            var result = session.Run(new List<NamedOnnxValue> {
+                NamedOnnxValue.CreateFromTensor(inputName, inputTensor)
+            });
+
+            float[] queryFeature = result.First().AsEnumerable<float>().ToArray();
+            queryFeature = Normalize_chara(queryFeature);
+
+            var top = features
+                .AsParallel()
+                .Select(f => new { f.Id, Name = idNameMap[f.Id], Score = Cosine(f.Feature, queryFeature) })
+                // 並列処理された結果を OrderByDescending で順序付け
+                .OrderByDescending(x => x.Score)
+                .FirstOrDefault();
+            if (top != null)
+            {
+                Debug.WriteLine($"最も近い画像: {top.Name} (ID: {top.Id}, Score: {top.Score:F3})");
+
+                var match = characters.FirstOrDefault(c => c.名称 == top.Name);
+                if (match != null)
+                {
+                    CharacterBox.SelectedItem = match;
+                }
+            }
+        }
+
+        private void CaptureAndOcrButton_Click(object sender, RoutedEventArgs e)
+        {
+            string path = @".\Temp\capture.png";
+            int hr = CaptureWrapper.CaptureWindowByTitle("VenusBloodVALKYRIE", path);
+            if (hr != 0)
+            {
+                MessageBox.Show($"キャプチャ失敗: {hr}");
+                return;
+            }
+
+            using Bitmap bmp = new Bitmap(path);
+            // 必要部分を切り抜き
+            //var cropRect = new System.Drawing.Rectangle(593, 100, 250, 33);//名前
+            var cropRect_chara = new System.Drawing.Rectangle(315, 85, 190, 190);//名前
+            var cropRect_shogo = new System.Drawing.Rectangle(593, 75, 300, 27);//称号
+            var cropRect_equip1 = new System.Drawing.Rectangle(558, 245, 231, 22);//装備1
+            var cropRect_equip2 = new System.Drawing.Rectangle(558, 271, 231, 22);//装備2
+            var cropRect_ryoshoku = new System.Drawing.Rectangle(558, 297, 231, 22);//糧食
+            //using Bitmap cropped = bmp.Clone(cropRect, bmp.PixelFormat);
+            // グレースケール
+            string noSpace="";
+            var popup = new ProgressWindow(this);
+            popup.Owner = this;
+            popup.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            popup.ShowDialog();
+        }
+
+        public void best_match_shogo(string noSpace)
+        {
+            //var (best1, best2, score) = ShogoMatcher.FindBestPair(noSpace, src_shogo1, src_shogo2);
+            var (best1, best2, score) = ShogoMatcher.FindBestPair(noSpace, src_shogo1, src_shogo2);
+            if (best1 != null && best2 != null)
+            {
+                shogo1Box.SelectedItem = best1;
+                shogo2Box.SelectedItem = best2;
+                // 見つかったペアで何かする（selected に設定する／UI更新 等）
+                Debug.WriteLine($"Found: {best1.ItemDisp} + {best2.ItemDisp} (score={score:F3})");
+            }
+            else if (best1 != null)
+                shogo1Box.SelectedItem = best1;
+            else if (best2 != null)
+                shogo2Box.SelectedItem = best2;
+            else
+                Debug.WriteLine($"No good match (best score={score:F3})");
+
+        }
+
+        private void MoveSelected(int offset)
+        {
+            var list = saved_list.ItemsSource as ObservableCollection<savedata>;
+            if (saved_list.SelectedItem is savedata selected && list != null)
+            {
+                int idx = list.IndexOf(selected);
+                int newIndex = idx + offset;
+                if (newIndex < 0 || newIndex >= list.Count) return;
+
+                list.Move(idx, newIndex); // ObservableCollection の Move
+                saved_list.SelectedItem = selected;
+            }
+        }
+
+        private void MoveUpButton_Click(object sender, RoutedEventArgs e) => MoveSelected(-1);
+        private void MoveDownButton_Click(object sender, RoutedEventArgs e) => MoveSelected(1);
+
+        private void btnSortId_Click(object sender, RoutedEventArgs e)
+        {
+            SortList((a, b) => string.Compare(a.character_id, b.character_id, StringComparison.Ordinal));
+        }
+        private void SortList(Comparison<savedata> comparison)
+        {
+            var list = all_save_data as ObservableCollection<savedata>;
+            if (list == null) return;
+
+            // ObservableCollection を一旦 List に変換
+            var sorted = list.ToList();
+            sorted.Sort(comparison);
+
+            // 元の ObservableCollection を更新
+            list.Clear();
+            foreach (var item in sorted)
+                list.Add(item);
+
+            // ListBox は ItemsSource が ObservableCollection なので自動更新
+        }
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            // 全ウィンドウ閉じる
+            foreach (Window w in Application.Current.Windows)
+                w.Close();
+
+            // 念のため完全終了
+            Application.Current.Shutdown();
         }
     }
 }
