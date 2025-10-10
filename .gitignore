@@ -18,3 +18,9 @@
 /packages
 /tessdata
 /VBV_calc/Properties/PublishProfiles
+/img2vec/feature_extraction/resnet50_features.onnx
+/img2vec/chara_data/hensei_features.json
+/img2vec/feature_extraction/features.json
+/img2vec/resnet50_saved_model
+/img2vec/resnet50_features.onnx
+/img2vec/resnet50_saved_model.keras
