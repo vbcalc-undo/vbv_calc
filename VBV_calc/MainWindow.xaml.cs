@@ -1,32 +1,23 @@
 ﻿using FuzzySharp;
 using JsonFileIO.Jsons;
+using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.Tensors;
 using Newtonsoft.Json;
-using NMeCab;
-using System;
-using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing;
 using System.Drawing.Imaging;
-using System.Globalization;
-using System.IO;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Shapes;
-using Tesseract;
 using Tesseract;
 using VBV_calc.Helpers;
 using VBV_calc.Models;
-using Microsoft.ML.OnnxRuntime;
-using Microsoft.ML.OnnxRuntime.Tensors;
 using static VBV_calc.MainWindow;
 
 namespace VBV_calc
@@ -39,6 +30,7 @@ namespace VBV_calc
         public const int FINALSKILL_NUM = 21;
         // ComboBox1 プロパティの型を object から ComboBox に変更
         public ComboBox ComboBox1 { get; private set; }
+        private bool _isProgrammaticChange = false;
 
         public class ItemSet
         {
@@ -173,7 +165,9 @@ namespace VBV_calc
                 string.IsNullOrEmpty(cost) || !double.TryParse(cost, out _) ||
                 string.IsNullOrEmpty(rank))
             {
+                _isProgrammaticChange = true;
                 levelbox.Text = "1";
+                _isProgrammaticChange = false;
                 hpbox.Text = "1";
                 sokudobox.Text = "1";
                 kougekibox.Text = "1";
@@ -222,8 +216,9 @@ namespace VBV_calc
             int bou_status = (int)((double.Parse(bou) + buko) * level1 + level2) + soubi1_status.bougyo + soubi2_status.bougyo + ryoshoku_status.bougyo;
             int soku_status = (int)((double.Parse(soku)) * level1 + level2) + soubi1_status.sokudo + soubi2_status.sokudo + ryoshoku_status.sokudo;
             int chi_status = (int)((double.Parse(chiryoku)) * level1 + level2) + soubi1_status.tiryoku + soubi2_status.tiryoku + ryoshoku_status.tiryoku;
-
+            _isProgrammaticChange = true;
             levelbox.Text = level.ToString();
+            _isProgrammaticChange = false;
             hpbox.Text = hp_status.ToString();
             sokudobox.Text = soku_status.ToString();
             kougekibox.Text = kou_status.ToString();
@@ -283,12 +278,52 @@ namespace VBV_calc
             if (kou_status < 1) kou_status = 1;
             if (bou_status < 1) bou_status = 1;
 
+            _isProgrammaticChange = true;
             levelbox.Text = level.ToString();
+            _isProgrammaticChange = false;
             hpbox.Text = hp_status.ToString();
             sokudobox.Text = soku_status.ToString();
             kougekibox.Text = kou_status.ToString();
             bougyobox.Text = bou_status.ToString();
             chiryokubox.Text = chi_status.ToString();
+        }
+
+
+        private void status_calc_box(int level_value,int bukou_value)
+        {
+            int hp, soku, kou, bou, chiryoku, cost;
+            string rank;
+            if (bukou_value > 100) 
+                bukou_value = 100;
+            if (bukou_value < 1) 
+                bukou_value = 1;
+
+            current_Character_Status.get_status(out hp, out kou, out bou, out soku, out chiryoku, out cost, out rank);
+            double  keikenti = 50 * (level_value * level_value) - (100 * level_value) + 50;
+            double buko = (bukou_value - 25.0) / 2.0 / (Math.Sqrt(cost));
+            double level1 = 1.0 + Math.Sqrt(keikenti) / 1000.0;
+            double level2 = Math.Sqrt(keikenti) / 50.0;
+
+            double temp = (level_value - 1.0) / 4.0 + 1.0;
+            int hp_status = (int)(hp * ((level_value - 1.0) / 4.0 + 1.0));
+            int kou_status = (int)((kou + buko + shogo1_status.kougeki + shogo2_status.kougeki) * level1 + level2) + soubi1_status.kougeki + soubi2_status.kougeki + ryoshoku_status.kougeki;
+            int bou_status = (int)((bou + buko + shogo1_status.bougyo + shogo2_status.bougyo) * level1 + level2) + soubi1_status.bougyo + soubi2_status.bougyo + ryoshoku_status.bougyo;
+            int soku_status = (int)((soku + shogo1_status.sokudo + shogo2_status.sokudo) * level1 + level2) + soubi1_status.sokudo + soubi2_status.sokudo + ryoshoku_status.sokudo;
+            int chi_status = (int)((chiryoku + shogo1_status.tiryoku + shogo2_status.tiryoku) * level1 + level2) + soubi1_status.tiryoku + soubi2_status.tiryoku + ryoshoku_status.tiryoku;
+
+            if (chi_status < 1) chi_status = 1;
+            if (soku_status < 1) soku_status = 1;
+            if (kou_status < 1) kou_status = 1;
+            if (bou_status < 1) bou_status = 1;
+
+            if (hpbox != null && sokudobox != null && kougekibox != null && chiryokubox != null && bougyobox != null)
+            {
+                hpbox.Text = hp_status.ToString();
+                sokudobox.Text = soku_status.ToString();
+                kougekibox.Text = kou_status.ToString();
+                bougyobox.Text = bou_status.ToString();
+                chiryokubox.Text = chi_status.ToString();
+            }
         }
 
         /* デフォルトのキャラクターの能力 */
@@ -3966,6 +4001,17 @@ namespace VBV_calc
         int level_shitei = 0;
         private void levelbox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            int level=1, buko=1;
+            if (levelbox != null && bukobox != null && _isProgrammaticChange == false)
+            {
+                if (int.TryParse(levelbox.Text, out level))
+                {
+                }
+                if (int.TryParse(bukobox.Text, out buko))
+                {
+                }
+                status_calc_box(level, buko);
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -3977,111 +4023,7 @@ namespace VBV_calc
         {
 
         }
-        /*
-        public static class CaptureWrapper
-        {
-            [DllImport("CaptureWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int CaptureWindowByTitle(string windowTitle, string outputPath);
-        }
-        // Bitmap → Pix 変換
-        private Pix BitmapToPix(Bitmap bmp)
-        {
-            using MemoryStream ms = new MemoryStream();
-            bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-            ms.Position = 0;
-            return Pix.LoadFromMemory(ms.ToArray());
-        }
 
-        // グレースケール
-        private Bitmap ToGrayscale(Bitmap original)
-        {
-            Bitmap gray = new Bitmap(original.Width, original.Height);
-            using (Graphics g = Graphics.FromImage(gray))
-            {
-                var colorMatrix = new ColorMatrix(new float[][]
-                {
-                    new float[]{0.299f, 0.299f, 0.299f, 0, 0},
-                    new float[]{0.587f, 0.587f, 0.587f, 0, 0},
-                    new float[]{0.114f, 0.114f, 0.114f, 0, 0},
-                    new float[]{0, 0, 0, 1, 0},
-                    new float[]{0, 0, 0, 0, 1}
-                });
-                using var attributes = new ImageAttributes();
-                attributes.SetColorMatrix(colorMatrix);
-                g.DrawImage(original, new System.Drawing.Rectangle(0, 0, gray.Width, gray.Height),
-                            0, 0, original.Width, original.Height,
-                            GraphicsUnit.Pixel, attributes);
-            }
-            return gray;
-        }
-
-        // 拡大（NearestNeighborで潰れ防止）
-        private Bitmap ResizeBitmap(Bitmap bmp, int width, int height)
-        {
-            Bitmap result = new Bitmap(width, height);
-            using (Graphics g = Graphics.FromImage(result))
-            {
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
-                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                g.DrawImage(bmp, new System.Drawing.Rectangle(0, 0, width, height));
-            }
-            return result;
-        }
-
-        // Otsu法による自動二値化
-        private Bitmap OtsuBinarize(Bitmap grayBmp)
-        {
-            int width = grayBmp.Width;
-            int height = grayBmp.Height;
-            Bitmap binBmp = new Bitmap(width, height);
-
-            // ヒストグラム作成
-            int[] hist = new int[256];
-            for (int y = 0; y < height; y++)
-                for (int x = 0; x < width; x++)
-                    hist[grayBmp.GetPixel(x, y).R]++;
-
-            // Otsu閾値計算
-            int total = width * height;
-            float sum = 0;
-            for (int t = 0; t < 256; t++) sum += t * hist[t];
-
-            float sumB = 0;
-            int wB = 0;
-            int wF = 0;
-            float varMax = 0;
-            int threshold = 0;
-
-            for (int t = 0; t < 256; t++)
-            {
-                wB += hist[t];
-                if (wB == 0) continue;
-                wF = total - wB;
-                if (wF == 0) break;
-
-                sumB += t * hist[t];
-                float mB = sumB / wB;
-                float mF = (sum - sumB) / wF;
-                float varBetween = wB * wF * (mB - mF) * (mB - mF);
-                if (varBetween > varMax)
-                {
-                    varMax = varBetween;
-                    threshold = t;
-                }
-            }
-
-            // 二値化
-            for (int y = 0; y < height; y++)
-                for (int x = 0; x < width; x++)
-                {
-                    byte val = grayBmp.GetPixel(x, y).R > threshold ? (byte)255 : (byte)0;
-                    binBmp.SetPixel(x, y, System.Drawing.Color.FromArgb(val, val, val));
-                }
-
-            return binBmp;
-        }
-        */
         public static class CaptureWrapper
         {
             [DllImport("CaptureWrapper.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
@@ -4216,7 +4158,7 @@ namespace VBV_calc
             if (bestMatch != null)
                 CharacterBox.SelectedItem = bestMatch;
         }
-        private void SelectMostSimilarEquipment(string input,int shurui)
+        public void SelectMostSimilarEquipment(string input,int shurui)
         {
             System.Collections.IEnumerable target;
             if (shurui == 0)
@@ -4276,7 +4218,9 @@ namespace VBV_calc
             double blackRatio = (double)blackPixels / totalPixels;
             return blackRatio > blackRatioThreshold;
         }
-        private string cropedAndselect(System.Drawing.Rectangle cropRect,int kakudai,int threathold)
+        private static readonly TesseractEngine _engine = new TesseractEngine(@"./tessdata", "jpn", EngineMode.LstmOnly);
+
+        public string cropedAndselect(System.Drawing.Rectangle cropRect,int kakudai,int threathold)
         {
             string path = @"C:\Temp\capture.png";
             using Bitmap bmp = new Bitmap(path);
@@ -4291,18 +4235,15 @@ namespace VBV_calc
                 return "";
             // OCR処理
             using var pix = BitmapToPix(binarized);
-            using var engine = new TesseractEngine(@"./tessdata", "jpn", EngineMode.LstmOnly);
-            engine.DefaultPageSegMode = PageSegMode.SingleLine;
-            using var page = engine.Process(pix);
+            _engine.DefaultPageSegMode = PageSegMode.SingleLine;
+            using var page = _engine.Process(pix);
             string text = page.GetText();
             string noSpace = text.Replace(" ", "");  // 半角スペースを削除
-            //MessageBox.Show($"OCR結果: {noSpace}");
             Debug.WriteLine($"OCR結果: {noSpace}");
             string inputText = noSpace;
             string debugPath = @"C:\Temp\cropped_debug.png";
-            binarized.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
+            //binarized.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
             return noSpace;
-
         }
         private double JaroWinklerSimilarity(string s1, string s2)
         {
@@ -4355,7 +4296,6 @@ namespace VBV_calc
                 if (s1[i] == s2[i]) prefix++;
                 else break;
             }
-
             return jaro + 0.1 * prefix * (1 - jaro);
         }
         private string Normalize(string s)
@@ -4520,7 +4460,7 @@ namespace VBV_calc
 
             return dot / ((float)Math.Sqrt(normA) * (float)Math.Sqrt(normB));
         }
-        private void load_from_game(int sw, int sh, int ew, int eh)
+        public void load_from_game(int sw, int sh, int ew, int eh)
         {
             string path = @"C:\Temp\capture.png";
             using Bitmap tempbmp = new Bitmap(path);
@@ -4597,45 +4537,81 @@ namespace VBV_calc
             //var cropRect = new System.Drawing.Rectangle(593, 100, 250, 33);//名前
             var cropRect_chara = new System.Drawing.Rectangle(315, 85, 190, 190);//名前
             var cropRect_shogo = new System.Drawing.Rectangle(593, 75, 300, 27);//称号
-            var cropRect_equip1 = new System.Drawing.Rectangle(558, 245, 231, 21);//装備1
-            var cropRect_equip2 = new System.Drawing.Rectangle(558, 271, 231, 21);//装備2
+            var cropRect_equip1 = new System.Drawing.Rectangle(558, 245, 231, 22);//装備1
+            var cropRect_equip2 = new System.Drawing.Rectangle(558, 271, 231, 22);//装備2
             var cropRect_ryoshoku = new System.Drawing.Rectangle(558, 297, 231, 22);//糧食
             //using Bitmap cropped = bmp.Clone(cropRect, bmp.PixelFormat);
             // グレースケール
             string noSpace="";
+            var popup = new ProgressWindow(this);
+            popup.Owner = this;
+            popup.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            popup.ShowDialog();
+
+            /*
+            Stopwatch sw = Stopwatch.StartNew();
             load_from_game(315, 85, 190, 190);
+            sw.Stop();
+            Debug.WriteLine($"キャラ実行時間: {sw.ElapsedMilliseconds} ms");
             /*noSpace = cropedAndselect(cropRect,3,175);
             if (noSpace != "")
                 SelectMostSimilar(noSpace);*/
-            noSpace = cropedAndselect(cropRect_equip1,3,210);
+            /*sw = Stopwatch.StartNew();
+            noSpace = cropedAndselect(cropRect_equip1,3,220);
             if(noSpace!="")
                 SelectMostSimilarEquipment(noSpace,0);
-            noSpace = cropedAndselect(cropRect_equip2, 3, 210);
+
+            sw.Stop();
+            Debug.WriteLine($"装備1実行時間: {sw.ElapsedMilliseconds} ms");
+            sw = Stopwatch.StartNew();
+            
+            noSpace = cropedAndselect(cropRect_equip2, 3, 220);
             if (noSpace != "")
                 SelectMostSimilarEquipment(noSpace,1);
-            noSpace = cropedAndselect(cropRect_ryoshoku, 3, 210);
+
+            sw.Stop();
+            Debug.WriteLine($"装備2実行時間: {sw.ElapsedMilliseconds} ms");
+            sw = Stopwatch.StartNew();
+
+
+            noSpace = cropedAndselect(cropRect_ryoshoku, 3, 220);
             if (noSpace != "")
                 SelectMostSimilarEquipment(noSpace, 2);
-            noSpace = cropedAndselect(cropRect_shogo, 3, 210);
+
+            sw.Stop();
+            Debug.WriteLine($"糧食実行時間: {sw.ElapsedMilliseconds} ms");
+            sw = Stopwatch.StartNew();
+
+
+            noSpace = cropedAndselect(cropRect_shogo, 3, 220);
             if (noSpace != "")
             {
-                var (best1, best2, score) = ShogoMatcher.FindBestPair(noSpace, src_shogo1, src_shogo2);
-                if (best1 != null && best2 != null)
-                {
-                    shogo1Box.SelectedItem = best1;
-                    shogo2Box.SelectedItem = best2;
-                    // 見つかったペアで何かする（selected に設定する／UI更新 等）
-                    Debug.WriteLine($"Found: {best1.ItemDisp} + {best2.ItemDisp} (score={score:F3})");
-                }
-                else if(best1 !=null)
-                    shogo1Box.SelectedItem = best1;
-                else if(best2 != null)
-                    shogo2Box.SelectedItem = best2;
-                else
-                    Debug.WriteLine($"No good match (best score={score:F3})");
-
+                best_match_shogo(noSpace);
             }
+            sw.Stop();
+            Debug.WriteLine($"称号実行時間: {sw.ElapsedMilliseconds} ms");
+            */
         }
+
+        public void best_match_shogo(string noSpace)
+        {
+            var (best1, best2, score) = ShogoMatcher.FindBestPair(noSpace, src_shogo1, src_shogo2);
+            if (best1 != null && best2 != null)
+            {
+                shogo1Box.SelectedItem = best1;
+                shogo2Box.SelectedItem = best2;
+                // 見つかったペアで何かする（selected に設定する／UI更新 等）
+                Debug.WriteLine($"Found: {best1.ItemDisp} + {best2.ItemDisp} (score={score:F3})");
+            }
+            else if (best1 != null)
+                shogo1Box.SelectedItem = best1;
+            else if (best2 != null)
+                shogo2Box.SelectedItem = best2;
+            else
+                Debug.WriteLine($"No good match (best score={score:F3})");
+
+        }
+
         private void MoveSelected(int offset)
         {
             var list = saved_list.ItemsSource as ObservableCollection<savedata>;
@@ -4672,6 +4648,15 @@ namespace VBV_calc
                 list.Add(item);
 
             // ListBox は ItemsSource が ObservableCollection なので自動更新
+        }
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            // 全ウィンドウ閉じる
+            foreach (Window w in Application.Current.Windows)
+                w.Close();
+
+            // 念のため完全終了
+            Application.Current.Shutdown();
         }
     }
 }

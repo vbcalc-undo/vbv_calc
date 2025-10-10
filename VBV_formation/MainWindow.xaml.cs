@@ -21,6 +21,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -31,6 +32,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using VBV_calc;
 using VBV_calc.Helpers;
 using VBV_calc.Models;
 using static System.Net.Mime.MediaTypeNames;
@@ -50,7 +52,6 @@ namespace VBV_formation
             public int sokudo;
             public int chiryoku;
         }
-
         private void load_json_shogo_func(string filename, string medalname)
         {         // ここにJSON読み込みのコードを追加
             List<ShogoJson> shogo = null; // ここで宣言
@@ -359,6 +360,9 @@ namespace VBV_formation
             capture_shidan_numBox.ItemsSource = Enumerable.Range(1, 6).ToList();
             capture_shidan_numBox.SelectedIndex = 0; // 初期値は1
 
+            kyohon_box.ItemsSource = Enumerable.Range(0, 7).ToList();
+            kyohon_box.SelectedIndex = 0; // 初期値は0
+
             load_json_character();
             load_json_equipment();
             load_json_shogo();
@@ -439,6 +443,15 @@ namespace VBV_formation
             else
             {
             }
+            string jsonPath = @"data/features.json";              // Python特徴量DB
+            string csvPath = @"data/list.csv";                   // ID→名前
+
+            string json = File.ReadAllText(jsonPath);
+            featureDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, float[]>>(json);
+            idNameMap = File.ReadAllLines(csvPath)
+            .Skip(1)
+            .Select(line => line.Split(','))
+            .ToDictionary(parts => parts[1], parts => parts[2]);
         }
 
         private int ExtractNumberFromBracket(string input)
@@ -817,19 +830,21 @@ namespace VBV_formation
                     character_Info.character_shuzoku = characterObj.種族;
 
                     //キャラクターのパラメータを表示する
+                    var sb = new StringBuilder();
                     var character1_status_box = (TextBox)this.FindName($"character{number}_status_box");
-                    character1_status_box.Text = "HP:" + character_Info.character_status["HP"] + "\n";
-                    character1_status_box.Text += "攻撃:" + character_Info.character_status["攻撃"] + "\n";
-                    character1_status_box.Text += "防御:" + character_Info.character_status["防御"] + "\n";
-                    character1_status_box.Text += "速度:" + character_Info.character_status["速度"] + "\n";
-                    character1_status_box.Text += "知力:" + character_Info.character_status["知力"] + "\n";
-                    character1_status_box.Text += "称号1:" + character_Info.character_shogo1 + "\n";
-                    character1_status_box.Text += "称号2:" + character_Info.character_shogo2 + "\n";
-                    character1_status_box.Text += "装備1:" + character_Info.character_equipment1 + "\n";
-                    character1_status_box.Text += "装備2:" + character_Info.character_equipment2 + "\n";
-                    character1_status_box.Text += "糧食:" + character_Info.character_ryoshoku + "\n";
-                    character1_status_box.Text += "種族:" + character_Info.character_shuzoku + "\n";
-                    character1_status_box.Text += "加護:" + character_Info.character_kago + "\n";
+                    sb.AppendLine ("HP:" + character_Info.character_status["HP"]);
+                    sb.AppendLine("攻撃:" + character_Info.character_status["攻撃"]);
+                    sb.AppendLine("防御:" + character_Info.character_status["防御"]);
+                    sb.AppendLine("速度:" + character_Info.character_status["速度"]);
+                    sb.AppendLine("知力:" + character_Info.character_status["知力"]);
+                    sb.AppendLine("称号1:" + character_Info.character_shogo1);
+                    sb.AppendLine("称号2:" + character_Info.character_shogo2);
+                    sb.AppendLine("装備1:" + character_Info.character_equipment1);
+                    sb.AppendLine("装備2:" + character_Info.character_equipment2);
+                    sb.AppendLine("糧食:" + character_Info.character_ryoshoku);
+                    sb.AppendLine("種族:" + character_Info.character_shuzoku);
+                    sb.AppendLine("加護:" + character_Info.character_kago);
+                    character1_status_box.Text = sb.ToString();
                     //shidan_assistの中にnumberがあればアシストスキルを入れ替える
                     if (shidan_assist.Any(item => item.Id == number))
                     {
@@ -837,15 +852,17 @@ namespace VBV_formation
                     }
                     shidan_assist.Add(new ItemSet { Id = number, Name = characterObj.アシストスキル[0] });
                     //character_infoにすべて登録する
-                    character_Info.soubi_status = soubi_status;
-                    //いったんデバッグ。character1に格納されているスキルをcharacter1_skill_boxへ表示する
+                    character_Info.soubi_status = soubi_status;                    
+                    //個人スキルの表示
                     var character1_skill_box = (TextBox)this.FindName($"character{number}_skill_box");
                     character1_skill_box.Text = "";
+                    sb.Clear();
                     foreach (var skill in temp_skills)
                     {
-                        character1_skill_box.Text += skill.Key + ":" + skill.Value + "\n";
+                        sb.AppendLine(skill.Key + ":" + skill.Value);
                     }
-                    //デバッグここまで
+                    character1_skill_box.Text =sb.ToString();
+                    //all_characters書き換え
                     if (all_characters.ContainsKey(number))
                         all_characters.Remove(number);
                     all_characters.Add(number, character_Info);
@@ -919,7 +936,7 @@ namespace VBV_formation
             temp_chiryoku += (shidan_skill[skillname].Item1 - temp_self_kassei) / 4;
             return (temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku);
         }
-        private void character_kassei_update()
+        public void character_kassei_update()
         {
             int temp_kougeki = 0;
             int temp_bougyo = 0;
@@ -1103,7 +1120,7 @@ namespace VBV_formation
             return (temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku);
         }
 
-        private void character_shiki_update()
+        public void character_shiki_update()
         {
             //師団スキルにある活性をもとに、キャラクターのステータスを更新する
             int i = 1;
@@ -1151,9 +1168,9 @@ namespace VBV_formation
                         }
                     }
                     if (skill.Key == "英雄覇気")
-                        {
-                            (temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku) = shidan_shiki_skill(character.Value, "英雄覇気", temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku);
-                        }                    
+                    {
+                        (temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku) = shidan_shiki_skill(character.Value, "英雄覇気", temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku);
+                    }
                     else if (skill.Key == "竜歌覚醒" || skill.Key == "竜歌共鳴")
                     {
                         int kakusei_value = 0;
@@ -1279,7 +1296,6 @@ namespace VBV_formation
                 current_assist_skill_value = 0;
 
                 shidan_skill_box.Text = "";
-                stance_text_box.Text = "";
                 set_shidan_skill();
                 character_kassei_update();
                 character_shiki_update();
@@ -1313,7 +1329,7 @@ namespace VBV_formation
             {
             }
         }
-        private void resync_assist_skill()
+        public void resync_assist_skill()
         {
             int temp = current_assist_select;
             del_assist_skill();
@@ -1403,6 +1419,15 @@ namespace VBV_formation
                 }
             }
         }
+
+        private void Character_load_capture(int number)
+        {
+            var selectedValue = assist_skill_box.SelectedValue;
+            var selectedItem = assist_skill_box.SelectedItem;
+            var selectedText = assist_skill_box.Text;
+            change_character_box(number);
+        }
+
 
         private void Character1_load_Button_Click(object sender, RoutedEventArgs e)
         {
@@ -2646,7 +2671,7 @@ namespace VBV_formation
             double bairitu = 1.0;
             if (skill.Key == "狂奔の牙")
             {
-                bairitu *= (skill.Value + 100.0) / 100.0;
+                bairitu *= ((double)(skill.Value * (int)kyohon_box.SelectedItem + 100.0)) / 100.0;
             }
             else if (skill.Key == "加速進化")
             {
@@ -2720,7 +2745,7 @@ namespace VBV_formation
             }
         }
         //加護だけじゃなくて昼夜とかスタンスの計算もして加算する
-        private void kago_calc()
+        public void kago_calc()
         {
             otori_number = 0;
             otori_bougyo = 999999999;
@@ -4138,7 +4163,7 @@ namespace VBV_formation
                         }
                         if (skill.Key == "英雄覇気")
                         {
-                            (temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku) = leg_shidan_shiki_skill(legion_shidan_list[number-1], leg_character.Value, "英雄覇気", temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku);
+                            (temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku) = leg_shidan_shiki_skill(legion_shidan_list[number - 1], leg_character.Value, "英雄覇気", temp_kougeki, temp_bougyo, temp_sokudo, temp_chiryoku);
                         }
                     }
                     if (leg_character.Value.character_skill.ContainsKey("狂戦士化"))
@@ -5372,9 +5397,12 @@ namespace VBV_formation
 
             return dot / ((float)Math.Sqrt(normA) * (float)Math.Sqrt(normB));
         }
-
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+        public int shidan_capture_selectedNum = 0;//師団のどの位置をキャプチャーするのかの変数。別ウインドに渡す
+        private void Start_Click(object sender, RoutedEventArgs e)
         {
+            int selectedNumber = 0;
+            int step = 0;
+            all_characters.Clear();
             string path = @"C:\Temp\capture_shidan.png";
             int hr = CaptureWrapper.CaptureWindowByTitle("VenusBloodVALKYRIE", path);
             if (hr != 0)
@@ -5383,31 +5411,33 @@ namespace VBV_formation
                 return;
             }
             using Bitmap tempbmp = new Bitmap(path);
-            int selectedNumber = 1;
             if (capture_shidan_numBox.SelectedItem != null)
             {
-                selectedNumber = (int)capture_shidan_numBox.SelectedItem -1;
+                selectedNumber = (int)capture_shidan_numBox.SelectedItem - 1;
             }
-            load_from_game(79, 400 + selectedNumber * 110, 83, 60,1);
-            load_from_game(229, 400 + selectedNumber * 110, 83, 60, 2);
-            load_from_game(379, 400 + selectedNumber * 110, 83, 60, 3);
-            load_from_game(539, 400 + selectedNumber * 110, 83, 60, 4);
-            load_from_game(679, 400 + selectedNumber * 110, 83, 60, 5);
-            load_from_game(829, 400 + selectedNumber * 110, 83, 60, 6);
+            for (int i = 1; i < 7; i++)
+            {
+                //delete_shidan_chara(i);
+            }
+            shidan_capture_selectedNum = selectedNumber;
+            var popup = new ProgressWindow(this);
+            popup.Owner = this;
+            popup.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            popup.ShowDialog();
         }
-
-        private void load_from_game(int sw,int sh,int ew, int eh,int chara_num)
+        private static InferenceSession session = new InferenceSession(@"data/resnet50_features.onnx");
+        private static Dictionary<string, float[]> featureDict;
+        private static Dictionary<string, string> idNameMap;
+        public void load_from_game(int sw, int sh, int ew, int eh, int chara_num)
         {
             string path = @"C:\Temp\capture_shidan.png";
             using Bitmap tempbmp = new Bitmap(path);
-            var cropRect = new System.Drawing.Rectangle(sw,sh,ew,eh);
+            var cropRect = new System.Drawing.Rectangle(sw, sh, ew, eh);
             using Bitmap bmp = tempbmp.Clone(cropRect, tempbmp.PixelFormat);
             //using Bitmap bmp = new Bitmap("./data/ic0000.png");
             string debugPath = @"C:\Temp\cropped_debug_shidan.png";
             bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
-            string onnxPath = @"data/resnet50_features.onnx";   // Pythonで変換したONNXモデル
-            string jsonPath = @"data/features.json";              // Python特徴量DB
-            string csvPath = @"data/list.csv";                   // ID→名前
+            Stopwatch stopwa = Stopwatch.StartNew();
 
             // 1. 画像ロード & 224x224 にリサイズ
             //using Bitmap bmp = new Bitmap(inputPath);
@@ -5417,7 +5447,6 @@ namespace VBV_formation
             var inputTensor = BitmapToTensor_KerasCaffe(resized);
 
             // 3. ONNX 推論
-            using var session = new InferenceSession(onnxPath);
             string inputName = session.InputMetadata.Keys.First(); // 入力名はONNXで確認
             var result = session.Run(new List<NamedOnnxValue> {
                 NamedOnnxValue.CreateFromTensor(inputName, inputTensor)
@@ -5426,25 +5455,16 @@ namespace VBV_formation
             float[] queryFeature = result.First().AsEnumerable<float>().ToArray();
             queryFeature = Normalize(queryFeature);
 
-            // 4. 特徴量DB読み込み
-            string json = File.ReadAllText(jsonPath);
-            var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, float[]>>(json);
-
-            // CSV読み込み（ID→名称）
-            var csvLines = File.ReadAllLines(csvPath)
-                .Skip(1)
-                .Select(line => line.Split(','))
-                .Select(parts => new { Id = parts[1], Name = parts[2] })
-                .ToDictionary(x => x.Id, x => x.Name);
-
-            List<ImageFeature> features = dict.Select(kv => new ImageFeature { Id = kv.Key, Feature = kv.Value }).ToList();
+            List<ImageFeature> features = featureDict.Select(kv => new ImageFeature { Id = kv.Key, Feature = kv.Value }).ToList();
 
             // 5. 類似検索（コサイン類似度）
             var top = features
-                .Select(f => new { f.Id, Name = csvLines[f.Id], Score = Cosine(f.Feature, queryFeature) })
+                .Select(f => new { f.Id, Name = idNameMap[f.Id], Score = Cosine(f.Feature, queryFeature) })
                 .OrderByDescending(x => x.Score)
                 .FirstOrDefault();
-
+            stopwa.Stop();
+            Debug.WriteLine($"ここまで画像検索: {stopwa.ElapsedMilliseconds} ms");
+            stopwa = Stopwatch.StartNew();
             if (top != null)
             {
                 Debug.WriteLine($"最も近い画像: {top.Name} (ID: {top.Id}, Score: {top.Score:F3})");
@@ -5453,16 +5473,16 @@ namespace VBV_formation
                 if (match != null)
                 {
                     saved_list.SelectedItem = match;
-                    saved_list.ScrollIntoView(match);
-                    string methodName = $"Character{chara_num}_load_Button_Click";
-                    var method = this.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                    if (method != null)
-                    {
-                        // イベントハンドラと同じ引数 (sender, e)
-                        method.Invoke(this, new object[] { null, null });
-                    }
+                    //saved_list.ScrollIntoView(match);
+                    Character_load_capture(chara_num);
+                }
+                else
+                {
+                    delete_shidan_chara(chara_num);
                 }
             }
+            stopwa.Stop();
+            Debug.WriteLine($"選択: {stopwa.ElapsedMilliseconds} ms");
         }
 
 
@@ -5471,57 +5491,78 @@ namespace VBV_formation
             public string Id { get; set; }
             public float[] Feature { get; set; }
         }
-        class Program
+        public static T? FindParent<T>(DependencyObject child) where T : DependencyObject
         {
-            static float[] ExtractFeature(Bitmap bmp, InferenceSession session)
+            DependencyObject parent = VisualTreeHelper.GetParent(child);
+            while (parent != null)
             {
-                Bitmap resized = new Bitmap(bmp, new System.Drawing.Size(224, 224));
-                float[] input = new float[3 * 224 * 224];
-
-                for (int y = 0; y < 224; y++)
-                {
-                    for (int x = 0; x < 224; x++)
-                    {
-                        System.Drawing.Color c = resized.GetPixel(x, y);
-                        int idx = y * 224 + x;
-                        input[idx] = (c.R / 255f - 0.485f) / 0.229f;
-                        input[224 * 224 + idx] = (c.G / 255f - 0.456f) / 0.224f;
-                        input[2 * 224 * 224 + idx] = (c.B / 255f - 0.406f) / 0.225f;
-                    }
-                }
-
-                var tensor = new DenseTensor<float>(input, new int[] { 1, 3, 224, 224 });
-                var result = session.Run(new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor("input", tensor) });
-                return result.First().AsEnumerable<float>().ToArray();
+                if (parent is T tParent)
+                    return tParent;
+                parent = VisualTreeHelper.GetParent(parent);
             }
+            return null;
         }
-
-        private void Button_Click_Clear3(object sender, RoutedEventArgs e)
+        private void Window_Closed(object sender, EventArgs e)
         {
-            var selectedValue = assist_skill_box.SelectedValue;
-            var selectedItem = assist_skill_box.SelectedItem;
-            var selectedText = assist_skill_box.Text;
+            // 全ウィンドウ閉じる
+            foreach (Window w in System.Windows.Application.Current.Windows)
+                w.Close();
 
-            if (selectedValue == "3")
-            {
-                del_assist_skill();
-                //shidan_assist.Remove(shidan_assist.First(item => item.Id == 1));
-            }
-            character3_name_box.Text = "";
-                character3_skill_box.Text = "";
-            character3_status_box.Text = "";
-            buko3_fig.Text = "";
-            all_characters.Remove(3);
+            // 念のため完全終了
+            System.Windows.Application.Current.Shutdown();
+        }
+        public void delete_shidan_chara(int number)
+        {
+            string targetchara = $"character{number}_name_box";
+            string targetskill = $"character{number}_skill_box";
+            string targetstatus = $"character{number}_status_box";
+            string targetbuko = $"buko{number}_fig";
+
+            all_characters.Remove(number);
             set_shidan_skill();
             resync_assist_skill();
             character_kassei_update();
             character_shiki_update();
             kago_calc();
-            character3_name_box.Text = "";
-            character3_skill_box.Text = "";
-            character3_status_box.Text = "";
-            buko3_fig.Text = "";
+            var textBox = this.FindName(targetchara) as TextBox;
+            textBox.Text = "";
+            textBox = this.FindName(targetskill) as TextBox;
+            textBox.Text = "";
+            textBox = this.FindName(targetstatus) as TextBox;
+            textBox.Text = "";
+            textBox = this.FindName(targetbuko) as TextBox;
+            textBox.Text = "";
         }
+
+        private void Button_Click_Clear(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                // 親のGroupBoxを探す
+                var groupBox = FindParent<GroupBox>(btn);
+                if (groupBox != null)
+                {
+                    string header = groupBox.Header?.ToString() ?? "";
+
+                    // 全角→半角変換（例：「４」→「4」）
+                    string normalized = header.Normalize(NormalizationForm.FormKC);
+
+                    // 数字部分を抽出
+                    var match = Regex.Match(normalized, @"\d+");
+                    if (match.Success)
+                    {
+                        int number = int.Parse(match.Value);
+                        delete_shidan_chara(number);
+                    }
+                }
+            }
+        }
+
+        private void kyohon_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            kago_calc();
+        }
+
     }
 
 }
