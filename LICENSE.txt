@@ -16,3 +16,76 @@ The above copyright notice and this permission notice shall be included in all c
 
 つまりソースコードやバイナリはMITライセンスに則り好きにしていいけど、JSONフォルダ以下のデータを使用したらhttps://wikiwiki.jp/vbv-jp2/ の規約を守ってね、ということです。
 
+========================================================
+使用ライブラリのライセンスについて / Third-Party Licenses
+========================================================
+
+本ソフトウェアは以下のオープンソースライブラリを使用しています。
+
+1. TensorFlow / Keras
+   - ライセンス: Apache License 2.0
+   - URL: https://www.tensorflow.org/
+
+2. numpy
+   - ライセンス: BSD 3-Clause
+   - URL: https://numpy.org/
+
+3. pandas
+   - ライセンス: BSD 3-Clause
+   - URL: https://pandas.pydata.org/
+
+4. Microsoft.ML.OnnxRuntime
+   - ライセンス: MIT License
+   - URL: https://github.com/microsoft/onnxruntime
+
+5. Newtonsoft.Json
+   - ライセンス: MIT License
+   - URL: https://www.newtonsoft.com/json
+
+6. System.Drawing.Common
+   - ライセンス: MIT License
+   - URL: https://learn.microsoft.com/dotnet/api/system.drawing.common
+
+--------------------------------------------------------
+【注意事項 / Notice】
+
+- 本ソフトウェアにはゲームの元画像は含まれていません。
+- 特徴量データ (features.json) のみを使用しています。
+- 上記ライブラリの再配布や商用利用は各ライセンスに従ってください。
+- ライセンス全文については、各ライブラリの公式ページをご確認ください。
+--------------------------------------------------------
+
+This software uses the following open source libraries:
+
+1. TensorFlow / Keras
+   - License: Apache License 2.0
+   - URL: https://www.tensorflow.org/
+
+2. numpy
+   - License: BSD 3-Clause
+   - URL: https://numpy.org/
+
+3. pandas
+   - License: BSD 3-Clause
+   - URL: https://pandas.pydata.org/
+
+4. Microsoft.ML.OnnxRuntime
+   - License: MIT License
+   - URL: https://github.com/microsoft/onnxruntime
+
+5. Newtonsoft.Json
+   - License: MIT License
+   - URL: https://www.newtonsoft.com/json
+
+6. System.Drawing.Common
+   - License: MIT License
+   - URL: https://learn.microsoft.com/dotnet/api/system.drawing.common
+
+--------------------------------------------------------
+Notes:
+
+- This software does NOT include any commercial game images.
+- Only feature data (features.json) is included.
+- Redistribution and commercial use of the above libraries must follow their respective licenses.
+- For full license text, please refer to the official websites of each library.
+========================================================
