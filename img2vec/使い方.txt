@@ -1,4 +1,4 @@
-project_root/
+img2vec/
 ├── chara_data/               # vbv_calc用の元データとlist.csvを入れる
 ├── hensei_data/              # vbv_formation用の元データとlist.csvを入れる
 ├── feature_extraction/       # 出力用ディレクトリ
@@ -10,4 +10,16 @@ project_root/
 まずchara_dataとhensei_dataに特徴量を抽出する画像を置く。
 次にextract_resnet_chara.pyとextract_resnet.pyを実行すると自動的にfeature_extractionに特徴量データが保存される。
 最後にpythonで使用したkerasモデルをONNIXに変換するためconvert_keras_to_savedmodel.py->saveonnx.pyを実行する
-これでfeature_extractionに必要なデータがすべてそろうので、vbv_calc（formation）のカレントディレクトリに置く。
+これでfeature_extractionに必要なデータがすべてそろうので、vbv_calc（formation）.exeのカレントディレクトリに置く。
+別途、tessdataも必要。以下からダウンロードし同じくbinのカレントにtessdata/jpn.traindedataを配置。
+https://github.com/tesseract-ocr/tessdata/blob/main/jpn.traineddata
+
+最終的にはbin直下に以下のようになればOK。
+.
+└── feature_extraction
+    ├── chara_features.json    #vbv_calcで使用される、extract_resnet_chara.pyの結果
+    ├── feature.json           #vbv_formationで使用される、extract_resnet.pyの結果
+    ├── list.csv               #共用の紐づけ用リスト
+    └── resnet50_features.onnx #convert...とsaveonnx.pyから作成されるC#用onnxファイル
+└── tessdata
+    └── jpn.traineddata        #tessdataからダウンロードするOCR用の学習データ

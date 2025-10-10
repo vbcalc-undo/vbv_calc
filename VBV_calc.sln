@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VBV_formation", "VBV_formation\VBV_formation.csproj", "{DBEC925D-D998-4A7C-B171-BD2845A09964}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GpuCaptureWrapper", "GpuCaptureWrapper\GpuCaptureWrapper.vcxproj", "{7D64B3B2-7628-4CD9-A443-D2BC87CBD4FC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CaptureWrapper", "CaptureWrapper\CaptureWrapper.vcxproj", "{7D64B3B2-7628-4CD9-A443-D2BC87CBD4FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
