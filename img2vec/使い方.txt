@@ -1,0 +1,13 @@
+project_root/
+├── chara_data/               # vbv_calc用の元データとlist.csvを入れる
+├── hensei_data/              # vbv_formation用の元データとlist.csvを入れる
+├── feature_extraction/       # 出力用ディレクトリ
+├── convert_keras_to_savedmodel.py              # Kerasモデルを保存するスクリプト
+├── saveonnx.py  # Keras→SavedModel変換スクリプト
+├── extract_resnet_chara.py   # vbv_calc用のキャラ画像専用の特徴量抽出スクリプト
+└── extract_resnet.py         # vbv_formation用のResNetで画像特徴量を抽出するスクリプト
+
+まずchara_dataとhensei_dataに特徴量を抽出する画像を置く。
+次にextract_resnet_chara.pyとextract_resnet.pyを実行すると自動的にfeature_extractionに特徴量データが保存される。
+最後にpythonで使用したkerasモデルをONNIXに変換するためconvert_keras_to_savedmodel.py->saveonnx.pyを実行する
+これでfeature_extractionに必要なデータがすべてそろうので、vbv_calc（formation）のカレントディレクトリに置く。
