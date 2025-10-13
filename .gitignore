@@ -25,3 +25,6 @@
 /img2vec/resnet50_saved_model.keras
 /CaptureWrapper/x64/Debug
 /VBV_calc/bin/Debug/feature_extraction
+/img2vec/chara_data
+/img2vec/feature_extraction
+/img2vec/hensei_data
