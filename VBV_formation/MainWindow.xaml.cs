@@ -5405,15 +5405,16 @@ namespace VBV_formation
         private static InferenceSession session = new InferenceSession(@"feature_extraction/resnet50_features.onnx");
         private static Dictionary<string, float[]> featureDict;
         private static Dictionary<string, string> idNameMap;
-        public void load_from_game(int sw, int sh, int ew, int eh, int chara_num)
+
+        /*public void load_from_game(int sw, int sh, int ew, int eh, int chara_num)
         {
+
             string path = @".\Temp\capture_shidan.png";
             using Bitmap tempbmp = new Bitmap(path);
             var cropRect = new System.Drawing.Rectangle(sw, sh, ew, eh);
             using Bitmap bmp = tempbmp.Clone(cropRect, tempbmp.PixelFormat);
-            //using Bitmap bmp = new Bitmap("./data/ic0000.png");
-            string debugPath = @".\Temp\cropped_debug_shidan.png";
-            //bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
+            string debugPath = $@".\Temp\cropped_debug_shidan{chara_num}.png";
+            bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
             Stopwatch stopwa = Stopwatch.StartNew();
 
             // 1. 画像ロード & 224x224 にリサイズ
@@ -5461,7 +5462,66 @@ namespace VBV_formation
             stopwa.Stop();
             Debug.WriteLine($"選択: {stopwa.ElapsedMilliseconds} ms");
         }
+            */
+        public void load_from_game(int sw, int sh, int ew, int eh, int chara_num, float colorWeight = 1.0f)
+        {
+            string path = @".\Temp\capture_shidan.png";
+            using Bitmap tempbmp = new Bitmap(path);
+            var cropRect = new System.Drawing.Rectangle(sw, sh, ew, eh);
+            using Bitmap bmp = tempbmp.Clone(cropRect, tempbmp.PixelFormat);
+            string debugPath = $@".\Temp\cropped_debug_shidan{chara_num}.png";
+            bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
 
+            // --- 224x224 にリサイズ ---
+            using Bitmap resized = new Bitmap(bmp, 224, 224);
+
+            // --- Tensor変換 + ONNX推論 ---
+            var inputTensor = BitmapToTensor_KerasCaffe(resized);
+            string inputName = session.InputMetadata.Keys.First();
+            var result = session.Run(new List<NamedOnnxValue> {
+               NamedOnnxValue.CreateFromTensor(inputName, inputTensor)
+            });
+            float[] cnnFeature = result.First().AsEnumerable<float>().ToArray();
+            cnnFeature = Normalize(cnnFeature);
+
+            // --- 色特徴補助 (JSON末尾に色特徴を格納している場合) ---
+            int cnnLength = cnnFeature.Length;
+            var features = featureDict.Select(kv =>
+            {
+                float[] f = (float[])kv.Value.Clone();
+                if (colorWeight != 1.0f)
+                {
+                    // 色特徴部分を重み付け (末尾147次元想定)
+                    int colorStart = f.Length - 147;
+                    for (int i = colorStart; i < f.Length; i++)
+                        f[i] *= colorWeight;
+                }
+                // 全体を再正規化
+                f = Normalize(f);
+                return new ImageFeature { Id = kv.Key, Feature = f };
+            }).ToList();
+
+            // --- 類似検索 ---
+            var top = features
+                .Select(f => new { f.Id, Name = idNameMap[f.Id], Score = Cosine(f.Feature, cnnFeature) })
+                .OrderByDescending(x => x.Score)
+                .FirstOrDefault();
+
+            if (top != null)
+            {
+                Debug.WriteLine($"最も近い画像: {top.Name} (ID: {top.Id}, Score: {top.Score:F3})");
+                var match = all_save_data.FirstOrDefault(c => c.character_name == top.Name);
+                if (match != null)
+                {
+                    saved_list.SelectedItem = match;
+                    Character_load_capture(chara_num);
+                }
+                else
+                {
+                    delete_shidan_chara(chara_num);
+                }
+            }
+        }
 
         class ImageFeature
         {

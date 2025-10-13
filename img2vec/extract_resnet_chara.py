@@ -6,52 +6,55 @@ import json
 import os
 from PIL import Image
 
-# CNNモデル（最終層除去、GlobalAveragePooling）
+# CNNモデル（最終層除去）
 model = ResNet50(weights='imagenet', include_top=False, pooling='avg')
 
-# CSV読み込み（IDを文字列として読み込む）
 csv_path = "chara_data/list.csv"
-df = pd.read_csv(csv_path, dtype={'id': str})  # 文字列として読み込み
+df = pd.read_csv(csv_path, dtype={'id': str})
 
-def extract_feature(img_path):
-    """画像パスから特徴量ベクトルを抽出"""
-    # PILで画像読み込み
-    img = Image.open(img_path)
-
-    # RGBAならRGBに変換
-    if img.mode != "RGB":
-        img = img.convert("RGB")
-
-    crop_box = (0, 0, img.width, img.height)
-    img = img.crop(crop_box)
-
-    # ResNet50入力にリサイズ
-    img = img.resize((224, 224))
-
-    # Keras形式に変換
+def extract_cnn_feature(img):
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
     x = preprocess_input(x)
+    return model.predict(x).flatten()
 
-    # 特徴量抽出
-    feature = model.predict(x)
-    return feature.flatten()
+def extract_color_feature(img, bins_hsv=16, bins_rgb=8):
+    img = img.resize((224,224))
+    arr = np.array(img)/255.0
+
+    # RGB平均
+    rgb_mean = arr.mean(axis=(0,1))
+
+    # RGBヒストグラム
+    r_hist, _ = np.histogram(arr[:,:,0], bins=bins_rgb, range=(0,1), density=True)
+    g_hist, _ = np.histogram(arr[:,:,1], bins=bins_rgb, range=(0,1), density=True)
+    b_hist, _ = np.histogram(arr[:,:,2], bins=bins_rgb, range=(0,1), density=True)
+
+    # HSVヒストグラム
+    hsv_img = img.convert("HSV")
+    hsv_arr = np.array(hsv_img)/255.0
+    h_hist, _ = np.histogram(hsv_arr[:,:,0], bins=bins_hsv, range=(0,1), density=True)
+    s_hist, _ = np.histogram(hsv_arr[:,:,1], bins=bins_hsv, range=(0,1), density=True)
+    v_hist, _ = np.histogram(hsv_arr[:,:,2], bins=bins_hsv, range=(0,1), density=True)
+
+    color_feat = np.concatenate([rgb_mean, r_hist, g_hist, b_hist, h_hist, s_hist, v_hist])
+    return color_feat
 
 features = {}
 for _, row in df.iterrows():
-    # IDを4桁ゼロ埋め
     img_id = str(row['id']).zfill(4)
-    img_file = f"chara_data/bs{img_id}.png"  # ファイル名を bcXXXX.png に変更
-
+    img_file = f"chara_data/bs{img_id}.png"
     if os.path.exists(img_file):
-        features[img_id] = extract_feature(img_file).tolist()
+        img = Image.open(img_file).convert("RGB")
+        cnn_feat = extract_cnn_feature(img)
+        color_feat = extract_color_feature(img)
+        features[img_id] = np.concatenate([cnn_feat, color_feat]).tolist()
         print(f"Processed {img_file}")
     else:
         print(f"File not found: {img_file}")
 
 # JSON保存
-json_path = "feature_extraction/chara_features.json"
-with open(json_path, "w", encoding="utf-8") as f:
+with open("feature_extraction/chara_features.json", "w", encoding="utf-8") as f:
     json.dump(features, f, ensure_ascii=False)
 
-print(f"Features saved to {json_path}")
+print("Features saved.")
