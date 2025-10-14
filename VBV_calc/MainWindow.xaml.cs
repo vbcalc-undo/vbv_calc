@@ -1906,6 +1906,9 @@ namespace VBV_calc
 
             return ibeido_mushi_value;
         }
+
+
+
         private int paring_mushi_calc(int unmei_value)
         {
             int paring_mushi_value = 0;
@@ -1978,6 +1981,500 @@ namespace VBV_calc
         double hissatu_bougyo_bairitu = 0.0;
         double hissatu_kakuritu = 0.0;
         int ibeido_mushi = 0;
+
+
+
+
+        //めんどくさいのでもう1から作る。通常ダメージ期待値のほうもそのうちこちらに寄せて共通化
+        private void hangeki_calc_damage()
+        {
+            int tousho_value = 0;
+            int seisen_value = 0;
+            int tokkou_value = 0;
+            int kenshu_value = 0;
+            int mukei_value = 0;
+            int shinma_value = 0;
+            int jigenshoheki_value = 0;
+            int hissatu_taisei_value = 0;
+            int chimei_taisei_value = 0;
+            int ibeido_value = 0;
+            int block_value = 0;
+            int waisho_value = 0;
+            int sikou_value = 0;
+            int unmei_value = 0;
+            int paring_value = 0;
+            int kyohu_value = 0;
+            int jigenzangeki_value = 0;
+            int kyousensi_value = 0;
+            int kyohon_value = 0;
+            int kasoku_value = 0;
+            int hangekitaisei_value = 0;
+            int zenryoku_value = 0;
+            bool senshu_flag = false;
+
+
+            int enemy_tousho_value = 0;
+            int enemy_seisen_value = 0;
+            int enemy_unmei_value = 0;
+            int enemy_jigenzangeki_value = 0;
+            int enemy_hangekibaika_value = 0;
+            int enemy_shinkaku_value = 0;
+            int enemy_kyojingari_value = 0;
+            int enemy_hissatuzouka_value = 0;
+            int enemy_timei_value = 0;
+            int enemy_kyousensi_value = 0;
+            int enemy_kyohon_value = 0;
+            int enemy_kasoku_value = 0;
+            
+            bool enemy_senshu_flag = false;
+            bool enemy_shuyaku_flag = false;
+            bool enemy_enkaku_flag = false;
+
+
+
+            //防御側の反撃計算のための初期化と取得
+            //選択モードから取得した場合。ちゃんと自分の輪と改変を足す
+            if (int.TryParse(enemy_unmei_box2.Text, out enemy_unmei_value))
+            {
+            }
+            else
+            {
+                // 変換できなかった場合はデフォルト値（0）のまま
+            }
+            enemy_unmei_value += GetFinalSkillValue("enemy_", "運命改変");
+            enemy_unmei_value += GetFinalSkillValue("enemy_", "運命の輪");
+            //その他の防御スキル
+            enemy_tousho_value = GetFinalSkillValue("enemy_", "凍傷気流");
+            enemy_seisen_value = GetFinalSkillValue("enemy_", "聖戦の導き");
+            enemy_jigenzangeki_value = GetFinalSkillValue("enemy_", "次元斬撃");
+
+            enemy_hangekibaika_value = GetFinalSkillValue("enemy_", "反撃倍化");
+            enemy_shinkaku_value = GetFinalSkillValue("enemy_", "心核穿ち");
+            enemy_kyojingari_value = GetFinalSkillValue("enemy_", "巨人狩り");
+            enemy_hissatuzouka_value = GetFinalSkillValue("enemy_", "必殺増加");
+            enemy_timei_value = GetFinalSkillValue("enemy_", "致命必殺");
+            //ステータス関係
+            enemy_kyousensi_value = GetFinalSkillValue("enemy_", "狂戦士化");
+            enemy_kyohon_value = GetFinalSkillValue("enemy_", "狂奔の牙");
+            enemy_kasoku_value = GetFinalSkillValue("enemy_", "加速進化");
+
+            enemy_senshu_flag = HasFinalSkill("enemy_", "専守防衛");
+            enemy_shuyaku_flag = HasFinalSkill("enemy_", "集約攻撃");
+            enemy_enkaku_flag = HasFinalSkill("enemy_", "遠隔攻撃");
+
+            //攻撃側の反撃計算のための初期化と取得
+            tousho_value = GetFinalSkillValue("", "凍傷気流");
+            seisen_value = GetFinalSkillValue("", "聖戦の導き");
+            tokkou_value = GetFinalSkillValue("", "特攻防御");
+            kenshu_value = GetFinalSkillValue("", "堅守体躯");
+            mukei_value = GetFinalSkillValue("", "無形体躯");
+            shinma_value = GetFinalSkillValue("", "神魔体躯");
+            jigenshoheki_value = GetFinalSkillValue("", "次元障壁");
+            hangekitaisei_value = GetFinalSkillValue("", "反撃耐性");
+            hissatu_taisei_value = GetFinalSkillValue("", "必殺耐性");
+            chimei_taisei_value = GetFinalSkillValue("", "致命耐性");
+            block_value = GetFinalSkillValue("", "ブロック");
+            ibeido_value = GetFinalSkillValue("", "イベイド");
+            sikou_value = GetFinalSkillValue("", "至高の盾");
+            waisho_value = GetFinalSkillValue("", "矮小体躯");
+            kyohu_value = GetFinalSkillValue("", "恐怖の瞳");
+            paring_value = GetFinalSkillValue("", "パリング");
+            jigenzangeki_value = GetFinalSkillValue("", "次元斬撃");
+            kyousensi_value = GetFinalSkillValue("", "狂戦士化");
+            kyohon_value = GetFinalSkillValue("", "狂奔の牙");
+            kasoku_value = GetFinalSkillValue("", "加速進化");
+            zenryoku_value = GetFinalSkillValue("", "全力攻撃");
+            senshu_flag = HasFinalSkill("", "専守防衛");
+            bool use_kenshu = false;
+
+            unmei_value = get_unmei_value();
+
+            DebugTextBox_damage.Text = "====反撃ダメージ計算====\n";
+
+            //まずはステータス倍率をそれぞれ計算
+
+            double enemy_status_bairitu = 1.0 * ((100.0+6*enemy_kyohon_value)/100.0) * ((100.0 + enemy_kyousensi_value) / 100.0) * ((100.0 + 6 * enemy_kasoku_value) / 100.0);
+            double status_bairitu = 1.0 * ((100.0 + 6 * kyohon_value) / 100.0) * ((100.0 + kyousensi_value) / 100.0) * ((100.0 + 6 * kasoku_value) / 100.0);
+
+            int enemy_sokudo = 1;
+            if (enemy_sokudobox != null && !string.IsNullOrEmpty(enemy_sokudobox.Text))
+            {
+                if (int.TryParse(enemy_sokudobox.Text, out enemy_sokudo))
+                {
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+            }
+            int sokudo = 1;
+            if (sokudobox != null && !string.IsNullOrEmpty(sokudobox.Text))
+            {
+                if (int.TryParse(sokudobox.Text, out sokudo))
+                {
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+            }
+            int fix_enemy_sokudo = (int)(enemy_sokudo * enemy_status_bairitu);
+            int fix_sokudo =(int) (sokudo * status_bairitu);
+
+            //まずはクリティカルの計算
+            int enemy_critical_status_kakuritu = (int)(Math.Sqrt(fix_enemy_sokudo) * 3 - Math.Sqrt(fix_sokudo));
+            //運命値足す
+            if (enemy_hissatuzouka_value != 0)
+                enemy_hissatuzouka_value += enemy_unmei_value;
+            if (hissatu_taisei_value != 0)
+                hissatu_taisei_value += unmei_value;
+            //クリティカルの確率と致命を考慮したクリダメ倍率の算出
+            int enemy_critical_kakuritu = enemy_critical_status_kakuritu + enemy_hissatuzouka_value - hissatu_taisei_value;
+            int enemy_critical_damage_bairitu = enemy_critical_status_kakuritu + enemy_timei_value - chimei_taisei_value;
+
+            //クリティカルの上限を決定、上限以上を切る
+            //今は心核穿ちの上限は機能させない
+            int enemy_critical_jougen = 50;
+            if(enemy_hissatuzouka_value > 0)
+            {
+                enemy_critical_jougen = 75;
+            }
+            if(mukei_value > 60) 
+                mukei_value = 60;
+            enemy_critical_jougen -= mukei_value;
+            if (enemy_critical_jougen < 5) 
+                enemy_critical_jougen = 5;
+            if (enemy_critical_kakuritu > enemy_critical_jougen)
+                enemy_critical_kakuritu = enemy_critical_jougen;
+            if (enemy_critical_damage_bairitu < 50)
+                enemy_critical_damage_bairitu = 50;
+
+            //次に攻撃倍率の計算
+
+            double enemy_kougeki_bairitu = 1.0 ;
+
+            enemy_kougeki_bairitu *= (100.0 + enemy_shinkaku_value) / 100.0;
+            enemy_kougeki_bairitu *= (100.0 + enemy_hangekibaika_value) / 100.0;
+
+            //防御倍率の計算
+            double bougyo_bairitu = 1.0;
+
+            //防御倍率の計算
+            shinma_flag = false;
+            //堅守の場合上限92
+            if (kenshu_value > 92)
+            {
+                kenshu_value = 92;
+            }
+            //神魔体躯の場合上限98
+            if (shinma_value > 98)
+            {
+                shinma_value = 98;
+            }
+
+            //神魔を使うか堅守を使うか。同値なら神魔体躯を使う
+            if (kenshu_value > shinma_value)
+            {
+                use_kenshu = true;
+            }
+            else
+            {
+                use_kenshu = false;
+            }
+            //特攻防御はしんまと加算
+            tokkou_value += shinma_value;
+            //最大100
+            if (tokkou_value > 100) tokkou_value = 100;
+
+            if (enemy_shinkaku_value > 0)
+                mukei_value -= 25;
+            if (mukei_value < 0)
+                mukei_value = 0;
+
+            if (hangekitaisei_value > 95)
+                hangekitaisei_value = 95;
+            if (use_kenshu) {
+                bougyo_bairitu = bougyo_bairitu * ((100.0 - mukei_value) / 100.0) * ((100.0 - mukei_value) / 100.0) * ((100.0 - kenshu_value + 10) / 100.0) * ((100.0 - hangekitaisei_value) / 100.0) ;
+            }
+            else
+            {
+                bougyo_bairitu = bougyo_bairitu * ((100.0 - mukei_value) / 100.0) * ((100.0 - mukei_value) / 100.0) * ((100.0 - shinma_value) / 100.0) * ((100.0 - hangekitaisei_value) / 100.0);
+            }
+            if (senshu_flag)
+            {
+                bougyo_bairitu *= 0.5;
+            }
+
+            if (zenryoku_value > 0)
+            {
+                bougyo_bairitu *= ((100.0 + zenryoku_value) / 100.0);
+
+            }
+
+            //城壁による防御計算
+            double joheki = 0.0;
+            if (double.TryParse(joheki_box.Text, out joheki))
+            {
+
+            }
+            double joheki_bougyo = Math.Sqrt(joheki);
+
+
+            //特攻倍率の計算
+            String shuzoku_str = "";
+            shuzoku_str = shuzoku_box.Text;
+
+            Dictionary<string, int> parse_enemy_shuzoku = new Dictionary<string, int>();
+            for (int i = 0; i < shuzoku_str.Length; i++)
+            {
+                //parse_enemy_shuzokuに存在する場合+1する
+                if (parse_enemy_shuzoku.ContainsKey(shuzoku_str[i].ToString()))
+                {
+                    parse_enemy_shuzoku[shuzoku_str[i].ToString()]++;
+                }
+                else
+                {
+                    parse_enemy_shuzoku.Add(shuzoku_str[i].ToString(), 1);
+                }
+            }
+            string player_tokko_str = enemy_tokko_box.Text;
+            //一文字ずつなめて確認、あれば倍率を+1.0
+            double tokko_bairitu = 1.0;
+            for (int i = 0; i < player_tokko_str.Length; i++)
+            {
+                if (parse_enemy_shuzoku.ContainsKey(player_tokko_str[i].ToString()))
+                {
+                    //倍率を+1.0
+                    tokko_bairitu += 1.0;
+                }
+                else if (player_tokko_str[i].ToString() == "全")
+                {
+                    tokko_bairitu += parse_enemy_shuzoku.Count;
+                }
+            }
+            tokko_bairitu = 1.0 + (tokko_bairitu - 1.0) * (100 - tokkou_value) / 100.0;
+            DebugTextBox_damage.Text += "特攻倍率:" + tokko_bairitu + "\n";
+
+            //ブロック値は次元障壁、至高の盾と加算
+            double block_bairitu = 1.0;
+            block_value += (int)jigenshoheki_value;
+            block_value += (int)sikou_value;
+            if (block_value > 0)
+                block_value = block_value + enemy_unmei_value;
+            if (get_shuyaku_value() != 1.0)
+            {
+                //集約攻撃が入っている場合は、ブロックは無視する
+            }
+            else
+            {
+                if (block_value > 0)
+                {
+                    //ブロックが入っている場合は、ブロック値を使う
+                    if (block_value > 75) block_value = 75;
+                    block_bairitu = 1.0 * (100.0 - block_value) / 100.0 + 0.25 * (block_value) / 100.0;
+                    DebugTextBox_damage.Text += "ブロック倍率:" + block_bairitu + "\n";
+                }
+                else
+                {
+                    //ブロックが入っていない場合は1.0
+                    block_bairitu = 1.0;
+                }
+            }
+
+            //イベイド無視は反撃に存在しない
+            ibeido_value += (int)jigenshoheki_value;
+            ibeido_value += sikou_value;
+            if (ibeido_value > 0)
+                ibeido_value = ibeido_value + unmei_value;
+            if (ibeido_value < 0) ibeido_value = 0;
+            if (ibeido_value > 100) ibeido_value = 100;
+            //enkaku_flag = enkaku_check();
+            double ibeido_bairitu = 1.0;
+            if (enemy_enkaku_flag == true || enemy_jigenzangeki_value > 0)
+            {
+                DebugTextBox_damage.Text += "イベイド確率:" + ibeido_value + "\n";
+                ibeido_bairitu = (100.0 - ibeido_value) / 100.0;
+            }
+            else
+            {
+                DebugTextBox_damage.Text += "イベイド確率:0\n";
+            }
+
+            //凍傷と聖戦
+            double seisen_bairitu = 1.0;
+            double enemy_seisen_bairitu = 1.0;
+            double toushou_bairitu = 1.0;
+            double enemy_toushou_bairitu = 1.0;
+            int temp_toushou_bairitu = (int)(toushou_bairitu * 100.0 - 100) - (int)enemy_tousho_value;
+            int temp_seisen_bairitu = (int)(seisen_bairitu * 100.0 - 100) - (int)enemy_seisen_value;
+            if (temp_toushou_bairitu > 30) temp_toushou_bairitu = 30;
+            if (temp_toushou_bairitu < -30) temp_toushou_bairitu = -30;
+            if (temp_seisen_bairitu > 30) temp_seisen_bairitu = 30;
+            if (temp_seisen_bairitu < -30) temp_seisen_bairitu = -30;
+
+            if (temp_seisen_bairitu > 0)
+            {
+                seisen_bairitu = (100.0 + temp_seisen_bairitu) / 100.0;
+                enemy_seisen_bairitu = 1.0;
+            }
+            else if (temp_seisen_bairitu < 0)
+            {
+                seisen_bairitu = 1.0;
+                enemy_seisen_bairitu = (100.0 + temp_seisen_bairitu) / 100.0;
+            }
+            else
+            {
+                seisen_bairitu = 1.0;
+                enemy_seisen_bairitu = 1.0;
+            }
+
+            if (temp_toushou_bairitu < 0)
+            {
+                string p_shuzoku = shuzoku_box.Text;
+                toushou_bairitu = 1.0;
+                if (Regex.IsMatch(p_shuzoku, "炎|氷|星"))
+                {
+                    enemy_toushou_bairitu = 1.0;
+                }
+                else
+                {
+                    enemy_toushou_bairitu = (100.0 + temp_toushou_bairitu) / 100.0;
+                }
+            }
+            else if (temp_toushou_bairitu > 0)
+            {
+                if (Regex.IsMatch(shuzoku_str, "炎|氷|星"))
+                {
+                    toushou_bairitu = 1.0;
+                }
+                else
+                {
+                    toushou_bairitu = (100.0 + temp_toushou_bairitu) / 100.0;
+                }
+                enemy_toushou_bairitu = 1.0;
+            }
+            else
+            {
+                toushou_bairitu = 1.0;
+                enemy_toushou_bairitu = 1.0;
+            }
+            //職業とスタンスの計算
+            double shokugyo_bairitu = calc_shokugyo_bairitu();
+            double stance_bairitu = calc_stance_bairitu();
+            if (shokugyo_bairitu > 1.0)
+            {
+                DebugTextBox_damage.Text += "職業補正:" + shokugyo_bairitu + "\n";
+            }
+            if (stance_bairitu > 1.0)
+            {
+                DebugTextBox_damage.Text += "スタンス補正:" + stance_bairitu + "\n";
+            }
+
+
+            //パリングの運命値、至高の盾をチェック。運命値は次元斬撃の前。
+            double paring_bairitu = 1.0;
+            int enemy_paring_value_total = paring_value + sikou_value;
+
+            if (enemy_paring_value_total > 0)
+            {
+                enemy_paring_value_total += enemy_unmei_value;
+            }
+            enemy_paring_value_total += enemy_jigenzangeki_value;
+
+            //次元斬撃があるならは絶対0になる
+            if (enemy_jigenzangeki_value > 0)
+                enemy_paring_value_total = 0;
+            if (enemy_paring_value_total > 100) enemy_paring_value_total = 100;
+            if (enemy_paring_value_total < 0) enemy_paring_value_total = 0;
+
+            paring_bairitu = (100.0 - enemy_paring_value_total) / 100.0;
+
+
+            //恐怖の瞳の運命値とチェック
+            if (kyohu_value != 0)
+            {
+                kyohu_value += unmei_value;
+            }
+            if (kyohu_value > 50)
+                kyohu_value = 50;
+            double enemy_kyohu_bairitu = 1.0;
+            string shuzoku_txt = enemy_shuzoku_box.Text;
+            string[] kyohu_keywords = { "器", "竜", "夜" };
+            bool kyohu_containsAny = kyohu_keywords.Any(k => shuzoku_txt.Contains(k));
+            if (!kyohu_containsAny)
+            {
+                if (!HasFinalSkill("enemy_", "狂戦士化") && !HasFinalSkill("enemy_", "勇猛果敢") && !HasFinalSkill("enemy_", "恐怖の瞳") && !HasFinalSkill("enemy_", "決戦領域") && !HasFinalSkill("enemy_", "英雄覇気"))
+                {
+                    enemy_kyohu_bairitu = (100.0 - kyohu_value) / 100.0;
+                }
+            }
+
+            bougyo_bairitu *= enemy_kyohu_bairitu;
+
+            //攻撃倍率の計算
+            enemy_kougeki_bairitu = enemy_kougeki_bairitu * shokugyo_bairitu * stance_bairitu;
+            DebugTextBox_damage.Text += "防御スキル倍率:" + bougyo_bairitu + "\n";
+
+            //致命だけ防御を減算。防御値の最小値は1
+            double chimei_bairitu = 1.0;
+            if (enemy_timei_value != 0)
+            {
+                chimei_bairitu = ((100 - 25) / 100);
+
+            }
+            //防御側の攻撃と攻撃側の防御をとってくる
+
+            double enemy_kougeki = 1.0;
+            double bougyo = 1.0;
+            double.TryParse(enemy_kougekibox.Text, out enemy_kougeki);
+            double.TryParse(bougyobox.Text, out bougyo);
+
+            int enemy_kougeki_fix =(int)(enemy_kougeki * enemy_status_bairitu);
+            int bougyo_fix= (int)(bougyo * status_bairitu);
+
+            //クリティカルなしのダメージ
+            double temp_bougyo_bairitu = 1.0;
+            
+            double enemy_bougyo_value_temp = bougyo_fix;
+            if (enemy_bougyo_value_temp < 1.0)
+                enemy_bougyo_value_temp = 1.0;
+            double critical_nasi_damage = ((2.0 * enemy_kougeki_fix  + 5.0) * Math.Sqrt(double.Parse(enemy_hpbox.Text)*paring_bairitu * tokko_bairitu * bougyo_bairitu * block_bairitu * enemy_kougeki_bairitu/3) / (2.0 + bougyo_fix + joheki_bougyo));
+
+            //クリティカルありのダメージ計算
+            int bougyo_value_temp = (int)(bougyo_fix);
+            if (enemy_timei_value > 0)
+            {
+                bougyo_fix = (int)(bougyo_fix * 0.75);
+            }
+            
+            double critical_ari_damage = ((2.0 * enemy_kougeki_fix + 5.0) * Math.Sqrt(double.Parse(enemy_hpbox.Text) * tokko_bairitu * bougyo_bairitu * block_bairitu * ((100.0+enemy_critical_damage_bairitu)/100.0) * enemy_kougeki_bairitu / 3) / (2.0 + bougyo_fix + joheki_bougyo));
+            //統合する。ここでパリングも考慮する。クリティカルなしの時に倍率でかけてしまえばいい。
+            DebugTextBox_damage.Text += "敵攻撃力:" + enemy_kougeki_fix + "\n";
+            DebugTextBox_damage.Text += "crikaru:" + critical_ari_damage+ "\n";
+            DebugTextBox_damage.Text += "crinasi:" + critical_nasi_damage + "\n";
+            DebugTextBox_damage.Text += "クリティカル確率:" + enemy_critical_kakuritu + "\n";
+            DebugTextBox_damage.Text += "味方防御力:" + bougyo_fix+ "\n";
+
+            int damage_value = (int)(critical_ari_damage * (enemy_critical_kakuritu) / 100);
+            damage_value += (int)(critical_nasi_damage * ((100.0 - (double)(enemy_paring_value_total)) / 100.0) * ((100.0 - enemy_critical_kakuritu)/100.0));
+            damage_value = (int)(damage_value*ibeido_bairitu);
+            //damage_value = damage_value / 3;
+            if (jigenzangeki_value > 0)
+            {
+                hangeki_damage_min_box.Text = "0(0)";
+            }
+            else if (enkaku_flag)
+            {
+                hangeki_damage_min_box.Text = "0(" + damage_value + ")";
+
+            }
+            else
+            {
+                hangeki_damage_min_box.Text = damage_value + "(" + damage_value + ")";
+            }
+
+        }
+
         private void calc_damage()
         {
             if (isLoad)
@@ -2018,6 +2515,14 @@ namespace VBV_calc
             int enemy_kyohu_value = 0;
             int unmei_value = 0;
             int enemy_jigenzangeki_value = 0;
+            int enemy_hangekibaika_value = 0;
+            int enemy_shinkaku_value = 0;
+            int enemy_kyojingari_value =0;
+            int enemy_hissatuzouka_value =0;
+            int enemy_timei_value = 0;
+            bool enemy_senshu_flag = false;
+            bool enemy_shuyaku_flag = false;
+            bool enemy_enkaku_flag = false;
 
             if (enemy_mode == 0)
             {
@@ -2164,8 +2669,22 @@ namespace VBV_calc
             }
             else
             {
-                //選択モードから取得した場合
-                enemy_tokkou_value　= GetFinalSkillValue("enemy_", "特攻防御");
+                //選択モードから取得した場合。ちゃんと自分の輪と改変を足す
+                if (int.TryParse(enemy_unmei_box2.Text, out enemy_unmei_value))
+                {
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（0）のまま
+                }
+                //反撃計算でも使うやつら
+                enemy_unmei_value += GetFinalSkillValue("enemy_", "運命改変");
+                enemy_unmei_value += GetFinalSkillValue("enemy_", "運命の輪");
+                enemy_jigenzangeki_value = GetFinalSkillValue("enemy_", "次元斬撃");
+                enemy_tousho_value = GetFinalSkillValue("enemy_", "凍傷気流");
+                enemy_seisen_value = GetFinalSkillValue("enemy_", "聖戦の導き");
+                //その他の防御スキル
+                enemy_tokkou_value = GetFinalSkillValue("enemy_", "特攻防御");
                 enemy_kenshu_value = GetFinalSkillValue("enemy_", "堅守体躯");
                 enemy_mukei_value = GetFinalSkillValue("enemy_", "無形体躯");
                 enemy_shinma_value = GetFinalSkillValue("enemy_", "神魔体躯");
@@ -2173,27 +2692,24 @@ namespace VBV_calc
                 enemy_ukenagashi_value = GetFinalSkillValue("enemy_", "受け流し");
                 enemy_hissatu_taisei_value = GetFinalSkillValue("enemy_", "必殺耐性");
                 enemy_chimei_taisei_value = GetFinalSkillValue("enemy_", "致命耐性");
-                enemy_tousho_value = GetFinalSkillValue("enemy_", "凍傷気流");
-                enemy_seisen_value = GetFinalSkillValue("enemy_", "聖戦の導き");
                 enemy_block_value = GetFinalSkillValue("enemy_", "ブロック");
                 enemy_ibeido_value = GetFinalSkillValue("enemy_", "イベイド");
                 enemy_sikou_value = GetFinalSkillValue("enemy_", "至高の盾");
                 enemy_waisho_value = GetFinalSkillValue("enemy_", "矮小体躯");
                 enemy_kyohu_value = GetFinalSkillValue("enemy_", "恐怖の瞳");
                 enemy_paring_value = GetFinalSkillValue("enemy_", "パリング");
-                enemy_jigenzangeki_value= GetFinalSkillValue("enemy_", "次元斬撃");
+                //以下反撃計算用
+                enemy_hangekibaika_value = GetFinalSkillValue("enemy_", "反撃倍化");                
+                enemy_shinkaku_value = GetFinalSkillValue("enemy_", "心核穿ち");
+                enemy_kyojingari_value = GetFinalSkillValue("enemy_", "巨人狩り");
+                enemy_hissatuzouka_value = GetFinalSkillValue("enemy_", "必殺増加");
+                enemy_timei_value = GetFinalSkillValue("enemy_", "致命必殺");
                 enemy_senshu_flag = HasFinalSkill("enemy_", "専守防衛");
-                unmei_value = get_unmei_value();
-                if (int.TryParse(enemy_unmei_box2.Text, out enemy_unmei_value))
-                {
-                    // enermy_bougyo に変換された値が入る
-                }
-                else
-                {
-                    // 変換できなかった場合はデフォルト値（1.0）のまま
-                }
+                enemy_shuyaku_flag = HasFinalSkill("enemy_", "集約攻撃");
+                enemy_enkaku_flag = HasFinalSkill("enemy_", "遠隔攻撃");
             }
 
+            unmei_value = get_unmei_value();
             double player_kougeki = 1.0;
             if (double.TryParse(kougekibox.Text, out player_kougeki))
             {
@@ -2243,6 +2759,7 @@ namespace VBV_calc
             double enemy_toushou_bairitu = 1.0;
 
             unmei_value = get_unmei_value();
+            int hangeki_taisei_value = 0;
 
             //まずはステータスが変化する倍率を計算。攻撃のステータス値にかかる。
             p_status_bairitu *= get_kasoku_value();
@@ -2308,9 +2825,9 @@ namespace VBV_calc
             //心核は無形の必殺上限をどうにかする機能はない模様
             //運命値も無視
             int bougyo_mukei_sinkaku = 0;
+            if (enemy_mukei_value > 60) enemy_mukei_value = 60;
             if (enemy_mukei_value > 0)
                 bougyo_mukei_sinkaku = (int)(enemy_mukei_value) ;
-            if (enemy_mukei_value > 60) enemy_mukei_value = 60;
 
             //必殺の上限値から無形体躯の値を減算
             hissatu_jougen -= (int)enemy_mukei_value;
@@ -2574,10 +3091,12 @@ namespace VBV_calc
             double enemy_kyohu_bairitu = 1.0;
             string shuzoku_txt = shuzoku_box.Text;
             string[] kyohu_keywords = { "器", "竜", "夜" };
-            bool khyhu_containsAny = kyohu_keywords.Any(k => shuzoku_txt.Contains(k));
-            if (!khyhu_containsAny)
+            bool kyohu_containsAny = kyohu_keywords.Any(k => shuzoku_txt.Contains(k));
+            if (!kyohu_containsAny)
             {
-                enemy_kyohu_bairitu = (100.0 - enemy_kyohu_value) / 100.0;
+                if (!HasFinalSkill("", "狂戦士化") && !HasFinalSkill("", "勇猛果敢") && !HasFinalSkill("", "恐怖の瞳") && !HasFinalSkill("", "決戦領域") && !HasFinalSkill("", "英雄覇気")) {
+                    enemy_kyohu_bairitu = (100.0 - enemy_kyohu_value) / 100.0;
+                }
             }
             DebugTextBox_damage.Text += "恐怖の瞳倍率:" + enemy_kyohu_bairitu + "\n";
 
@@ -2599,6 +3118,7 @@ namespace VBV_calc
                 enemy_paring_value_total=0;
             if (enemy_paring_value_total > 100) enemy_paring_value_total = 100;
             if (enemy_paring_value_total < 0) enemy_paring_value_total = 0;
+            DebugTextBox_damage.Text += "パリング値:" + enemy_paring_value_total + "\n";
 
 
             //職業とスタンスの計算
@@ -2724,6 +3244,8 @@ namespace VBV_calc
             damage_kaisu_min_box.Text = tuigeki.ToString();
             damage_min_box.Text = Math.Truncate(min_damage_value).ToString();
 
+            if(enemy_mode==1)
+                hangeki_calc_damage();
 
         }
 

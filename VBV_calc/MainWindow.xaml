@@ -75,6 +75,7 @@
                             <TextBlock Canvas.Left="40" TextWrapping="Wrap" Text="師団運命値" Canvas.Top="400" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                             <TextBlock Canvas.Left="195" TextWrapping="Wrap" Text="スタンス" Canvas.Top="400" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                             <ComboBox x:Name="stance_box" Canvas.Left="155" Canvas.Top="420" Width="120" SelectionChanged="assistskill1_box_SelectionChanged" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                            <TextBox x:Name="joheki_box" Canvas.Left="296" TextWrapping="Wrap" Canvas.Top="420" Height="22" Width="120" TextChanged="unmei_box_TextChanged" HorizontalAlignment="Center" VerticalAlignment="Top" />
                             <GroupBox Header="パッシブスキル" Width="130" Height="300" Canvas.Left="475" Canvas.Top="1" HorizontalAlignment="Left" VerticalAlignment="Center" >
                                 <Canvas>
                                     <TextBox x:Name="passive1" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="20" Width="75" Height="22" HorizontalAlignment="Center" VerticalAlignment="Top" />
@@ -170,6 +171,7 @@
                                     <TextBox x:Name="chiryokubox" Canvas.Left="10" TextWrapping="Wrap" Text="0" Canvas.Top="330" Width="68" HorizontalAlignment="Left" VerticalAlignment="Center"  TextChanged="status_TextChanged"/>
                                 </Canvas>
                             </GroupBox>
+                            <TextBlock Canvas.Left="340" TextWrapping="Wrap" Text="城壁" Canvas.Top="399" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Canvas>
                     </GroupBox>
                     <GroupBox Header="リーダースキル" Width="130" Height="100" Canvas.Left="615" Canvas.Top="25" HorizontalAlignment="Left" VerticalAlignment="Center" >
@@ -449,6 +451,8 @@
                             <TextBlock Canvas.Left="130" TextWrapping="Wrap" Text="を" Canvas.Top="135" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                             <TextBox x:Name ="damage_kaisu_min_box" Canvas.Left="150" TextWrapping="Wrap" Text="" Canvas.Top="132" Width="30" RenderTransformOrigin="-0.716,4" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                             <TextBlock Canvas.Left="189" TextWrapping="Wrap" Text="回与える" Canvas.Top="133" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                            <TextBox x:Name ="hangeki_damage_min_box" Height="23" Canvas.Left="10" TextWrapping="Wrap" Text="" Canvas.Top="225" Width="111" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                            <TextBlock Canvas.Left="10" TextWrapping="Wrap" Canvas.Top="208" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="反撃ダメージ期待値"/></TextBlock>
                         </Canvas>
                     </GroupBox>
                 </Canvas>
