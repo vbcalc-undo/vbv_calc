@@ -7,5 +7,8 @@
     <Compile Update="ProgressWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="SaveWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

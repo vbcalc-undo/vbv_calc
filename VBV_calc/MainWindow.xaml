@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VBV_calc"
         mc:Ignorable="d"
-        Title="VBVダメージ倍率計算機" Height="980" Width="1655" Closed="Window_Closed">
+        Title="VBVダメージ倍率計算機" Height="980" Width="1724" Closed="Window_Closed">
 
     <TabControl Margin="0,0,0,7" >
         <TabItem Header="ダメージ倍率計算器">
-            <Canvas Margin="242,0,10,309">
-                <Canvas x:Name="maincanvas" Height="904" Width="1387" HorizontalAlignment="Center" VerticalAlignment="Top">
+            <Canvas Margin="10,0,24,309" Height="932">
+                <Canvas x:Name="maincanvas" Height="904" Width="1387" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="287">
                     <GroupBox Header="味方（攻撃）キャラクター" x:Name="attack_character_group" Width="1184" Height="480" Canvas.Left="00" Canvas.Top="5" HorizontalAlignment="Left" VerticalAlignment="Center" >
                         <Canvas Margin="1,0,-1,0">
                             <Button Content="画面から&#x0a;取り込み" Click="CaptureAndOcrButton_Click" Width="54" Height="48" Canvas.Left="204" Canvas.Top="10" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -240,7 +240,7 @@
                                         <TextBox x:Name="enemy_waisho_box" Height="18" Canvas.Left="530" TextWrapping="Wrap" Text="" Canvas.Top="95" Width="78" TextChanged="enemy_waisho_changed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                                         <TextBox x:Name="enemy_kyohu_box" Height="18" Canvas.Left="634" TextWrapping="Wrap" Text="" Canvas.Top="52" Width="78" TextChanged="enemy_waisho_changed" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                         <TextBox x:Name="enemy_paring_box" Height="18" Canvas.Left="634" TextWrapping="Wrap" Text="" Canvas.Top="95" Width="78" TextChanged="enemy_waisho_changed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                                        <TextBox x:Name="enemy_unmei_box" Height="18" Canvas.Left="530" TextWrapping="Wrap" Text="" Canvas.Top="140" Width="78" TextChanged="enemy_unmei_changed" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                                        <TextBox x:Name="enemy_unmei_box2" Height="18" Canvas.Left="530" TextWrapping="Wrap" Text="" Canvas.Top="140" Width="78" TextChanged="enemy_unmei_changed" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                         <TextBlock Canvas.Left="230" TextWrapping="Wrap" Text="特攻防御" Canvas.Top="30"/>
                                         <TextBlock Canvas.Left="230" TextWrapping="Wrap" Text="堅守体躯" Canvas.Top="75" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                         <TextBlock Canvas.Left="230" TextWrapping="Wrap" Text="無形体躯" Canvas.Top="120" HorizontalAlignment="Left" VerticalAlignment="Top" />
@@ -303,8 +303,8 @@
                                         <TextBox x:Name="enemy_assistskill1_chiryoku_box" Canvas.Left="10" TextWrapping="Wrap" Height="22" Canvas.Top="274" Width="115" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="enemy_assistskill1_chiryoku_box_TextChanged" />
                                         <TextBox x:Name="enemy_assistskill2_chiryoku_box" Canvas.Left="138" TextWrapping="Wrap" Height="22" Canvas.Top="274" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="enemy_assistskill2_chiryoku_box_TextChanged"/>
                                         <TextBox x:Name="enemy_assistskill3_chiryoku_box" Canvas.Left="268" TextWrapping="Wrap" Height="22" Canvas.Top="274" Width="120" HorizontalAlignment="Left" VerticalAlignment="Center" TextChanged="enemy_assistskill3_chiryoku_box_TextChanged"/>
-                                        <TextBox x:Name="enemy_unmei_box2" Canvas.Left="10" TextWrapping="Wrap" Canvas.Top="326" Height="22" Width="115" TextChanged="unmei_box_TextChanged" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                                        <ComboBox x:Name="enemy_stance_box2" Canvas.Left="138" Canvas.Top="326" Width="120" SelectionChanged="assistskill1_box_SelectionChanged" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                        <TextBox x:Name="enemy_unmei_box" Canvas.Left="10" TextWrapping="Wrap" Canvas.Top="326" Height="22" Width="115" TextChanged="enemy_unmei_changed" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                        <ComboBox x:Name="enemy_stance_box2" Canvas.Left="138" Canvas.Top="326" Width="120" SelectionChanged="enemy_stance_boxChanged" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                         <TextBox x:Name="enemy_joheki_box2" Canvas.Left="268" TextWrapping="Wrap" Canvas.Top="326" Height="22" Width="120" TextChanged="unmei_box_TextChanged" HorizontalAlignment="Left" VerticalAlignment="Center" />
                                         <TextBlock Canvas.Left="28" TextWrapping="Wrap" Text="師団運命値" Canvas.Top="301" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                         <TextBlock Canvas.Left="181" TextWrapping="Wrap" Text="スタンス" Canvas.Top="301" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -313,7 +313,7 @@
                                         <Button Content="画面から&#x0a;取り込み" Click="enemy_CaptureAndOcrButton_Click" Width="54" Height="48" Canvas.Left="204" Canvas.Top="10" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                                         <GroupBox Header="パッシブスキル" Width="130" Height="271" Canvas.Left="410" HorizontalAlignment="Left" VerticalAlignment="Center" >
                                             <Canvas Margin="0,0,0,21">
-                                                <TextBox x:Name="enemy_passive1" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="5" Width="75" Height="22" HorizontalAlignment="Center" VerticalAlignment="Top" />
+                                                <TextBox x:Name="enemy_passive1" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="5" Width="75" Height="22" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="enemy_passive1_TextChanged" />
                                                 <TextBox x:Name="enemy_passive2" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="35" Width="75" Height="22" HorizontalAlignment="Left" VerticalAlignment="Center" />
                                                 <TextBox x:Name="enemy_passive3" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="65" Width="75" Height="22" HorizontalAlignment="Left" VerticalAlignment="Center" />
                                                 <TextBox x:Name="enemy_passive4" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="95" Width="75" Height="22" HorizontalAlignment="Left" VerticalAlignment="Center" />
@@ -429,7 +429,7 @@
                             </TabControl>
                         </Grid>
                     </GroupBox>
-                    <GroupBox Header="計算結果" Width="248" Height="305" Canvas.Left="1111" Canvas.Top="589" HorizontalAlignment="Center" VerticalAlignment="Top">
+                    <GroupBox Header="計算結果" Width="258" Height="408" Canvas.Left="1111" Canvas.Top="490" HorizontalAlignment="Center" VerticalAlignment="Top">
                         <Canvas Margin="0,0,250,0">
                             <TextBlock Canvas.Left="10" TextWrapping="Wrap" Canvas.Top="10" HorizontalAlignment="Left" VerticalAlignment="Top"><Run Language="ja-jp" Text="攻撃倍率期待値"/></TextBlock>
                             <TextBlock Canvas.Left="10" TextWrapping="Wrap" Canvas.Top="57" HorizontalAlignment="Center" VerticalAlignment="Top"><Run Language="ja-jp" Text="ダメージ最大値"/></TextBlock>
@@ -456,27 +456,27 @@
                         </Canvas>
                     </GroupBox>
                 </Canvas>
-                <TextBox x:Name ="DebugTextBox" Height="213" Canvas.Left="1189" TextWrapping="Wrap" Text="" Canvas.Top="10" Width="167" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                <TextBox x:Name ="DebugTextBox_damage" Height="351" Canvas.Left="1189" TextWrapping="Wrap" Text="" Canvas.Top="228" Width="167" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                <Canvas Height="728" Canvas.Left="-226" Width="221" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <TextBox x:Name ="DebugTextBox" Height="213" Canvas.Left="1488" TextWrapping="Wrap" Text="" Canvas.Top="20" Width="168" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBox x:Name ="DebugTextBox_damage" Height="253" Canvas.Left="1489" TextWrapping="Wrap" Text="" Canvas.Top="238" Width="167" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <Canvas Height="904" Canvas.Left="10" Width="265" HorizontalAlignment="Left" VerticalAlignment="Center" Canvas.Top="10">
                     <ListBox x:Name="saved_list"
-         AlternationCount="9999"
-         Height="568"
-         Width="201"
-         Canvas.Left="10"
-         Canvas.Top="26"
-         SelectionMode="Single"
-         HorizontalAlignment="Center"
-         VerticalAlignment="Top"
-         SelectedValuePath="character_name">
+                         AlternationCount="9999"
+                         Height="636"
+                         Width="274"
+                         Canvas.Left="-8"
+                         Canvas.Top="26"
+                             SelectionMode="Extended"
+                             HorizontalAlignment="Left"
+                         VerticalAlignment="Center"
+                         SelectedValuePath="character_name" SelectionChanged="saved_list_SelectionChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <!-- 番号 + ドット -->
                                     <TextBlock 
-                    Text="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
+                                    Text="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, 
                                    Path=(ItemsControl.AlternationIndex)}"
-                    Margin="0,0,2,0"/>
+                                    Margin="0,0,2,0"/>
                                     <TextBlock Text=". " Margin="0,0,2,0"/>
                                     <!-- 本来の表示（character_idを表示） -->
                                     <TextBlock Text="{Binding character_id}" />
@@ -484,14 +484,16 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <Button Content="読み込み" Canvas.Left="82" Canvas.Top="608" Height="30" Width="56" HorizontalAlignment="Center" VerticalAlignment="Top" Click="Load_Button_Click" RenderTransformOrigin="0.518,0.057"/>
-                    <Button Content="保存" Canvas.Left="9" Canvas.Top="608" Height="30" Width="47" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Saved_Button_Click"/>
-                    <Button Content="削除" Canvas.Left="160" Canvas.Top="608" Height="30" Width="47" Click="Delete_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                    <Button Content="　ファイルへ書き込み" Canvas.Left="9" Canvas.Top="688" Height="30" Width="202" Click="Write_File_Button_Click" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                    <TextBlock Canvas.Left="55" TextWrapping="Wrap" Text="キャラクター保存リスト" Canvas.Top="5" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                    <Button Content="↑ 上へ" Width="59" Click="MoveUpButton_Click" Canvas.Left="10" Canvas.Top="654" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                    <Button Content="↓ 下へ" Width="59" Click="MoveDownButton_Click" Canvas.Left="79" Canvas.Top="654" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                    <Button Canvas.Left="152" Width="59" Canvas.Top="654" x:Name="btnSortId" Content="ソート" Click="btnSortId_Click" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <Button x:Name="hozon_button" Content="保存" Canvas.Left="8" Canvas.Top="725" Height="30" Width="77" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Saved_Button_Click"/>
+                    <Button x:Name="yomikomi_button" Content="読み込み" Canvas.Left="91" Canvas.Top="725" Height="30" Width="79" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Load_Button_Click" RenderTransformOrigin="0.518,0.057"/>
+                    <Button Content="削除" Canvas.Left="175" Canvas.Top="725" Height="30" Width="79" Click="Delete_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <Button Content="　ファイルへ書き込み" Canvas.Left="9" Canvas.Top="818" Height="30" Width="245" Click="Write_File_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <TextBlock Canvas.Left="82" TextWrapping="Wrap" Text="キャラクター保存リスト" Canvas.Top="5" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <Button Content="↑ 上へ" Width="76" Click="MoveUpButton_Click" Canvas.Left="9" Canvas.Top="779" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                    <Button Content="↓ 下へ" Width="79" Click="MoveDownButton_Click" Canvas.Left="91" Canvas.Top="779" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <Button Canvas.Left="175" Width="79" Canvas.Top="779" x:Name="btnSortId" Content="ソート" Click="btnSortId_Click" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                    <TextBox x:Name="save_character_name_box" Canvas.Left="-9" TextWrapping="Wrap" Text="" Canvas.Top="692" Width="274" Height="24" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <TextBlock Canvas.Left="-9" TextWrapping="Wrap" Text="保存名" Canvas.Top="671"/>
                 </Canvas>
             </Canvas>
         </TabItem>

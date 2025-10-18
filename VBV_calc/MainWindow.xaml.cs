@@ -42,6 +42,11 @@ namespace VBV_calc
             public String ItemDisp { get; set; }
             public string ItemValue { get; set; }
 
+            public ItemSet() // ← これ追加！
+            {
+                ItemDisp = "";
+                ItemValue = "";
+            }
             // プロパティをコンストラクタでセット
             public ItemSet(String v, String s)
             {
@@ -1011,7 +1016,11 @@ namespace VBV_calc
         private double calc_stance_bairitu()
         {
             string stance = stance_box.SelectedItem as string;
-            string enemy_stance = enemy_stance_box.SelectedItem as string; ;
+            string enemy_stance = "";
+            if (enemy_mode==0)
+              enemy_stance = enemy_stance_box.SelectedItem as string; ;
+            if (enemy_mode == 1)
+                enemy_stance = enemy_stance_box2.SelectedItem as string; ;
             if (stance != "" && enemy_stance != "")
             {
                 if (stance == "進撃" && enemy_stance == "計略")
@@ -1261,6 +1270,8 @@ namespace VBV_calc
 
             enemy_stance_box.ItemsSource = STANCE_LIST;
             enemy_stance_box.SelectedIndex = -1;
+            enemy_stance_box2.ItemsSource = STANCE_LIST;
+            enemy_stance_box2.SelectedIndex = -1;
             stance_box.ItemsSource = STANCE_LIST;
             stance_box.SelectedIndex = -1;
             enemy_shokugyo_box.ItemsSource = SHOKUGYO_LIST;
@@ -1338,7 +1349,6 @@ namespace VBV_calc
             _isInitialized = true; // 初期化完了
         }
         List<ImageFeature> features;
-
         private string _Passive1;
 
 
@@ -2089,7 +2099,7 @@ namespace VBV_calc
 
             unmei_value = get_unmei_value();
 
-            DebugTextBox_damage.Text = "====反撃ダメージ計算====\n";
+            DebugTextBox_damage.Text += "==反撃ダメージ計算==n";
 
             //まずはステータス倍率をそれぞれ計算
 
@@ -2870,7 +2880,7 @@ namespace VBV_calc
             }
             else
             {
-                if (double.TryParse(enemy_joheki_box.Text, out joheki))
+                if (double.TryParse(enemy_joheki_box2.Text, out joheki))
                 {
 
                 }
@@ -3679,6 +3689,7 @@ namespace VBV_calc
             // finalskills.Add(passive3.Text, passive3_fig.Text);
             // ... など
         }
+
         private void equipment_tokko_plus(string skillname, string skillvalue)
         {
             //装備のスキル名に特攻があれば、tokko_boxに追加する
@@ -4403,7 +4414,7 @@ namespace VBV_calc
         {
 
         }
-
+        /*
         private void Saved_Button_Click(object sender, RoutedEventArgs e)
         {
             savedata tempdata;
@@ -4564,6 +4575,325 @@ namespace VBV_calc
 
             }
         }
+        */
+        /*
+        /// <summary>
+        /// ItemSetを持つComboBoxの選択内容をsafeに取り出して処理する
+        /// </summary>
+        private void SetItemData(ComboBox comboBox, Action<ItemSet> setter)
+        {
+            if (comboBox?.SelectedItem is ItemSet item)
+                setter(item);
+            else
+                setter(new ItemSet { ItemValue = "", ItemDisp = "" });
+        }
+
+        /// <summary>
+        /// アシストスキル用の共通処理
+        /// </summary>
+        /// 
+        private void SetAssistData(ComboBox comboBox, TextBox chiryokuBox, Action<string> setter)
+        {
+            if (comboBox?.SelectedItem is ItemSet item)
+                setter(item.ItemValue);
+            else
+                setter("");
+        }
+        /*
+        private void Saved_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (CharacterBox.SelectedItem is not CharacterJson selectedCharacter)
+                return;
+
+            var tempdata = new savedata
+            {
+                character_name = selectedCharacter.名称,
+                character_id = $"{selectedCharacter.名称} ({DateTime.Now:yyyy/MM/dd HH:mm:ss})",
+                leader_flag = leader_flag
+            };
+
+            // 各項目を共通関数でセット
+            SetItemData(EquipmentBox1, v => { tempdata.equipment1 = v.ItemValue; tempdata.equipment1_name = v.ItemDisp; });
+            SetItemData(EquipmentBox2, v => { tempdata.equipment2 = v.ItemValue; tempdata.equipment2_name = v.ItemDisp; });
+            SetItemData(ryoshokuBox, v => { tempdata.ryoshoku = v.ItemValue; tempdata.ryoshoku_name = v.ItemDisp; });
+            SetItemData(shogo1Box, v => { tempdata.shogo1 = v.ItemValue; tempdata.shogo1_name = v.ItemDisp; });
+            SetItemData(shogo2Box, v => { tempdata.shogo2 = v.ItemValue; tempdata.shogo2_name = v.ItemDisp; });
+
+            SetAssistData(assistskill1_box, assistskill1_chiryoku_box, v => { tempdata.assist1 = v; tempdata.assist1_chiryoku = assistskill1_chiryoku_box.Text ?? ""; });
+            SetAssistData(assistskill2_box, assistskill2_chiryoku_box, v => { tempdata.assist2 = v; tempdata.assist2_chiryoku = assistskill2_chiryoku_box.Text ?? ""; });
+            SetAssistData(assistskill3_box, assistskill3_chiryoku_box, v => { tempdata.assist3 = v; tempdata.assist3_chiryoku = assistskill3_chiryoku_box.Text ?? ""; });
+
+            tempdata.unmei = unmei_box.Text ?? "";
+
+            all_save_data.Add(tempdata);
+        }*/
+
+        /*       
+               private string GenerateUniqueName(string baseName)
+               {
+                   int counter = 1;
+                   string newName = baseName;
+
+                   while (all_save_data.Any(x => x.character_id == newName))
+                   {
+                       newName = $"{baseName}({counter})";
+                       counter++;
+                   }
+
+                   return newName;
+
+               }
+               private void Saved_Button_Click(object sender, RoutedEventArgs e)
+               {
+                   if (CharacterBox.SelectedItem is not CharacterJson selectedCharacter)
+                       return;
+
+                   string enteredName = save_character_name_box.Text?.Trim();
+
+                   // 名前ボックスが空ならキャラ名を基本に
+                   string baseName = string.IsNullOrEmpty(enteredName)
+                       ? selectedCharacter.名称
+                       : enteredName;
+
+                   string saveName = GenerateUniqueName(baseName); // (1), (2)… を自動付与
+
+                   var tempdata = new savedata
+                   {
+                       character_name = selectedCharacter.名称,
+                       character_id = saveName,
+                       leader_flag = leader_flag
+                   };
+
+                   // 各装備・称号などのデータをセット
+                   SetItemData(EquipmentBox1, v => { tempdata.equipment1 = v.ItemValue; tempdata.equipment1_name = v.ItemDisp; });
+                   SetItemData(EquipmentBox2, v => { tempdata.equipment2 = v.ItemValue; tempdata.equipment2_name = v.ItemDisp; });
+                   SetItemData(ryoshokuBox, v => { tempdata.ryoshoku = v.ItemValue; tempdata.ryoshoku_name = v.ItemDisp; });
+                   SetItemData(shogo1Box, v => { tempdata.shogo1 = v.ItemValue; tempdata.shogo1_name = v.ItemDisp; });
+                   SetItemData(shogo2Box, v => { tempdata.shogo2 = v.ItemValue; tempdata.shogo2_name = v.ItemDisp; });
+
+                   SetAssistData(assistskill1_box, assistskill1_chiryoku_box, v => { tempdata.assist1 = v; tempdata.assist1_chiryoku = assistskill1_chiryoku_box.Text ?? ""; });
+                   SetAssistData(assistskill2_box, assistskill2_chiryoku_box, v => { tempdata.assist2 = v; tempdata.assist2_chiryoku = assistskill2_chiryoku_box.Text ?? ""; });
+                   SetAssistData(assistskill3_box, assistskill3_chiryoku_box, v => { tempdata.assist3 = v; tempdata.assist3_chiryoku = assistskill3_chiryoku_box.Text ?? ""; });
+
+                   tempdata.unmei = unmei_box.Text ?? "";
+
+                   // --- 🔽 同名チェック ---
+                   var existing = all_save_data.FirstOrDefault(x => x.character_id == baseName);
+                   if (existing != null)
+                   {
+                       var result = MessageBox.Show(
+                           $"「{baseName}」は既に存在します。\n上書きしますか？",
+                           "保存確認",
+                           MessageBoxButton.YesNoCancel,
+                           MessageBoxImage.Question,
+                           MessageBoxResult.Cancel);
+
+                       switch (result)
+                       {
+                           case MessageBoxResult.Yes:
+                               all_save_data.Remove(existing);
+                               tempdata.character_id = baseName;
+                               all_save_data.Add(tempdata);
+                               MessageBox.Show("上書きしました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                               break;
+
+                           case MessageBoxResult.No:
+                               all_save_data.Add(tempdata);
+                               MessageBox.Show($"別名「{saveName}」で保存しました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                               break;
+
+                           case MessageBoxResult.Cancel:
+                               return;
+                       }
+                   }
+                   else
+                   {
+                       all_save_data.Add(tempdata);
+                       MessageBox.Show($"「{saveName}」として保存しました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                   }
+               }
+        */
+
+        /*
+        private void Saved_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (CharacterBox.SelectedItem is not CharacterJson selectedCharacter)
+                return;
+
+            string enteredName = save_character_name_box.Text?.Trim();
+
+            // 名前ボックスが空なら自動生成
+            string saveName = string.IsNullOrEmpty(enteredName)
+                ? $"{selectedCharacter.名称} ({DateTime.Now:yyyy/MM/dd HH:mm:ss})"
+                : enteredName;
+
+            var tempdata = new savedata
+            {
+                character_name = selectedCharacter.名称,
+                character_id = saveName,
+                leader_flag = leader_flag
+            };
+
+            // 各装備・称号などを共通関数で代入
+            SetItemData(EquipmentBox1, v => { tempdata.equipment1 = v.ItemValue; tempdata.equipment1_name = v.ItemDisp; });
+            SetItemData(EquipmentBox2, v => { tempdata.equipment2 = v.ItemValue; tempdata.equipment2_name = v.ItemDisp; });
+            SetItemData(ryoshokuBox, v => { tempdata.ryoshoku = v.ItemValue; tempdata.ryoshoku_name = v.ItemDisp; });
+            SetItemData(shogo1Box, v => { tempdata.shogo1 = v.ItemValue; tempdata.shogo1_name = v.ItemDisp; });
+            SetItemData(shogo2Box, v => { tempdata.shogo2 = v.ItemValue; tempdata.shogo2_name = v.ItemDisp; });
+
+            SetAssistData(assistskill1_box, assistskill1_chiryoku_box, v => { tempdata.assist1 = v; tempdata.assist1_chiryoku = assistskill1_chiryoku_box.Text ?? ""; });
+            SetAssistData(assistskill2_box, assistskill2_chiryoku_box, v => { tempdata.assist2 = v; tempdata.assist2_chiryoku = assistskill2_chiryoku_box.Text ?? ""; });
+            SetAssistData(assistskill3_box, assistskill3_chiryoku_box, v => { tempdata.assist3 = v; tempdata.assist3_chiryoku = assistskill3_chiryoku_box.Text ?? ""; });
+
+            tempdata.unmei = unmei_box.Text ?? "";
+
+            // --- 🔽 同名チェック（3択ダイアログ） ---
+            var existing = all_save_data.FirstOrDefault(x => x.character_id == saveName);
+            if (existing != null)
+            {
+                var result = MessageBox.Show(
+                    $"「{saveName}」は既に存在します。\nどうしますか？",
+                    "保存確認",
+                    MessageBoxButton.YesNoCancel,
+                    MessageBoxImage.Question,
+                    MessageBoxResult.Cancel);
+
+                switch (result)
+                {
+                    case MessageBoxResult.Yes: // 上書き
+                        all_save_data.Remove(existing);
+                        all_save_data.Add(tempdata);
+                        MessageBox.Show("上書きしました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                        break;
+
+                    case MessageBoxResult.No: // 別名保存
+                        string newName = GenerateUniqueName(saveName);
+                        tempdata.character_id = newName;
+                        all_save_data.Add(tempdata);
+                        MessageBox.Show($"別名「{newName}」で保存しました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                        break;
+
+                    case MessageBoxResult.Cancel: // キャンセル
+                        return;
+                }
+            }
+            else
+            {
+                // 同名がなければ普通に追加
+                all_save_data.Add(tempdata);
+                MessageBox.Show("保存しました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        */
+        private void SetItemData(ComboBox comboBox, Action<ItemSet> setter)
+        {
+            if (comboBox?.SelectedItem is ItemSet item)
+                setter(item);
+            else
+                setter(new ItemSet("", ""));
+        }
+
+        private void SetAssistData(ComboBox comboBox, TextBox chiryokuBox, Action<string> setter)
+        {
+            if (comboBox?.SelectedItem is ItemSet item)
+                setter(item.ItemValue);
+            else
+                setter("");
+        }
+
+        private string GenerateUniqueName(string baseName)
+        {
+            // 末尾に (数字) があれば除去
+            string nameWithoutNumber = System.Text.RegularExpressions.Regex.Replace(baseName, @"\(\d+\)$", "");
+
+            string newName = nameWithoutNumber;
+            int counter = 1;
+
+            while (all_save_data.Any(x => x.character_id == newName))
+            {
+                newName = $"{nameWithoutNumber}({counter})";
+                counter++;
+            }
+
+            return newName;
+        }
+
+        private void Saved_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (CharacterBox.SelectedItem is not CharacterJson selectedCharacter)
+                return;
+
+            string enteredName = save_character_name_box.Text?.Trim();
+            string baseName = string.IsNullOrEmpty(enteredName) ? selectedCharacter.名称 : enteredName;
+
+            // 保存用データ生成
+            var tempdata = new savedata
+            {
+                character_name = selectedCharacter.名称,
+                leader_flag = leader_flag
+            };
+
+            // 装備・称号などのデータセット
+            SetItemData(EquipmentBox1, v => { tempdata.equipment1 = v.ItemValue; tempdata.equipment1_name = v.ItemDisp; });
+            SetItemData(EquipmentBox2, v => { tempdata.equipment2 = v.ItemValue; tempdata.equipment2_name = v.ItemDisp; });
+            SetItemData(ryoshokuBox, v => { tempdata.ryoshoku = v.ItemValue; tempdata.ryoshoku_name = v.ItemDisp; });
+            SetItemData(shogo1Box, v => { tempdata.shogo1 = v.ItemValue; tempdata.shogo1_name = v.ItemDisp; });
+            SetItemData(shogo2Box, v => { tempdata.shogo2 = v.ItemValue; tempdata.shogo2_name = v.ItemDisp; });
+
+            SetAssistData(assistskill1_box, assistskill1_chiryoku_box, v => { tempdata.assist1 = v; tempdata.assist1_chiryoku = assistskill1_chiryoku_box.Text ?? ""; });
+            SetAssistData(assistskill2_box, assistskill2_chiryoku_box, v => { tempdata.assist2 = v; tempdata.assist2_chiryoku = assistskill2_chiryoku_box.Text ?? ""; });
+            SetAssistData(assistskill3_box, assistskill3_chiryoku_box, v => { tempdata.assist3 = v; tempdata.assist3_chiryoku = assistskill3_chiryoku_box.Text ?? ""; });
+
+            tempdata.unmei = unmei_box.Text ?? "";
+
+            // --- 同名チェック ---
+            var existing = all_save_data.FirstOrDefault(x => x.character_id == baseName);
+
+            if (existing != null)
+            {
+                // SaveWindow を表示
+                Debug.WriteLine("直前のBasename:"+baseName);
+                var saveWindow = new SaveWindow(baseName);
+                saveWindow.Owner = this;
+                bool? dialogResult = saveWindow.ShowDialog();
+
+                if (dialogResult == true)
+                {
+                    switch (saveWindow.Choice)
+                    {
+                        case SaveWindow.SaveChoice.Overwrite:
+                            all_save_data.Remove(existing);
+                            tempdata.character_id = baseName;
+                            all_save_data.Add(tempdata);
+                            MessageBox.Show("上書きしました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                            break;
+
+                        case SaveWindow.SaveChoice.SaveAsNew:
+                            string newName = GenerateUniqueName(baseName);
+                            tempdata.character_id = newName;
+                            all_save_data.Add(tempdata);
+                            MessageBox.Show($"別名「{newName}」で保存しました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                            save_character_name_box.Text = newName;
+                            break;
+                    }
+                }
+                else
+                {
+                    // Cancel → 何もしない
+                    return;
+                }
+            }
+            else
+            {
+                // 同名なし → baseName で保存
+                tempdata.character_id = baseName;
+                all_save_data.Add(tempdata);
+                MessageBox.Show($"「{baseName}」として保存しました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                save_character_name_box.Text = baseName;
+                saved_list.SelectedItem = tempdata;
+            }
+        }
         public bool isLoad = false;
 
         private void Load_Button_Click(object sender, RoutedEventArgs e)
@@ -4575,6 +4905,7 @@ namespace VBV_calc
             if (selected != null)
             {
 
+                save_character_name_box.Text = selected.character_id;
                 //this.Visibility = Visibility.Collapsed; // 画面を一時非表示
                 var sw = Stopwatch.StartNew();
                 shogo1Box.SelectionChanged -= shogo1_SelectionChanged;
@@ -4798,9 +5129,9 @@ namespace VBV_calc
             }
         }
 
-        private int calc_chiryoku_assist(string fig, int number)
+        private int calc_chiryoku_assist(string fig, int number,string prefix)
         {
-            var chiryokuBox = (TextBox)this.FindName($"assistskill{number}_chiryoku_box");
+            var chiryokuBox = (TextBox)this.FindName($"{prefix}assistskill{number}_chiryoku_box");
             int temp_fig = 0;
             int chiryoku = 1;
             if (chiryokuBox != null && !string.IsNullOrEmpty(chiryokuBox.Text) && int.TryParse(chiryokuBox.Text, out int parsedChiryoku))
@@ -4832,7 +5163,7 @@ namespace VBV_calc
 
                 if (temp_skill.Length > 1)
                 {
-                    int temp = calc_chiryoku_assist(temp_skill[1], index);
+                    int temp = calc_chiryoku_assist(temp_skill[1], index,prefix);
                     // 上限25
                     if (temp > 25) temp = 25;
                     // 心核穿ちは5固定
@@ -4925,7 +5256,7 @@ namespace VBV_calc
 
         private void enemy_unmei_changed(object sender, TextChangedEventArgs e)
         {
-            Resync_finalskil();
+            enemy_Resync_finalskil();
             calc_damage();
         }
 
@@ -4939,32 +5270,29 @@ namespace VBV_calc
         private void Delete_Button_Click(object sender, RoutedEventArgs e)
         {
             // 選択された savedata を取得
-            var selected = saved_list.SelectedItem as savedata;
-            if (selected != null)
+            var selectedItems = saved_list.SelectedItems.Cast<savedata>().ToList();
+            if (selectedItems.Count > 0)
             {
-                // 削除前に現在のインデックスを取得
+                // 削除前に一番上の選択インデックスを覚えておく
                 int index = saved_list.SelectedIndex;
 
-                // リストから削除
-                all_save_data.Remove(selected);
+                // all_save_data からまとめて削除
+                foreach (var item in selectedItems)
+                {
+                    all_save_data.Remove(item);
+                }
 
                 // 新しい選択を決める
                 if (all_save_data.Count > 0)
                 {
-                    // 下のアイテムがあれば選択
-                    if (index < all_save_data.Count)
-                    {
-                        saved_list.SelectedIndex = index; // 下のアイテム
-                    }
-                    else
-                    {
-                        saved_list.SelectedIndex = all_save_data.Count - 1; // 上のアイテム
-                    }
+                    if (index >= all_save_data.Count)
+                        index = all_save_data.Count - 1;
+
+                    saved_list.SelectedIndex = index; // 次の候補を選択
                 }
                 else
                 {
-                    // リストが空なら選択をクリア
-                    saved_list.SelectedIndex = -1;
+                    saved_list.SelectedIndex = -1; // 全部消えたら選択解除
                 }
             }
         }
@@ -5899,7 +6227,6 @@ namespace VBV_calc
                     bestId = int.Parse(f.Id);
                 }
             }
-
             // 7. 選択反映
             var match = characters.FirstOrDefault(c => c.名称 == bestName);
             if (match != null)
@@ -6139,5 +6466,15 @@ namespace VBV_calc
             System.Windows.Application.Current.Shutdown();
         }
 
+        private void saved_list_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            hozon_button.IsEnabled = saved_list.SelectedItems.Count <= 1;
+            yomikomi_button.IsEnabled = saved_list.SelectedItems.Count <= 1;
+        }
+
+        private void enemy_passive1_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
 }
