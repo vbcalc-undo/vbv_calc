@@ -66,3 +66,16 @@
 /img2vec/job_リーダー.png
 /VBV_Screen2Wiki/bin/Debug
 /VBV_Screen2Wiki/obj
+/ImageSeracherTest
+/wiki2json/character/data/units_busho.json
+/wiki2json/character/data/units_ippan.json
+/img2vec/query_image.png
+/img2vec/query_image2.png
+/img2vec/query_image3.png
+/img2vec/query_image4.png
+/img2vec/equipment_text.py
+/img2vec/extract_element.py
+/img2vec/extract_equipment.py
+/img2vec/extract_equipment_text.py
+/img2vec/extract_job.py
+/img2vec/extract_leader.py
