@@ -439,7 +439,7 @@ namespace VBV_formation
             else
             {
             }
-            string jsonPath = @"feature_extraction/features.json";              // Python特徴量DB
+            string jsonPath = @"feature_extraction/features_shidan.json";              // Python特徴量DB
             string csvPath = @"feature_extraction/list.csv";                   // ID→名前
 
             string json = File.ReadAllText(jsonPath);

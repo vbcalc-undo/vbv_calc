@@ -76,7 +76,7 @@
                             <TextBlock Canvas.Left="195" TextWrapping="Wrap" Text="スタンス" Canvas.Top="400" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                             <ComboBox x:Name="stance_box" Canvas.Left="155" Canvas.Top="420" Width="120" SelectionChanged="assistskill1_box_SelectionChanged" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                             <TextBox x:Name="joheki_box" Canvas.Left="296" TextWrapping="Wrap" Canvas.Top="420" Height="22" Width="120" TextChanged="unmei_box_TextChanged" HorizontalAlignment="Center" VerticalAlignment="Top" />
-                            <GroupBox Header="パッシブスキル" Width="130" Height="300" Canvas.Left="475" Canvas.Top="1" HorizontalAlignment="Left" VerticalAlignment="Center" >
+                            <GroupBox x:Name="passiveGroupBox" Header="パッシブスキル" Width="130" Height="300" Canvas.Left="475" Canvas.Top="1" HorizontalAlignment="Left" VerticalAlignment="Center" >
                                 <Canvas>
                                     <TextBox x:Name="passive1" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="20" Width="75" Height="22" HorizontalAlignment="Center" VerticalAlignment="Top" />
                                     <TextBox x:Name="passive2" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="50" Width="75" Height="22" HorizontalAlignment="Left" VerticalAlignment="Center" />
@@ -96,7 +96,7 @@
                                     <TextBox x:Name="passive8_fig" Canvas.Left="80" TextWrapping="Wrap" Canvas.Top="230" Width="37" HorizontalAlignment="Center" VerticalAlignment="Top" Height="22" />
                                 </Canvas>
                             </GroupBox>
-                            <GroupBox Header="アシストスキル" Width="130" Height="120" Canvas.Left="475" Canvas.Top="305" HorizontalAlignment="Left" VerticalAlignment="Center" >
+                            <GroupBox x:Name="assistGroupBox" Header="アシストスキル" Width="130" Height="120" Canvas.Left="475" Canvas.Top="305" HorizontalAlignment="Left" VerticalAlignment="Center" >
                                 <Canvas>
                                     <TextBox x:Name ="assist1_name" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="5" Width="71" Height="22" HorizontalAlignment="Left" VerticalAlignment="Top" />
                                     <TextBox x:Name ="assist1_fig_box" Canvas.Left="80" TextWrapping="Wrap" Canvas.Top="5" Width="37" Height="22" HorizontalAlignment="Left" VerticalAlignment="Top"/>
@@ -174,7 +174,7 @@
                             <TextBlock Canvas.Left="340" TextWrapping="Wrap" Text="城壁" Canvas.Top="399" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         </Canvas>
                     </GroupBox>
-                    <GroupBox Header="リーダースキル" Width="130" Height="100" Canvas.Left="615" Canvas.Top="25" HorizontalAlignment="Left" VerticalAlignment="Center" >
+                    <GroupBox x:Name="leaderGroupBox" Header="リーダースキル" Width="130" Height="100" Canvas.Left="615" Canvas.Top="25" HorizontalAlignment="Left" VerticalAlignment="Center" >
                         <Canvas>
                             <TextBox x:Name="leader1" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="20" Width="73" Height="22" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                             <TextBox x:Name="leader1_fig" Canvas.Left="80" TextWrapping="Wrap" Canvas.Top="20" Width="37" Height="22" HorizontalAlignment="Left" VerticalAlignment="Top" />
@@ -182,7 +182,7 @@
                             <TextBox x:Name="leader2_fig" Canvas.Left="80" TextWrapping="Wrap" Canvas.Top="50" Width="37" Height="22" HorizontalAlignment="Left" VerticalAlignment="Top" />
                         </Canvas>
                     </GroupBox>
-                    <GroupBox Header="称号スキル" Width="130" Height="90" Canvas.Left="615" Canvas.Top="130" HorizontalAlignment="Left" VerticalAlignment="Center" >
+                    <GroupBox x:Name="shogoGroupBox" Header="称号スキル" Width="130" Height="90" Canvas.Left="615" Canvas.Top="130" HorizontalAlignment="Left" VerticalAlignment="Center" >
                         <Canvas>
                             <TextBox x:Name="shogo1" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="10" Height="22" Width="73" HorizontalAlignment="Left" VerticalAlignment="Top" />
                             <TextBox x:Name="shogo2" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="40" Height="22" Width="73" HorizontalAlignment="Left" VerticalAlignment="Top" />
@@ -190,7 +190,7 @@
                             <TextBox x:Name="shogo2_fig" Canvas.Left="80" TextWrapping="Wrap" Canvas.Top="40" Height="22" Width="37" HorizontalAlignment="Left" VerticalAlignment="Top" />
                         </Canvas>
                     </GroupBox>
-                    <GroupBox Header="装備スキル" Width="130" Height="220" Canvas.Left="615" Canvas.Top="225" HorizontalAlignment="Left" VerticalAlignment="Center" >
+                    <GroupBox x:Name="equipGroupBox" Header="装備スキル" Width="130" Height="220" Canvas.Left="615" Canvas.Top="225" HorizontalAlignment="Left" VerticalAlignment="Center" >
                         <Canvas>
                             <TextBox x:Name="equipment1_skill1" Canvas.Left="0"  TextWrapping="Wrap" Text="" Canvas.Top="25" Height="22" Width="73" HorizontalAlignment="Left" VerticalAlignment="Top" />
                             <TextBox x:Name="equipment1_skill2" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="55" Height="22" Width="73" HorizontalAlignment="Left" VerticalAlignment="Top" />
@@ -311,7 +311,7 @@
                                         <TextBlock Canvas.Left="311" TextWrapping="Wrap" Text="城壁" Canvas.Top="301" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                         <CheckBox x:Name="enemy_leaderflag" Content="リーダーフラグ" Canvas.Left="309" Canvas.Top="19" Checked="enemy_leader_CheckBox_Checked" Unchecked="enemy_leader_CheckBox_Unchecked" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                         <Button Content="画面から&#x0a;取り込み" Click="enemy_CaptureAndOcrButton_Click" Width="54" Height="48" Canvas.Left="204" Canvas.Top="10" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                                        <GroupBox Header="パッシブスキル" Width="130" Height="271" Canvas.Left="410" HorizontalAlignment="Left" VerticalAlignment="Center" >
+                                        <GroupBox x:Name="enemy_passiveGroupBox" Header="パッシブスキル" Width="130" Height="271" Canvas.Left="410" HorizontalAlignment="Left" VerticalAlignment="Center" >
                                             <Canvas Margin="0,0,0,21">
                                                 <TextBox x:Name="enemy_passive1" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="5" Width="75" Height="22" HorizontalAlignment="Center" VerticalAlignment="Top" TextChanged="enemy_passive1_TextChanged" />
                                                 <TextBox x:Name="enemy_passive2" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="35" Width="75" Height="22" HorizontalAlignment="Left" VerticalAlignment="Center" />
@@ -331,7 +331,7 @@
                                                 <TextBox x:Name="enemy_passive8_fig" Canvas.Left="80" TextWrapping="Wrap" Canvas.Top="215" Width="37" HorizontalAlignment="Center" VerticalAlignment="Top" Height="22" />
                                             </Canvas>
                                         </GroupBox>
-                                        <GroupBox Header="リーダースキル" Width="130" Height="86" Canvas.Left="410" Canvas.Top="271" HorizontalAlignment="Left" VerticalAlignment="Center" >
+                                        <GroupBox x:Name="enemy_leaderGroupBox" Header="リーダースキル" Width="130" Height="86" Canvas.Left="410" Canvas.Top="271" HorizontalAlignment="Left" VerticalAlignment="Center" >
                                             <Canvas>
                                                 <TextBox x:Name="enemy_leader1" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="5" Width="73" Height="22" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                                 <TextBox x:Name="enemy_leader1_fig" Canvas.Left="80" TextWrapping="Wrap" Canvas.Top="5" Width="37" Height="22" HorizontalAlignment="Left" VerticalAlignment="Top" />
@@ -339,7 +339,7 @@
                                                 <TextBox x:Name="enemy_leader2_fig" Canvas.Left="80" TextWrapping="Wrap" Canvas.Top="35" Width="37" Height="22" HorizontalAlignment="Left" VerticalAlignment="Top" />
                                             </Canvas>
                                         </GroupBox>
-                                        <GroupBox Header="アシストスキル" Width="130" Height="120" Canvas.Left="547" HorizontalAlignment="Left" VerticalAlignment="Top" >
+                                        <GroupBox x:Name="enemy_assistGroupBox" Header="アシストスキル" Width="130" Height="120" Canvas.Left="547" HorizontalAlignment="Left" VerticalAlignment="Top" >
                                             <Canvas>
                                                 <TextBox x:Name ="enemy_assist1_name" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="5" Width="71" Height="22" HorizontalAlignment="Left" VerticalAlignment="Top" />
                                                 <TextBox x:Name ="enemy_assist1_fig_box" Canvas.Left="80" TextWrapping="Wrap" Canvas.Top="5" Width="37" Height="22" HorizontalAlignment="Left" VerticalAlignment="Top"/>
@@ -349,7 +349,7 @@
                                                 <TextBox x:Name ="enemy_assist3_fig_box" Canvas.Left="80" TextWrapping="Wrap" Canvas.Top="65" Width="37" Height="22" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                                             </Canvas>
                                         </GroupBox>
-                                        <GroupBox Header="装備スキル" Width="130" Height="220" Canvas.Left="547" Canvas.Top="137" HorizontalAlignment="Center" VerticalAlignment="Top" >
+                                        <GroupBox x:Name="enemy_equipGroupBox" Header="装備スキル" Width="130" Height="220" Canvas.Left="547" Canvas.Top="137" HorizontalAlignment="Center" VerticalAlignment="Top" >
                                             <Canvas>
                                                 <TextBox x:Name="enemy_equipment1_skill1" Canvas.Left="0"  TextWrapping="Wrap" Text="" Canvas.Top="25" Height="22" Width="73" HorizontalAlignment="Left" VerticalAlignment="Top" />
                                                 <TextBox x:Name="enemy_equipment1_skill2" Canvas.Left="0" TextWrapping="Wrap" Text="" Canvas.Top="55" Height="22" Width="73" HorizontalAlignment="Left" VerticalAlignment="Top" />

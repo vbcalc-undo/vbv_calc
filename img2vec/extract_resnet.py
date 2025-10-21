@@ -68,7 +68,7 @@ for _, row in df.iterrows():
         print(f"File not found: {img_file}")
 
 # --- JSON保存 ---
-json_path = "feature_extraction/features.json"
+json_path = "feature_extraction/features_shidan.json"
 os.makedirs(os.path.dirname(json_path), exist_ok=True)
 with open(json_path, "w", encoding="utf-8") as f:
     json.dump(features, f, ensure_ascii=False, indent=2)

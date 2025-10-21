@@ -9,12 +9,14 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
 using System.Windows.Shapes;
 using Tesseract;
 using VBV_calc.Helpers;
@@ -23,6 +25,8 @@ using Windows.Devices.Sensors;
 using Windows.Media.Ocr;
 using static System.Net.Mime.MediaTypeNames;
 using static VBV_calc.MainWindow;
+using Color = System.Drawing.Color;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace VBV_calc
 {
@@ -859,6 +863,7 @@ namespace VBV_calc
         }
         private void enemy_ComboBox_SelectionChanged_character(object sender, SelectionChangedEventArgs e)
         {
+            enemy_enablePassiveChange = false;
             // labelに現在コンボ選択の内容を表示
             //ItemSet tmp = ((ItemSet)CharacterBox.SelectedItem);//表示名はキャストして取りだす
             int count = characters.Count;
@@ -868,6 +873,7 @@ namespace VBV_calc
             enemy_Resync_finalskil();
             calc_final_attack_mag();
             calc_damage();
+            enemy_enablePassiveChange = true;
         }
         // 修正内容: ComboBox の DataSource, DisplayMember, ValueMember は WPF には存在しません。
         // WPF では ItemsSource, DisplayMemberPath, SelectedValuePath を使います。
@@ -1346,8 +1352,63 @@ namespace VBV_calc
             enemy_assistskill3_box.SelectedValuePath = "ItemValue";
             _engine_number.SetVariable("tessedit_char_whitelist", "0123456789"); // 数字のみ
 
+            this.Loaded += MainWindow_Loaded;
+
             _isInitialized = true; // 初期化完了
         }
+
+        private bool enablePassiveChange = true;   // 味方パッシブスキル用
+        private bool enemy_enablePassiveChange = true;     // 敵パッシブスキル用
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            foreach (var gb in new[] { passiveGroupBox, leaderGroupBox, shogoGroupBox, assistGroupBox, equipGroupBox })
+            {
+                AttachTextChangedHandlersLogical(gb, PassiveSkillsChange);
+            }
+            foreach (var gb in new[] { enemy_passiveGroupBox, enemy_leaderGroupBox, enemy_assistGroupBox, enemy_equipGroupBox })
+            {
+                AttachTextChangedHandlersLogical(gb, enemy_PassiveSkillsChange);
+            }
+        }
+
+        private void AttachTextChangedHandlersLogical(DependencyObject parent, TextChangedEventHandler handler)
+        {
+            foreach (var child in LogicalTreeHelper.GetChildren(parent))
+            {
+                if (child is TextBox tb)
+                    tb.TextChanged += handler;
+                else if (child is DependencyObject dobj)
+                    AttachTextChangedHandlersLogical(dobj, handler);
+            }
+        }
+
+        private void PassiveSkillsChange(object sender, TextChangedEventArgs e)
+        {
+            if (!enablePassiveChange) return;  // OFFなら何もしない
+            passive_skills_change();
+        }
+        private void enemy_PassiveSkillsChange(object sender, TextChangedEventArgs e)
+        {
+
+            if (!enemy_enablePassiveChange) return;    // OFFなら無効
+            enemy_passive_skills_change();
+        }
+
+        private void passive_skills_change()
+        {
+            Resync_finalskil();
+            calc_final_attack_mag();
+            calc_damage();
+        }
+
+        private void enemy_passive_skills_change()
+        {
+            enemy_Resync_finalskil();
+            calc_final_attack_mag();
+            calc_damage();
+        }
+
         List<ImageFeature> features;
         private string _Passive1;
 
@@ -2058,7 +2119,7 @@ namespace VBV_calc
             enemy_seisen_value = GetFinalSkillValue("enemy_", "聖戦の導き");
             enemy_jigenzangeki_value = GetFinalSkillValue("enemy_", "次元斬撃");
 
-            enemy_hangekibaika_value = GetFinalSkillValue("enemy_", "反撃倍化");
+            enemy_hangekibaika_value = GetFinalSkillValue("enemy_", "反撃倍加");
             enemy_shinkaku_value = GetFinalSkillValue("enemy_", "心核穿ち");
             enemy_kyojingari_value = GetFinalSkillValue("enemy_", "巨人狩り");
             enemy_hissatuzouka_value = GetFinalSkillValue("enemy_", "必殺増加");
@@ -2099,7 +2160,7 @@ namespace VBV_calc
 
             unmei_value = get_unmei_value();
 
-            DebugTextBox_damage.Text += "==反撃ダメージ計算==n";
+            DebugTextBox_damage.Text += "==反撃ダメージ計算==\n";
 
             //まずはステータス倍率をそれぞれ計算
 
@@ -2156,6 +2217,8 @@ namespace VBV_calc
                 enemy_critical_jougen = 5;
             if (enemy_critical_kakuritu > enemy_critical_jougen)
                 enemy_critical_kakuritu = enemy_critical_jougen;
+            if (enemy_critical_kakuritu < 5)
+                enemy_critical_kakuritu = 5;
             if (enemy_critical_damage_bairitu < 50)
                 enemy_critical_damage_bairitu = 50;
 
@@ -2164,7 +2227,9 @@ namespace VBV_calc
             double enemy_kougeki_bairitu = 1.0 ;
 
             enemy_kougeki_bairitu *= (100.0 + enemy_shinkaku_value) / 100.0;
-            enemy_kougeki_bairitu *= (100.0 + enemy_hangekibaika_value) / 100.0;
+            DebugTextBox_damage.Text += "心核倍率:" + (100.0 + enemy_shinkaku_value) / 100.0 + "\n";
+            enemy_kougeki_bairitu *= (100.0 + 100*enemy_hangekibaika_value) / 100.0;
+            DebugTextBox_damage.Text += "反撃倍加倍率:" + (100.0 + enemy_hangekibaika_value) / 100.0 + "\n";
 
             //防御倍率の計算
             double bougyo_bairitu = 1.0;
@@ -2460,8 +2525,8 @@ namespace VBV_calc
             double critical_ari_damage = ((2.0 * enemy_kougeki_fix + 5.0) * Math.Sqrt(double.Parse(enemy_hpbox.Text) * tokko_bairitu * bougyo_bairitu * block_bairitu * ((100.0+enemy_critical_damage_bairitu)/100.0) * enemy_kougeki_bairitu / 3) / (2.0 + bougyo_fix + joheki_bougyo));
             //統合する。ここでパリングも考慮する。クリティカルなしの時に倍率でかけてしまえばいい。
             DebugTextBox_damage.Text += "敵攻撃力:" + enemy_kougeki_fix + "\n";
-            DebugTextBox_damage.Text += "crikaru:" + critical_ari_damage+ "\n";
-            DebugTextBox_damage.Text += "crinasi:" + critical_nasi_damage + "\n";
+            DebugTextBox_damage.Text += "クリ時ダメージ:" + (int)critical_ari_damage+ "\n";
+            DebugTextBox_damage.Text += "通常ダメージ:" + (int)critical_nasi_damage + "\n";
             DebugTextBox_damage.Text += "クリティカル確率:" + enemy_critical_kakuritu + "\n";
             DebugTextBox_damage.Text += "味方防御力:" + bougyo_fix+ "\n";
 
@@ -2709,7 +2774,7 @@ namespace VBV_calc
                 enemy_kyohu_value = GetFinalSkillValue("enemy_", "恐怖の瞳");
                 enemy_paring_value = GetFinalSkillValue("enemy_", "パリング");
                 //以下反撃計算用
-                enemy_hangekibaika_value = GetFinalSkillValue("enemy_", "反撃倍化");                
+                enemy_hangekibaika_value = GetFinalSkillValue("enemy_", "反撃倍加");                
                 enemy_shinkaku_value = GetFinalSkillValue("enemy_", "心核穿ち");
                 enemy_kyojingari_value = GetFinalSkillValue("enemy_", "巨人狩り");
                 enemy_hissatuzouka_value = GetFinalSkillValue("enemy_", "必殺増加");
@@ -3663,7 +3728,13 @@ namespace VBV_calc
             CollectFinalSkills("", finalskills, leader_flag, current_Character_Status, tokko_box);
             ClearTextBoxes("final", 21);
             SetKeyValueTexts(finalskills, "final");
-            status_calc_fix();
+            int level_value = 1;
+            int bukou_value = 1;
+
+            int.TryParse(levelbox.Text, out level_value);
+            int.TryParse(bukobox.Text, out bukou_value);
+            status_calc_box(level_value,bukou_value);
+            //status_calc_fix();
             // 必要に応じて他のスキルも追加可能
             // finalskills.Add(passive2.Text, passive2_fig.Text);
             // finalskills.Add(passive3.Text, passive3_fig.Text);
@@ -3683,7 +3754,11 @@ namespace VBV_calc
             CollectFinalSkills("enemy_", finalskills, enemy_leader_flag, enemy_current_Character_Status, enemy_tokko_box);
             ClearTextBoxes("enemy_final", 21);
             SetKeyValueTexts(finalskills, "enemy_final");
-            enemy_status_calc_fix();
+            int level_value = 1;
+
+            int.TryParse(enemy_levelbox.Text, out level_value);
+            enemy_status_calc_box(level_value);
+            //enemy_status_calc_fix();
             // 必要に応じて他のスキルも追加可能
             // finalskills.Add(passive2.Text, passive2_fig.Text);
             // finalskills.Add(passive3.Text, passive3_fig.Text);
@@ -3860,7 +3935,9 @@ namespace VBV_calc
         }
         private void ComboBox_SelectionChanged_EquipmentBox1(object sender, SelectionChangedEventArgs e)
         {
+            enablePassiveChange = false;
             exec_equipment1_box();
+            enablePassiveChange = true;
         }
 
         private void enemy_exec_equipment1_box()
@@ -3919,7 +3996,9 @@ namespace VBV_calc
         }
         private void enemy_ComboBox_SelectionChanged_EquipmentBox1(object sender, SelectionChangedEventArgs e)
         {
+            enemy_enablePassiveChange = false;
             enemy_exec_equipment1_box();
+            enemy_enablePassiveChange = true;
         }
         private void exec_equipment2_box()
         {
@@ -4035,12 +4114,17 @@ namespace VBV_calc
         }
         private void ComboBox_SelectionChanged_EquipmentBox2(object sender, SelectionChangedEventArgs e)
         {
+            enablePassiveChange = false;
             exec_equipment2_box();
+            enablePassiveChange = true;
+
         }
 
         private void enemy_ComboBox_SelectionChanged_EquipmentBox2(object sender, SelectionChangedEventArgs e)
         {
+            enemy_enablePassiveChange = false;
             enemy_exec_equipment2_box();
+            enemy_enablePassiveChange = true;
         }
 
         private void TextBox_TextChanged_12(object sender, TextChangedEventArgs e)
@@ -4120,12 +4204,17 @@ namespace VBV_calc
         }
         private void ComboBox_SelectionChanged_ryoshokuBox(object sender, SelectionChangedEventArgs e)
         {
+            enablePassiveChange = false;
             exec_ryoshoku_box();
+            enablePassiveChange = true;
         }
 
         private void enemy_ComboBox_SelectionChanged_ryoshokuBox(object sender, SelectionChangedEventArgs e)
         {
+            enemy_enablePassiveChange = false;
             enemy_exec_ryoshoku_box();
+            enemy_enablePassiveChange = true;
+
         }
         private void exec_shogo1_box()
         {
@@ -4170,8 +4259,9 @@ namespace VBV_calc
         }
         private void shogo1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            enablePassiveChange = false;
             exec_shogo1_box();
-
+            enablePassiveChange = true;
         }
         private void enemy_status_changed(object sender, TextChangedEventArgs e)
         {
@@ -4223,7 +4313,9 @@ namespace VBV_calc
         }
         private void shogo2_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            enablePassiveChange = false;
             exec_shogo2_box();
+            enablePassiveChange = true;
         }
 
         String filter_shokugyo = "";//職業フィルター
@@ -6353,6 +6445,7 @@ namespace VBV_calc
                 MessageBox.Show($"キャプチャ失敗: {hr}");
                 return;
             }
+            enablePassiveChange = false;
 
             using Bitmap bmp = new Bitmap(path);
             // 必要部分を切り抜き
@@ -6369,10 +6462,12 @@ namespace VBV_calc
             popup.Owner = this;
             popup.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             popup.ShowDialog();
+            enablePassiveChange = true;
         }
 
         private void enemy_CaptureAndOcrButton_Click(object sender, RoutedEventArgs e)
         {
+            
             string path = @".\Temp\capture.png";
             int hr = CaptureWrapper.CaptureWindowByTitle("VenusBloodVALKYRIE", path);
             if (hr != 0)
@@ -6380,7 +6475,7 @@ namespace VBV_calc
                 MessageBox.Show($"キャプチャ失敗: {hr}");
                 return;
             }
-
+            enemy_enablePassiveChange = false;
             using Bitmap bmp = new Bitmap(path);
             // 必要部分を切り抜き
             //var cropRect = new System.Drawing.Rectangle(593, 100, 250, 33);//名前
@@ -6396,6 +6491,7 @@ namespace VBV_calc
             popup.Owner = this;
             popup.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             popup.ShowDialog();
+            enemy_enablePassiveChange = true;
         }
 
 

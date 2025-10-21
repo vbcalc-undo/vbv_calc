@@ -1,15 +1,41 @@
-﻿using JsonFileIO.Jsons;
+﻿using Emgu.CV;
+using Emgu.CV;
+using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Features2D;
+using Emgu.CV.Features2D;
+using Emgu.CV.Structure;
+using Emgu.CV.Structure;
+using Emgu.CV.Structure;
+using Emgu.CV.Util;
+using Emgu.CV.Util;
+using Emgu.CV.XObjdetect;
 using JsonFileIO.Jsons;
+using JsonFileIO.Jsons;
+using MathNet.Numerics.LinearAlgebra;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using Newtonsoft.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System;
+using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing;           // Bitmap, Color, Rectangle
 using System.Drawing.Drawing2D;
+using System.Drawing.Drawing2D; // Graphics の補助
 using System.Drawing.Imaging;
 using System.IO;
+using System.IO;
+using System.Linq;              // LINQ（Concat, Sum など）
+using System.Numerics;
+using System.Printing;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -25,7 +51,8 @@ using VBV_calc.Models;
 using Windows.Devices.Sensors;
 using Windows.Media.Ocr;
 using Windows.UI.ViewManagement;
-
+using Rectangle = System.Drawing.Rectangle;
+using Size = System.Drawing.Size;
 
 namespace VBV_Screen2Wiki
 {
@@ -139,7 +166,7 @@ namespace VBV_Screen2Wiki
         private string inputName_job;
         private string inputName_leader;
 
-        class ImageFeature
+        public class ImageFeature
         {
             public string Id { get; set; }
             public float[] Feature { get; set; }
@@ -232,16 +259,73 @@ namespace VBV_Screen2Wiki
             load_json_equipment_func(@"./json/equipments\soubi_ryoushoku.json", "糧食");
         }
 
+
+
         private void box_to_markdown(bool save_flag)
         {
+            ItemSet soubi1 = (ItemSet)EquipmentBox1.SelectedItem;
+            ItemSet soubi2 = (ItemSet)EquipmentBox2.SelectedItem;
+            ItemSet ryoshoku = (ItemSet)ryoshokuBox.SelectedItem;
+            string soubi1_text = soubi1.ItemDisp;
+            string soubi2_text = soubi2.ItemDisp;
+            string ryoshoku_text = ryoshoku.ItemDisp;
+
+            int hp = 0;
+            int kou = 0;
+            int bou = 0;
+            int soku = 0;
+            int chiryoku = 0;
+            foreach (var equip in all_equipments)
+            {
+                var target = equip.Value.FirstOrDefault(f => f.名称 == soubi1_text);
+                if (target != null)
+                {
+                    kou += int.Parse(target.性能変化_攻);
+                    bou += int.Parse(target.性能変化_防);
+                    soku += int.Parse(target.性能変化_速);
+                    chiryoku += int.Parse(target.性能変化_知);
+                }
+                var target2 = equip.Value.FirstOrDefault(f => f.名称 == soubi2_text);
+                if (target2 != null)
+                {
+                    kou += int.Parse(target2.性能変化_攻);
+                    bou += int.Parse(target2.性能変化_防);
+                    soku += int.Parse(target2.性能変化_速);
+                    chiryoku += int.Parse(target2.性能変化_知);
+                }
+                var target3 = equip.Value.FirstOrDefault(f => f.名称 == ryoshoku_text);
+                if (target3 != null)
+                {
+                    kou += int.Parse(target3.性能変化_攻);
+                    bou += int.Parse(target3.性能変化_防);
+                    soku += int.Parse(target3.性能変化_速);
+                    chiryoku += int.Parse(target3.性能変化_知);
+                }
+            }
+            hp = int.Parse(hp_box.Text);
+            int temp_kou = int.Parse(kougeki_box.Text) - kou;
+            int temp_bou = int.Parse(bougyo_box.Text) - bou;
+            int temp_soku = int.Parse(sokudo_box.Text) - soku;
+            int temp_chiryoku = int.Parse(chiryoku_box.Text) - chiryoku;
+
+            int level_value = int.Parse(level_box.Text);
+
+            int keikenti = 50 * (level_value * level_value) - (100 * level_value) + 50;
+            double level1 = 1.0 + Math.Sqrt(keikenti) / 1000.0;
+            double level2 = Math.Sqrt(keikenti) / 50.0;
+
+            int kihon_hp = (int)((hp)/ ((level_value - 1.0) / 4.0 + 1.0) + 1);
+            int kihon_kou = (int)((temp_kou - level2) / level1)+1;
+            int kihon_bou = (int)((temp_bou - level2) / level1) + 1;
+            int kihon_soku = (int)((temp_soku - level2) / level1) + 1;
+            int kihon_chiryoku = (int)((temp_chiryoku - level2) / level1) + 1;
+
+
+
+
             string name = Name_box.Text?.Trim() ?? "";
             string kago = kago_box.Text?.Trim() ?? "";
             string shokugyou = shokugyou_box.Text?.Trim() ?? "";
-            string hp = hp_box.Text?.Trim() ?? "";
-            string kougeki = kougeki_box.Text?.Trim() ?? "";
-            string bougyo = bougyo_box.Text?.Trim() ?? "";
-            string sokudo = sokudo_box.Text?.Trim() ?? "";
-            string chiryoku = chiryoku_box.Text?.Trim() ?? "";
             string shuzoku = shuzoku_box.Text?.Trim() ?? "";
             string tokkou = tokkou_box.Text?.Trim() ?? "";
             string soubi = soubi_box.Text?.Trim() ?? "";
@@ -264,22 +348,29 @@ namespace VBV_Screen2Wiki
             int[] passive_figs = new int[8];
             TextBox[] passive_boxes =
             {
-                passive1_box, passive2_box, passive3_box, passive4_box,
-                passive5_box, passive6_box, passive7_box, passive8_box
+                passive1_figure, passive2_figure, passive3_figure, passive4_figure,
+                passive5_figure, passive6_figure, passive7_figure, passive8_figure
             };
             for (int i = 0; i < passive_boxes.Length; i++)
             {
                 int.TryParse(passive_boxes[i].Text?.Trim() ?? "", out passive_figs[i]);
             }
+            int leader1_fig = 0;
+            int leader2_fig = 0;
+            int assist_fig = 0;
+
+            int.TryParse(leader1_figure.Text?.Trim() ?? "", out leader1_fig);
+            int.TryParse(leader1_figure.Text?.Trim() ?? "", out leader2_fig);
+            int.TryParse(assist_figure.Text?.Trim() ?? "", out assist_fig);
 
             wikitext_box.Text = hozon_text+"|"+name;
             wikitext_box.Text += "|" + kago;
             wikitext_box.Text += "|" + shokugyou;
-            wikitext_box.Text += "|" + hp;
-            wikitext_box.Text += "|" + kougeki;
-            wikitext_box.Text += "|" + bougyo;
-            wikitext_box.Text += "|" + sokudo;
-            wikitext_box.Text += "|" + chiryoku;
+            wikitext_box.Text += "|" + kihon_hp;
+            wikitext_box.Text += "|" + kihon_kou;
+            wikitext_box.Text += "|" + kihon_bou;
+            wikitext_box.Text += "|" + kihon_soku;
+            wikitext_box.Text += "|" + kihon_chiryoku;
             wikitext_box.Text += "|" + shuzoku;
             wikitext_box.Text += "|" + tokkou;
             wikitext_box.Text += "|" + soubi;
@@ -326,8 +417,22 @@ namespace VBV_Screen2Wiki
                 wikitext_box.Text += "[" + passive_figs[7] + "]";
             }
             wikitext_box.Text += "|" + leader1;
+
+            if (leader1_fig != 0)
+            {
+                wikitext_box.Text += "[" + leader1_fig + "]";
+            }
+            wikitext_box.Text += "&br;" + leader2;
+            if (leader2_fig != 0)
+            {
+                wikitext_box.Text += "[" + leader2_fig + "]";
+            }
             wikitext_box.Text += "&br;" + leader2;
             wikitext_box.Text += "|" + assist;
+            if (assist_fig != 0)
+            {
+                wikitext_box.Text += "[" + assist_fig + "]";
+            }
             wikitext_box.Text += "|" + naisei;
             wikitext_box.Text += "|" + sutance;
             wikitext_box.Text += "|" + bikou;
@@ -345,7 +450,7 @@ namespace VBV_Screen2Wiki
 
         private void Name_box_TextChanged(object sender, TextChangedEventArgs e)
         {
-            box_to_markdown(false);
+            //box_to_markdown(false);
         }
         // グレースケール変換
         private Bitmap ToGrayscale(Bitmap original)
@@ -656,12 +761,43 @@ namespace VBV_Screen2Wiki
             }
         }
 
+        public void SelectMostSimilarSkill_leader(string input, int skillnum)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return;
+
+            input = Normalize(input);
+
+            var bestMatch = all_skils
+                .Where(e => !string.IsNullOrWhiteSpace(e))
+                .Select(e => new
+                {
+                    Item = e,
+                    Score = JaroWinklerSimilarity(Normalize(e), input)
+                })
+                .OrderByDescending(x => x.Score)
+                .FirstOrDefault()?.Item;
+            if (bestMatch != null)
+            {
+                ((TextBox)FindName($"leader{skillnum}_box"))!.Text = bestMatch;
+            }
+            else
+            {
+                ((TextBox)FindName($"leader{skillnum}_box"))!.Text = "";
+            }
+        }
 
         private void Save_Button_Click(object sender, RoutedEventArgs e)
         {
             box_to_markdown(true);
         }
+        private void henkan_Button_Click(object sender, RoutedEventArgs e)
+        {
 
+
+
+            box_to_markdown(false);
+        }
         private void ComboBox_SelectionChanged_EquipmentBox1(object sender, SelectionChangedEventArgs e)
         {
 
@@ -677,122 +813,446 @@ namespace VBV_Screen2Wiki
 
         }
 
-        public string LoadFromGame_MobileNetV2_NCHW(int sw, int sh, int ew, int eh, int getFlag, float colorWeight = 1.0f)
+
+        public class ImageSearcher
         {
-            // 1. 元画像ロード & クロップ
-            using var tempBmp = new Bitmap(@".\Temp\capture_2wiki.png");
-            using var cropped = tempBmp.Clone(new System.Drawing.Rectangle(sw, sh, ew, eh), tempBmp.PixelFormat);
 
-            // デバッグ用
-            cropped.Save(@".\Temp\capture_2_icon.png", System.Drawing.Imaging.ImageFormat.Png);
+            private List<ImageFeature> features_job;
+            private List<ImageFeature> features_equipment;
+            private List<ImageFeature> features_leader;
+            private List<ImageFeature> features_element;
 
-            // 2. getFlagに応じたデータセット切り替え
-            Bitmap reusableBitmap;
-            float[] reusableTensorBuffer;
-            string inputName;
-            Dictionary<string, string> idNameMap;
-            List<ImageFeature> features;
+            private Dictionary<string, string> idNameMap_job;
+            private Dictionary<string, string> idNameMap_equipment;
+            private Dictionary<string, string> idNameMap_leader;
+            private Dictionary<string, string> idNameMap_element;
 
-            switch (getFlag)
+            private Bitmap reusableBitmap_job;
+            private Bitmap reusableBitmap_equipment;
+            private Bitmap reusableBitmap_leader;
+            private Bitmap reusableBitmap_element;
+
+
+            // ===============================================================
+            // 🧠 初期化：ここで全データをロードしておく
+            // ===============================================================
+            public void Initialize()
             {
-                case 0:
-                    reusableBitmap = reusableBitmap_job;
-                    reusableTensorBuffer = reusableTensorBuffer_job;
-                    inputName = inputName_job;
-                    features = features_job;
-                    idNameMap = idNameMap_job;
-                    break;
-                case 1:
-                    reusableBitmap = reusableBitmap_equipment;
-                    reusableTensorBuffer = reusableTensorBuffer_equipment;
-                    inputName = inputName_equipment;
-                    features = features_equipment;
-                    idNameMap = idNameMap_equipment;
-                    break;
-                case 2:
-                    reusableBitmap = reusableBitmap_leader;
-                    reusableTensorBuffer = reusableTensorBuffer_leader;
-                    inputName = inputName_leader;
-                    features = features_leader;
-                    idNameMap = idNameMap_leader;
-                    break;
-                case 3:
-                default:
-                    reusableBitmap = reusableBitmap_element;
-                    reusableTensorBuffer = reusableTensorBuffer_element;
-                    inputName = inputName_element;
-                    features = features_element;
-                    idNameMap = idNameMap_element;
-                    break;
+                string csvPath_element = @"feature_extraction/element_list.csv";                   // ID→名前
+                string csvPath_job = @"feature_extraction/job_list.csv";                   // ID→名前
+                string csvPath_equipment = @"feature_extraction/equipment_list.csv";                   // ID→名前
+                string csvPath_leader = @"feature_extraction/leader_list.csv";                   // ID→名前
+
+                // 各カテゴリの特徴量JSONをロード
+                features_job = LoadFeaturesFromJson(@".\feature_extraction/features_job.json", out idNameMap_job);
+                features_equipment = LoadFeaturesFromJson(@".\feature_extraction/features_equipment.json", out idNameMap_equipment);
+                features_leader = LoadFeaturesFromJson(@".\feature_extraction/features_leader.json", out idNameMap_leader);
+                features_element = LoadFeaturesFromJson(@".\feature_extraction/features_element.json", out idNameMap_element);
+
+                // 使い回す描画用ビットマップを確保（56×56に指定）
+                reusableBitmap_job = new Bitmap(56, 56);
+                reusableBitmap_equipment = new Bitmap(56, 56);
+                reusableBitmap_leader = new Bitmap(56, 56);
+                reusableBitmap_element = new Bitmap(56, 56);
+                idNameMap_element = File.ReadAllLines(csvPath_element)
+                .Skip(1)
+                .Select(line => line.Split(','))
+                .ToDictionary(parts => parts[1], parts => parts[2]);
+                idNameMap_job = File.ReadAllLines(csvPath_job)
+                .Skip(1)
+                .Select(line => line.Split(','))
+                .ToDictionary(parts => parts[1], parts => parts[2]);
+                idNameMap_equipment = File.ReadAllLines(csvPath_equipment)
+                .Skip(1)
+                .Select(line => line.Split(','))
+                .ToDictionary(parts => parts[1], parts => parts[2]);
+                idNameMap_leader = File.ReadAllLines(csvPath_leader)
+                .Skip(1)
+                .Select(line => line.Split(','))
+                .ToDictionary(parts => parts[1], parts => parts[2]);
+
             }
 
-            // 3. 224x224にリサイズ
-            using var g = Graphics.FromImage(reusableBitmap);
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.CompositingQuality = CompositingQuality.HighQuality;
-            g.DrawImage(cropped, 0, 0, 224, 224);
 
-            // 4. 軽いシャープを適用
-            using var sharpened = ApplySharpenLight(reusableBitmap);
-
-            // 5. Tensor変換 (NCHW, MobileNetV2 [-1,1])
-            int width = 224;
-            int height = 224;
-            int hw = width * height;
-            int idxR = 0;
-            int idxG = hw;
-            int idxB = hw * 2;
-
-            for (int y = 0; y < height; y++)
+            private List<ImageFeature> LoadFeaturesFromJson(string featureJsonPath, out Dictionary<string, string> idNameMap)
             {
-                for (int x = 0; x < width; x++)
+                idNameMap = new Dictionary<string, string>();
+
+                if (!File.Exists(featureJsonPath))
+                    throw new FileNotFoundException($"Feature JSON not found: {featureJsonPath}");
+
+                string jsonText = File.ReadAllText(featureJsonPath);
+
+                // JObjectでパースして柔軟に処理
+                var obj = JObject.Parse(jsonText);
+                var featuresList = new List<ImageFeature>();
+
+                foreach (var kv in obj)
                 {
-                    Color c = sharpened.GetPixel(x, y);
-                    reusableTensorBuffer[idxR++] = c.R / 127.5f - 1f;
-                    reusableTensorBuffer[idxG++] = c.G / 127.5f - 1f;
-                    reusableTensorBuffer[idxB++] = c.B / 127.5f - 1f;
+                    string id = kv.Key;
+                    JArray arr = (JArray)kv.Value;
+
+                    // double[] → float[] に変換
+                    float[] feature = arr.Select(v => (float)v.Value<double>()).ToArray();
+
+                    featuresList.Add(new ImageFeature { Id = id, Feature = feature });
+                    idNameMap[id] = id;
                 }
+
+                return featuresList;
             }
 
-            // 6. CNN特徴抽出 (MobileNetV2)
-            using var results = session.Run(new[] {
-        NamedOnnxValue.CreateFromTensor(inputName,
-            new DenseTensor<float>(reusableTensorBuffer, new[] {1, 3, 224, 224}))
-    });
-            float[] cnnFeature = results.First().AsEnumerable<float>().ToArray();
-            cnnFeature = Normalize_chara(cnnFeature);
-
-            // 7. 色特徴抽出
-            float[] colorFeature = GetColorFeatureExtended(reusableBitmap); // RGB平均 + RGBヒスト + HSVヒスト
-            colorFeature = Normalize_chara(colorFeature);
-
-            // 8. CNN + 色特徴結合
-            float[] queryFeature = colorWeight <= 0f
-                ? cnnFeature
-                : Normalize_chara(cnnFeature.Concat(colorFeature.Select(v => v * colorWeight)).ToArray());
-
-            // 9. 類似度計算
-            float bestScore = float.MinValue;
-            string bestName = "";
-            foreach (var f in features)
+            public void LoadFeatureJson(string featureJsonPath, string csvPath, int getFlag)
             {
-                if (f.Feature.Length != queryFeature.Length) continue;
-                float score = Cosine(f.Feature, queryFeature);
-                if (score > bestScore)
+                // JSON 読み込み
+                string jsonText = File.ReadAllText(featureJsonPath);
+                var dict = JsonConvert.DeserializeObject<Dictionary<string, float[]>>(jsonText);
+                List<ImageFeature> featuresList = dict.Select(kv => new ImageFeature
                 {
-                    bestScore = score;
-                    bestName = idNameMap[f.Id];
+                    Id = kv.Key,
+                    Feature = kv.Value
+                }).ToList();
+                foreach (var kv in dict)
+                {
+                    featuresList.Add(new ImageFeature { Id = kv.Key, Feature = kv.Value });
                 }
-                Debug.WriteLine($"{idNameMap[f.Id]} : {score}");
-            }
-            Debug.WriteLine($"CNN feature: min={cnnFeature.Min()}, max={cnnFeature.Max()}");
-            Debug.WriteLine($"Color feature: min={colorFeature.Min()}, max={colorFeature.Max()}");
-            Debug.WriteLine($"Query feature length: {queryFeature.Length}");
-            if (bestScore < 0.3f)
-                bestName = "";
 
-            return bestName;
+                // getFlag に応じて対象のリストとマップを選択
+                List<ImageFeature> targetFeatures;
+                Dictionary<string, string> targetIdNameMap;
+                switch (getFlag)
+                {
+                    case 0:
+                        targetFeatures = features_job;
+                        targetIdNameMap = idNameMap_job;
+                        break;
+                    case 1:
+                        targetFeatures = features_equipment;
+                        targetIdNameMap = idNameMap_equipment;
+                        break;
+                    case 2:
+                        targetFeatures = features_leader;
+                        targetIdNameMap = idNameMap_leader;
+                        break;
+                    default:
+                        targetFeatures = features_element;
+                        targetIdNameMap = idNameMap_element;
+                        break;
+                }
+
+                targetFeatures.Clear();
+                targetFeatures.AddRange(featuresList);
+
+                // CSV から ID→名前マップ作成
+                foreach (var line in File.ReadAllLines(csvPath).Skip(1))
+                {
+                    var tokens = line.Split(',');
+                    string id = tokens[1];
+                    string name = tokens[2];
+                    targetIdNameMap[id] = name;
+                }
+
+                Console.WriteLine($"✅ Loaded {targetFeatures.Count} features from JSON for getFlag={getFlag}");
+            }
+            // ==================== 前処理 ====================
+            private Mat PreprocessEnhanced(Mat mat)
+            {
+                Mat blurred = new Mat();
+                CvInvoke.GaussianBlur(mat, blurred, new Size(0, 0), 1);
+                CvInvoke.AddWeighted(mat, 1.5, blurred, -0.5, 0, mat);
+
+                Mat gray = new Mat();
+                CvInvoke.CvtColor(mat, gray, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
+                CvInvoke.EqualizeHist(gray, gray);
+
+                return gray;
+            }
+
+            private Mat BitmapToMat(Bitmap bmp) => bmp.ToMat();
+
+            // ==================== 特徴抽出 ====================
+            private float[] ExtractORB(Mat gray, int maxFeatures = 500)
+            {
+                ORB orb = new ORB(maxFeatures);
+                Emgu.CV.Util.VectorOfKeyPoint kps = new Emgu.CV.Util.VectorOfKeyPoint();
+                Mat des = new Mat();
+                orb.DetectAndCompute(gray, null, kps, des, false);
+
+                if (des.IsEmpty)
+                    return new float[32 * maxFeatures];
+
+                float[] arr = new float[des.Rows * des.Cols];
+                des.CopyTo(arr);
+                if (arr.Length < 32 * maxFeatures)
+                    arr = arr.Concat(new float[32 * maxFeatures - arr.Length]).ToArray();
+                return NormalizeL2(arr);
+            }
+
+            private float[] ExtractCombinedFeatureFloat(Mat gray) => ExtractORB(gray);
+
+            private float[] NormalizeL2(float[] vec)
+            {
+                double norm = Math.Sqrt(vec.Sum(x => x * x));
+                if (norm < 1e-10) return vec;
+                return vec.Select(x => (float)(x / norm)).ToArray();
+            }
+
+            private float Cosine(float[] a, float[] b)
+            {
+                float dot = 0, normA = 0, normB = 0;
+                for (int i = 0; i < a.Length; i++)
+                {
+                    dot += a[i] * b[i];
+                    normA += a[i] * a[i];
+                    normB += b[i] * b[i];
+                }
+                return dot / ((float)Math.Sqrt(normA) * (float)Math.Sqrt(normB) + 1e-10f);
+            }
+
+            // ==================== 推論 ====================
+
+            public string LoadFromGame_ClassicFeature(Bitmap inputBmp, int sw, int sh, int ew, int eh, int getFlag)
+            {
+                Bitmap reusableBitmap;
+                List<ImageFeature> features;
+                Dictionary<string, string> idNameMap;
+                // --- 念のため初期化 ---
+                if (reusableBitmap_job == null) reusableBitmap_job = new Bitmap(56, 56);
+                if (reusableBitmap_equipment == null) reusableBitmap_equipment = new Bitmap(56, 56);
+                if (reusableBitmap_leader == null) reusableBitmap_leader = new Bitmap(56, 56);
+                if (reusableBitmap_element == null) reusableBitmap_element = new Bitmap(56, 56);
+                switch (getFlag)
+                {
+                    case 0:
+                        reusableBitmap = reusableBitmap_job;
+                        features = features_job;
+                        idNameMap = idNameMap_job;
+                        break;
+                    case 1:
+                        reusableBitmap = reusableBitmap_equipment;
+                        features = features_equipment;
+                        idNameMap = idNameMap_equipment;
+                        break;
+                    case 2:
+                        reusableBitmap = reusableBitmap_leader;
+                        features = features_leader;
+                        idNameMap = idNameMap_leader;
+                        break;
+                    default:
+                        reusableBitmap = reusableBitmap_element;
+                        features = features_element;
+                        idNameMap = idNameMap_element;
+                        break;
+                }
+
+                // ---------------- クロップ ----------------
+                using var cropped = inputBmp.Clone(new Rectangle(sw, sh, ew, eh), inputBmp.PixelFormat);
+
+                // ---------------- リサイズ ----------------
+                using (var g = Graphics.FromImage(reusableBitmap))
+                {
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.CompositingQuality = CompositingQuality.HighQuality;
+                    g.DrawImage(cropped, 0, 0, 56, 56);
+                }
+
+                // ---------------- 前処理 ----------------
+                Mat mat = BitmapToMat(reusableBitmap);
+                Mat preprocessed = PreprocessEnhanced(mat);
+
+                // ---------------- 特徴量抽出 ----------------
+                float[] queryFeature = ExtractCombinedFeatureFloat(preprocessed);
+
+                // ---------------- 類似度計算 ----------------
+                float bestScore = float.MinValue;
+                string bestName = "";
+                foreach (var f in features)
+                {
+                    if (f.Feature.Length != queryFeature.Length) continue;
+                    float score = Cosine(f.Feature, queryFeature);
+                    Debug.WriteLine("name:"+idNameMap[f.Id]+" score"+score);
+                    if (score > bestScore)
+                        bestName = idNameMap[f.Id];
+                }
+
+                if (bestScore < 0.3f)
+                    bestName = "";
+
+                return bestName;
+            }
+
+            // ==================== 前処理 ====================
+            private Mat PreprocessEnhanced(Bitmap bmp, int size = 56)
+            {
+                // 1. リサイズ
+                Bitmap resized = new Bitmap(size, size);
+                using (Graphics g = Graphics.FromImage(resized))
+                {
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.CompositingQuality = CompositingQuality.HighQuality;
+                    g.DrawImage(bmp, 0, 0, size, size);
+                }
+
+                // 2. Bitmap -> Mat
+                Mat mat = resized.ToMat();
+
+                // 3. シャープ化
+                Mat blurred = new Mat();
+                CvInvoke.GaussianBlur(mat, blurred, new Size(0, 0), 1);
+                CvInvoke.AddWeighted(mat, 1.5, blurred, -0.5, 0, mat);
+
+                // 4. グレースケール + 局所コントラスト強調
+                Mat gray = new Mat();
+                CvInvoke.CvtColor(mat, gray, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
+                CvInvoke.EqualizeHist(gray, gray);
+
+                return gray;
+            }
+
+            // ==================== 特徴量抽出 ====================
+            private float[] ExtractORB_fix(Mat gray, int maxFeatures = 500)
+            {
+                ORB orb = new ORB(maxFeatures);
+                VectorOfKeyPoint kps = new VectorOfKeyPoint();
+                Mat des = new Mat();
+                orb.DetectAndCompute(gray, null, kps, des, false);
+
+                if (des.IsEmpty)
+                    return new float[32 * maxFeatures];
+
+                float[] arr = new float[des.Rows * des.Cols];
+                des.CopyTo(arr);
+                if (arr.Length < 32 * maxFeatures)
+                    arr = arr.Concat(new float[32 * maxFeatures - arr.Length]).ToArray();
+                return NormalizeL2_fix(arr);
+            }
+
+            private float[] ExtractHOG(Mat gray)
+            {
+                HOGDescriptor hog = new HOGDescriptor(new Size(56, 56), new Size(8, 8), new Size(4, 4), new Size(8, 8), 9);
+                float[] descriptor = hog.Compute(gray);
+                return NormalizeL2_fix(descriptor);
+            }
+
+            private float[] ExtractLBP(Mat gray, int blockRows = 16, int blockCols = 16)
+            {
+                var imgData = gray.ToImage<Gray, byte>().Data;
+                int h = imgData.GetLength(0);
+                int w = imgData.GetLength(1);
+                List<float> feature = new List<float>();
+
+                int blockH = h / blockRows;
+                int blockW = w / blockCols;
+
+                for (int by = 0; by < blockRows; by++)
+                {
+                    for (int bx = 0; bx < blockCols; bx++)
+                    {
+                        List<int> codes = new List<int>();
+                        for (int y = 0; y < blockH; y++)
+                            for (int x = 0; x < blockW; x++)
+                                codes.Add(imgData[by * blockH + y, bx * blockW + x, 0]);
+
+                        double[] hist = new double[10]; // uniform LBP の簡易化
+                        foreach (var c in codes)
+                            hist[c % 10] += 1;
+                        hist = hist.Select(v => v / codes.Count).ToArray();
+                        feature.AddRange(hist.Select(v => (float)v));
+                    }
+                }
+
+                return NormalizeL2_fix(feature.ToArray());
+            }
+
+            private float[] ExtractCombinedFeature(Mat gray)
+            {
+                var orb = ExtractORB(gray);
+                var hog = ExtractHOG(gray);
+                var lbp = ExtractLBP(gray);
+                return NormalizeL2_fix(orb.Concat(hog).Concat(lbp).ToArray());
+            }
+
+            private float[] NormalizeL2_fix(float[] vec)
+            {
+                double norm = Math.Sqrt(vec.Sum(x => x * x));
+                if (norm < 1e-10) return vec;
+                return vec.Select(x => (float)(x / norm)).ToArray();
+            }
+
+            public string Predict(Bitmap inputBmp, int sw, int sh, int ew, int eh, int getFlag)
+            {
+
+                Bitmap reusableBitmap;
+                List<ImageFeature> features;
+                Dictionary<string, string> idNameMap;
+                // --- 念のため初期化 ---
+                if (reusableBitmap_job == null) reusableBitmap_job = new Bitmap(56, 56);
+                if (reusableBitmap_equipment == null) reusableBitmap_equipment = new Bitmap(56, 56);
+                if (reusableBitmap_leader == null) reusableBitmap_leader = new Bitmap(56, 56);
+                if (reusableBitmap_element == null) reusableBitmap_element = new Bitmap(56, 56);
+                switch (getFlag)
+                {
+                    case 0:
+                        reusableBitmap = reusableBitmap_job;
+                        features = features_job;
+                        idNameMap = idNameMap_job;
+                        break;
+                    case 1:
+                        reusableBitmap = reusableBitmap_equipment;
+                        features = features_equipment;
+                        idNameMap = idNameMap_equipment;
+                        break;
+                    case 2:
+                        reusableBitmap = reusableBitmap_leader;
+                        features = features_leader;
+                        idNameMap = idNameMap_leader;
+                        break;
+                    default:
+                        reusableBitmap = reusableBitmap_element;
+                        features = features_element;
+                        idNameMap = idNameMap_element;
+                        break;
+                }
+
+                // ---------------- クロップ ----------------
+                using var cropped = inputBmp.Clone(new Rectangle(sw, sh, ew, eh), inputBmp.PixelFormat);
+
+                // ---------------- リサイズ ----------------
+                using (var g = Graphics.FromImage(reusableBitmap))
+                {
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    g.CompositingQuality = CompositingQuality.HighQuality;
+                    g.DrawImage(cropped, 0, 0, 56, 56);
+                }
+
+                Mat gray = PreprocessEnhanced(reusableBitmap);
+                float[] queryFeat = ExtractCombinedFeature(gray);
+
+                float bestScore = float.MinValue;
+                string bestName = "";
+                foreach (var f in features)
+                {
+                    if (f.Feature.Length != queryFeat.Length) continue;
+                    float score = Cosine(f.Feature, queryFeat);
+                    if (idNameMap.TryGetValue(f.Id, out var name))
+                        System.Diagnostics.Debug.WriteLine($"{name} ({f.Id}) : {score:F6}");
+                    else
+                        System.Diagnostics.Debug.WriteLine($"{f.Id} : {score:F6}");
+
+                    if (score > bestScore)
+                    {
+                        bestScore = score;
+                        bestName = idNameMap[f.Id];
+                    }
+                }
+                System.Diagnostics.Debug.WriteLine($"Best score: {bestScore:F6}, Best name: {bestName}");
+                if (bestScore < 0.52f) bestName = "";
+                return bestName;
+            }
+
         }
 
 
@@ -1292,23 +1752,67 @@ namespace VBV_Screen2Wiki
                 var noSpace_in = cropedAndselect_number(cropRects_figure[i], 2, 200);
                 passiveFigures[i].Text = noSpace_in;
             }
-            string temp = LoadFromGame_MobileNetV2_NCHW(590, 330, 25, 25, 3,1);
+
+            ImageSearcher ImgSch =new ImageSearcher();
+            using var tempBmp = new Bitmap(@".\Temp\capture_2wiki.png");
+
+            ImgSch.Initialize();
+
+            string temp = ImgSch.Predict(tempBmp,590, 330, 25, 25, 3);
             kago_box.Text = temp;
-            temp = LoadFromGame_MobileNetV2_NCHW(615, 330, 25, 25, 3,1);
+            temp = ImgSch.Predict(tempBmp, 615, 330, 25, 25, 3);
             kago_box.Text += temp;
-
-            temp = LoadFromGame_MobileNetV2_NCHW(590, 355, 25, 25, 0, 1);
+            temp = ImgSch.Predict(tempBmp, 590, 355, 25, 25, 0);
             shokugyou_box.Text = temp;
-
-            temp = LoadFromGame_MobileNetV2_NCHW(865, 370, 30, 30, 2, 1);
+            temp = ImgSch.Predict(tempBmp, 865, 370, 30, 30, 2);
             stance_box.Text = temp;
-
-            temp = LoadFromGame_MobileNetV2_NCHW(594, 645, 25, 25, 1, 1);
+            temp = ImgSch.Predict(tempBmp, 594, 645, 25, 25, 1);
             soubi_box.Text = temp;
-
-            temp = LoadFromGame_MobileNetV2_NCHW(594, 670, 25, 25, 1, 1);
+            temp = ImgSch.Predict(tempBmp, 594, 670, 25, 25, 1);
             soubi_box.Text += "&br;" + temp;
 
+            int leader_figure = 0;
+
+            var cropRect_leader1 = new System.Drawing.Rectangle(
+                (int)(1140 * scaleX),
+                (int)(560 * scaleY),
+                (int)(50 * scaleX),
+                (int)(22 * scaleY));
+            noSpace = cropedAndselect(cropRect_leader1, 2, skill_th);
+            SelectMostSimilarSkill_leader(noSpace, 1);
+            var cropRect_leader1_fig = new System.Drawing.Rectangle(
+                (int)(1238 * scaleX),
+                (int)(560 * scaleY),
+                (int)(50 * scaleX),
+                (int)(22 * scaleY));
+            noSpace = cropedAndselect_number(cropRect_leader1_fig, 2, 100);
+            int.TryParse(noSpace, out leader_figure);
+            leader1_figure.Text = leader_figure.ToString();
+
+            var cropRect_leader2 = new System.Drawing.Rectangle(
+            (int)(1140 * scaleX),
+            (int)(576 * scaleY),
+            (int)(50 * scaleX),
+            (int)(22 * scaleY));
+            noSpace = cropedAndselect(cropRect_leader1, 2, skill_th);
+            SelectMostSimilarSkill_leader(noSpace, 2);
+            var cropRect_leader2_fig = new System.Drawing.Rectangle(
+                (int)(1238 * scaleX),
+                (int)(560 * scaleY),
+                (int)(50 * scaleX),
+                (int)(22 * scaleY));
+            noSpace = cropedAndselect_number(cropRect_leader2_fig, 2, 200);
+            int.TryParse(noSpace, out leader_figure);
+            leader2_figure.Text = leader_figure.ToString();
+
+
+            int assist_figure = 0;
+            var cropRect_assist = new System.Drawing.Rectangle(
+                (int)(1140 * scaleX),
+                (int)(795 * scaleY),
+                (int)(50 * scaleX),
+                (int)(22 * scaleY));
+            level_box.Text = status_level.ToString();
             hp_box.Text = status_hp.ToString();
             kougeki_box.Text = status_kougeki.ToString();
             bougyo_box.Text = status_bougyo.ToString();
@@ -1327,5 +1831,6 @@ namespace VBV_Screen2Wiki
         {
 
         }
+
     }
 }
