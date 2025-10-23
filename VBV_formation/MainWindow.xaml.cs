@@ -19,6 +19,7 @@ using System.Xml.Linq;
 using VBV_calc;
 using VBV_calc.Helpers;
 using VBV_calc.Models;
+using Windows.UI.ViewManagement;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using static VBV_calc.MainWindow;
 using Brush = System.Windows.Media.Brush;
@@ -444,6 +445,7 @@ namespace VBV_formation
 
             string json = File.ReadAllText(jsonPath);
             featureDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, float[]>>(json);
+            features = featureDict.Select(kv => new ImageFeature { Id = kv.Key, Feature = kv.Value }).ToList();
             idNameMap = File.ReadAllLines(csvPath)
             .Skip(1)
             .Select(line => line.Split(','))
@@ -5811,68 +5813,211 @@ namespace VBV_formation
             popup.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             popup.ShowDialog();
         }
+
+
+        private float[] GetColorFeatureExtended(Bitmap bmp)
+        {
+            int width = bmp.Width, height = bmp.Height;
+            var arr = new float[width, height, 3];
+
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    var c = bmp.GetPixel(x, y);
+                    arr[x, y, 0] = c.R / 255f;
+                    arr[x, y, 1] = c.G / 255f;
+                    arr[x, y, 2] = c.B / 255f;
+                }
+
+            // RGB平均
+            float rMean = 0, gMean = 0, bMean = 0;
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    rMean += arr[x, y, 0];
+                    gMean += arr[x, y, 1];
+                    bMean += arr[x, y, 2];
+                }
+            float total = width * height;
+            rMean /= total; gMean /= total; bMean /= total;
+
+            // RGBヒストグラム 8ビン
+            int binsRGB = 8;
+            float[] rHist = new float[binsRGB];
+            float[] gHist = new float[binsRGB];
+            float[] bHist = new float[binsRGB];
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    rHist[Math.Clamp((int)(arr[x, y, 0] * binsRGB), 0, binsRGB - 1)]++;
+                    gHist[Math.Clamp((int)(arr[x, y, 1] * binsRGB), 0, binsRGB - 1)]++;
+                    bHist[Math.Clamp((int)(arr[x, y, 2] * binsRGB), 0, binsRGB - 1)]++;
+                }
+            NormalizeHist(rHist);
+            NormalizeHist(gHist);
+            NormalizeHist(bHist);
+
+            // HSVヒストグラム 16ビン
+            int binsHSV = 16;
+            float[] hHist = new float[binsHSV];
+            float[] sHist = new float[binsHSV];
+            float[] vHist = new float[binsHSV];
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    ColorToHSV(bmp.GetPixel(x, y), out float h, out float s, out float v);
+                    hHist[Math.Clamp((int)(h / 360f * binsHSV), 0, binsHSV - 1)]++;
+                    sHist[Math.Clamp((int)(s * binsHSV), 0, binsHSV - 1)]++;
+                    vHist[Math.Clamp((int)(v * binsHSV), 0, binsHSV - 1)]++;
+                }
+            NormalizeHist(hHist);
+            NormalizeHist(sHist);
+            NormalizeHist(vHist);
+
+            // 結合 (RGB平均3 + RGBヒスト24 + HSVヒスト48 = 75次元)
+            return (new float[] { rMean, gMean, bMean })
+                .Concat(rHist).Concat(gHist).Concat(bHist)
+                .Concat(hHist).Concat(sHist).Concat(vHist)
+                .ToArray();
+        }
+        /// <summary>HSV変換</summary>
+        private static void ColorToHSV(System.Drawing.Color color, out float h, out float s, out float v)
+        {
+            float r = color.R / 255f;
+            float g = color.G / 255f;
+            float b = color.B / 255f;
+
+            float max = Math.Max(r, Math.Max(g, b));
+            float min = Math.Min(r, Math.Min(g, b));
+            v = max;
+
+            float delta = max - min;
+            if (max != 0)
+                s = delta / max;
+            else
+            {
+                s = 0;
+                h = 0;
+                return;
+            }
+
+            if (r == max)
+                h = (g - b) / delta;
+            else if (g == max)
+                h = 2 + (b - r) / delta;
+            else
+                h = 4 + (r - g) / delta;
+
+            h *= 60;
+            if (h < 0)
+                h += 360;
+        }
+
+        /// <summary>ヒストグラムを正規化</summary>
+        private static void NormalizeHist(float[] hist)
+        {
+            float sum = hist.Sum();
+            if (sum > 0)
+            {
+                for (int i = 0; i < hist.Length; i++)
+                    hist[i] /= sum;
+            }
+        }
+
+
         private static InferenceSession session = new InferenceSession(@"feature_extraction/resnet50_features.onnx");
         private static Dictionary<string, float[]> featureDict;
         private static Dictionary<string, string> idNameMap;
+        private Bitmap reusableBitmap = new Bitmap(224, 224); 
+        private float[] reusableTensorBuffer = new float[3 * 224 * 224]; // RGB 224x224
+
+        private void BitmapToTensor_KerasCaffe_inplace(Bitmap bmp, float[] buffer)
+        {
+            // bmp は 224x224 RGB
+            for (int y = 0; y < 224; y++)
+            {
+                for (int x = 0; x < 224; x++)
+                {
+                    var color = bmp.GetPixel(x, y);
+                    int idx = (y * 224 + x) * 3;
+                    // Keras Caffeモード: BGR - mean subtraction
+                    buffer[idx + 0] = color.B - 103.939f;
+                    buffer[idx + 1] = color.G - 116.779f;
+                    buffer[idx + 2] = color.R - 123.68f;
+                }
+            }
+        }
+        List<ImageFeature> features;
 
         public void load_from_game(int sw, int sh, int ew, int eh, int chara_num, float colorWeight = 1.0f)
         {
             string path = @".\Temp\capture_shidan.png";
-            using Bitmap tempbmp = new Bitmap(path);
-            var cropRect = new System.Drawing.Rectangle(sw, sh, ew, eh);
-            using Bitmap bmp = tempbmp.Clone(cropRect, tempbmp.PixelFormat);
-            string debugPath = $@".\Temp\cropped_debug_shidan{chara_num}.png";
-            bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
+            using Bitmap tempBmp = new Bitmap(path);
 
-            // --- 224x224 にリサイズ ---
-            using Bitmap resized = new Bitmap(bmp, 224, 224);
-
-            // --- Tensor変換 + ONNX推論 ---
-            var inputTensor = BitmapToTensor_KerasCaffe(resized);
+            using var cropped = tempBmp.Clone(new System.Drawing.Rectangle(sw, sh, ew, eh), tempBmp.PixelFormat);
+            using var g = Graphics.FromImage(reusableBitmap);
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+            g.DrawImage(cropped, 0, 0, 224, 224);
             string inputName = session.InputMetadata.Keys.First();
-            var result = session.Run(new List<NamedOnnxValue> {
-               NamedOnnxValue.CreateFromTensor(inputName, inputTensor)
-            });
-            float[] cnnFeature = result.First().AsEnumerable<float>().ToArray();
-            cnnFeature = Normalize(cnnFeature);
+            // 2. Tensor 変換
+            BitmapToTensor_KerasCaffe_inplace(reusableBitmap, reusableTensorBuffer);
 
-            // --- 色特徴補助 (JSON末尾に色特徴を格納している場合) ---
-            int cnnLength = cnnFeature.Length;
-            var features = featureDict.Select(kv =>
+            // 3. CNN特徴抽出
+            using var results = session.Run(new[] {
+        NamedOnnxValue.CreateFromTensor(inputName, new DenseTensor<float>(reusableTensorBuffer, new[] { 1, 224, 224, 3 }))
+    });
+            float[] cnnFeature = results.First().AsEnumerable<float>().ToArray();
+            cnnFeature = Normalize_chara(cnnFeature);
+
+            // 4. 色特徴抽出
+            float[] colorFeature = GetColorFeatureExtended(reusableBitmap); // RGB平均 + RGBヒスト + HSVヒスト
+            colorFeature = Normalize_chara(colorFeature);
+
+            // 5. CNN主軸＋色補助を結合
+            float[] queryFeature;
+            if (colorWeight <= 0f)
             {
-                float[] f = (float[])kv.Value.Clone();
-                if (colorWeight != 1.0f)
-                {
-                    // 色特徴部分を重み付け (末尾147次元想定)
-                    int colorStart = f.Length - 147;
-                    for (int i = colorStart; i < f.Length; i++)
-                        f[i] *= colorWeight;
-                }
-                // 全体を再正規化
-                f = Normalize(f);
-                return new ImageFeature { Id = kv.Key, Feature = f };
-            }).ToList();
-
-            // --- 類似検索 ---
-            var top = features
-                .Select(f => new { f.Id, Name = idNameMap[f.Id], Score = Cosine(f.Feature, cnnFeature) })
-                .OrderByDescending(x => x.Score)
-                .FirstOrDefault();
-
-            if (top != null)
+                queryFeature = cnnFeature; // 色補助なし
+            }
+            else
             {
-                Debug.WriteLine($"最も近い画像: {top.Name} (ID: {top.Id}, Score: {top.Score:F3})");
-                var match = all_save_data.FirstOrDefault(c => c.character_name == top.Name);
-                if (match != null)
+                queryFeature = cnnFeature.Concat(colorFeature.Select(v => v * colorWeight)).ToArray();
+                queryFeature = Normalize_chara(queryFeature); // 結合後正規化
+            }
+
+            // 6. 類似度計算
+            float bestScore = float.MinValue;
+            string bestName = null;
+            int bestId = -1;
+
+            foreach (var f in features)
+            {
+                if (f.Feature.Length != queryFeature.Length) continue; // 念のため
+                float score = Cosine(f.Feature, queryFeature);
+                if (score > bestScore)
                 {
-                    saved_list.SelectedItem = match;
-                    Character_load_capture(chara_num);
-                }
-                else
-                {
-                    delete_shidan_chara(chara_num);
+                    bestScore = score;
+                    bestName = idNameMap[f.Id];
+                    bestId = int.Parse(f.Id);
                 }
             }
+
+
+            var match = all_save_data.FirstOrDefault(c => c.character_name == bestName);
+            if (match != null)
+            {
+                saved_list.SelectedItem = match;
+                Character_load_capture(chara_num);
+            }
+            else
+            {
+                delete_shidan_chara(chara_num);
+            }
+        }
+        static float[] Normalize_chara(float[] vec)
+        {
+            double norm = Math.Sqrt(vec.Select(v => v * v).Sum());
+            return vec.Select(v => (float)(v / norm)).ToArray();
         }
 
         class ImageFeature

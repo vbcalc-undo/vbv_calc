@@ -860,6 +860,7 @@ namespace VBV_calc
             Resync_finalskil();
             calc_final_attack_mag();
             calc_damage();
+            save_character_name_box.Text = "";
         }
         private void enemy_ComboBox_SelectionChanged_character(object sender, SelectionChangedEventArgs e)
         {
@@ -4997,7 +4998,6 @@ namespace VBV_calc
             if (selected != null)
             {
 
-                save_character_name_box.Text = selected.character_id;
                 //this.Visibility = Visibility.Collapsed; // 画面を一時非表示
                 var sw = Stopwatch.StartNew();
                 shogo1Box.SelectionChanged -= shogo1_SelectionChanged;
@@ -5218,6 +5218,7 @@ namespace VBV_calc
                 Resync_finalskil();
                 calc_final_attack_mag();
                 calc_damage();
+                save_character_name_box.Text = selected.character_id;
             }
         }
 
@@ -6062,54 +6063,6 @@ namespace VBV_calc
 
             return dot / ((float)Math.Sqrt(normA) * (float)Math.Sqrt(normB));
         }
-        /*
-        public void load_from_game(int sw, int sh, int ew, int eh)
-        {
-            string path = @".\Temp\capture.png";
-            using Bitmap tempbmp = new Bitmap(path);
-
-            var cropRect = new System.Drawing.Rectangle(sw, sh, ew, eh);
-            using Bitmap bmp = tempbmp.Clone(cropRect, tempbmp.PixelFormat);
-            string debugPath = @".\Temp\cropped_debug.png";
-            string onnxPath = @"feature_extraction/resnet50_features.onnx";   // Pythonで変換したONNXモデル
-            string jsonPath = @"feature_extraction/chara_features.json";              // Python特徴量DB
-            string csvPath = @"feature_extraction/list.csv";                   // ID→名前
-
-            // 1. 画像ロード & 224x224 にリサイズ
-            using Bitmap resized = new Bitmap(bmp, 224, 224);
-
-            // 2. NHWC Tensor に変換 + Keras preprocess_input(Caffeモード)
-            var inputTensor = BitmapToTensor_KerasCaffe(resized);
-
-            // 3. ONNX 推論
-            string inputName = session.InputMetadata.Keys.First(); // 入力名はONNXで確認
-            var result = session.Run(new List<NamedOnnxValue> {
-                NamedOnnxValue.CreateFromTensor(inputName, inputTensor)
-            });
-
-            float[] queryFeature = result.First().AsEnumerable<float>().ToArray();
-            queryFeature = Normalize_chara(queryFeature);
-
-            var top = features
-                .AsParallel()
-                .Select(f => new { f.Id, Name = idNameMap[f.Id], Score = Cosine(f.Feature, queryFeature) })
-                // 並列処理された結果を OrderByDescending で順序付け
-                .OrderByDescending(x => x.Score)
-                .FirstOrDefault();
-            if (top != null)
-            {
-                Debug.WriteLine($"最も近い画像: {top.Name} (ID: {top.Id}, Score: {top.Score:F3})");
-
-                var match = characters.FirstOrDefault(c => c.名称 == top.Name);
-                if (match != null)
-                {
-                    CharacterBox.SelectedItem = match;
-                }
-            }
-        }
-        */
-
-        // 画像→Tensor（既存バッファに書き込むバージョン）
         private void BitmapToTensor_KerasCaffe_inplace(Bitmap bmp, float[] buffer)
         {
             // bmp は 224x224 RGB
@@ -6126,83 +6079,6 @@ namespace VBV_calc
                 }
             }
         }
-        /*
-        public void load_from_game(int sw, int sh, int ew, int eh)
-        {
-            using Bitmap tempbmp = new Bitmap(@".\Temp\capture.png");
-            using Bitmap bmp = tempbmp.Clone(new System.Drawing.Rectangle(sw, sh, ew, eh), tempbmp.PixelFormat);
-            using Bitmap resized = new Bitmap(bmp, 224, 224);
-            var inputTensor = BitmapToTensor_KerasCaffe(resized);
-
-            string inputName = session.InputMetadata.Keys.First();
-
-            // 🧩 usingでネイティブメモリをすぐ解放
-            using var results = session.Run(new[] { NamedOnnxValue.CreateFromTensor(inputName, inputTensor) });
-            float[] queryFeature = results.First().AsEnumerable<float>().ToArray();
-            queryFeature = Normalize_chara(queryFeature);
-
-            // 🚀 forループに変換（Parallel LINQ削除）
-            float bestScore = float.MinValue;
-            string bestName = null;
-            int bestId = -1;
-            foreach (var f in features)
-            {
-                float score = Cosine(f.Feature, queryFeature);
-                if (score > bestScore)
-                {
-                    bestScore = score;
-                    bestName = idNameMap[f.Id];
-                    bestId = int.Parse(f.Id);
-                }
-            }
-
-            var match = characters.FirstOrDefault(c => c.名称 == bestName);
-            if (match != null)
-            {
-                CharacterBox.SelectedItem = match;
-            }
-        }*/
-        /*
-        public void load_from_game(int sw, int sh, int ew, int eh)
-        {
-            // 1. 元画像ロード（必要なら毎回）    
-            using var tempBmp = new Bitmap(@".\Temp\capture.png");
-
-            // 2. クロップして再利用Bitmapにコピー
-            using var cropped = tempBmp.Clone(new System.Drawing.Rectangle(sw, sh, ew, eh), tempBmp.PixelFormat);
-            using var g = Graphics.FromImage(reusableBitmap);
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
-            g.DrawImage(cropped, 0, 0, 224, 224);
-
-            // 3. Tensor に変換（バッファ再利用）
-            BitmapToTensor_KerasCaffe_inplace(reusableBitmap, reusableTensorBuffer);
-
-            // 4. ONNX 推論
-            using var results = session.Run(new[] { NamedOnnxValue.CreateFromTensor(inputName, new DenseTensor<float>(reusableTensorBuffer, new[] { 1, 224, 224, 3 })) });
-            float[] queryFeature = results.First().AsEnumerable<float>().ToArray();
-            queryFeature = Normalize_chara(queryFeature);
-
-            // 5. 類似度計算（forループ）
-            float bestScore = float.MinValue;
-            string bestName = null;
-            int bestId = -1;
-
-            foreach (var f in features)
-            {
-                float score = Cosine(f.Feature, queryFeature);
-                if (score > bestScore)
-                {
-                    bestScore = score;
-                    bestName = idNameMap[f.Id];
-                    bestId = int.Parse(f.Id);
-                }
-            }
-
-            // 6. 選択反映
-            var match = characters.FirstOrDefault(c => c.名称 == bestName);
-            if (match != null)
-                CharacterBox.SelectedItem = match;
-        }*/
         public void load_from_game(int sw, int sh, int ew, int eh, float colorWeight = 1.0f)
         {
             // 1. 元画像ロード & クロップ
@@ -6462,6 +6338,7 @@ namespace VBV_calc
             popup.Owner = this;
             popup.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             popup.ShowDialog();
+            save_character_name_box.Text = "";
             enablePassiveChange = true;
         }
 
