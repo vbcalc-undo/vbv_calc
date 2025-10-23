@@ -38,12 +38,12 @@ namespace VBV_formation
             }
 
             // --- 処理順に呼ぶ ---
-            await NextAsync("キャラ1 読み込み中...", () => _mainWindow.load_from_game(79, 400 + selectedNumber * 110, 83, 60, 1));
-            await NextAsync("キャラ2 読み込み中...", () => _mainWindow.load_from_game(229, 400 + selectedNumber * 110, 83, 60, 2));
-            await NextAsync("キャラ3 読み込み中...", () => _mainWindow.load_from_game(379, 400 + selectedNumber * 110, 83, 60, 3));
-            await NextAsync("キャラ4 読み込み中...", () => _mainWindow.load_from_game(539, 400 + selectedNumber * 110, 83, 60, 4));
-            await NextAsync("キャラ5 読み込み中...", () => _mainWindow.load_from_game(679, 400 + selectedNumber * 110, 83, 60, 5));
-            await NextAsync("キャラ6 読み込み中...", () => _mainWindow.load_from_game(829, 400 + selectedNumber * 110, 83, 60, 6));
+            await NextAsync("キャラ1 読み込み中...", () => _mainWindow.load_from_game(80, 400 + selectedNumber * 110, 83, 60, 1));
+            await NextAsync("キャラ2 読み込み中...", () => _mainWindow.load_from_game(230, 400 + selectedNumber * 110, 83, 60, 2));
+            await NextAsync("キャラ3 読み込み中...", () => _mainWindow.load_from_game(381, 400 + selectedNumber * 110, 83, 60, 3));
+            await NextAsync("キャラ4 読み込み中...", () => _mainWindow.load_from_game(531, 400 + selectedNumber * 110, 83, 60, 4));
+            await NextAsync("キャラ5 読み込み中...", () => _mainWindow.load_from_game(682, 400 + selectedNumber * 110, 83, 60, 5));
+            await NextAsync("キャラ6 読み込み中...", () => _mainWindow.load_from_game(833, 400 + selectedNumber * 110, 83, 60, 6));
             await NextAsync("アシスト更新中...", () => _mainWindow.resync_assist_skill());
             await NextAsync("活性更新中...", () => _mainWindow.character_kassei_update());
             await NextAsync("指揮更新中...", () => _mainWindow.character_shiki_update());

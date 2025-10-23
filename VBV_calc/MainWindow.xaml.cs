@@ -9,17 +9,24 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
 using System.Windows.Shapes;
 using Tesseract;
 using VBV_calc.Helpers;
 using VBV_calc.Models;
+using Windows.Devices.Sensors;
+using Windows.Media.Ocr;
+using static System.Net.Mime.MediaTypeNames;
 using static VBV_calc.MainWindow;
+using Color = System.Drawing.Color;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace VBV_calc
 {
@@ -39,6 +46,11 @@ namespace VBV_calc
             public String ItemDisp { get; set; }
             public string ItemValue { get; set; }
 
+            public ItemSet() // ← これ追加！
+            {
+                ItemDisp = "";
+                ItemValue = "";
+            }
             // プロパティをコンストラクタでセット
             public ItemSet(String v, String s)
             {
@@ -65,93 +77,97 @@ namespace VBV_calc
         int soubi_shogo_bou = 0;
         int soubi_shogo_soku = 0;
         int soubi_shogo_chiryoku = 0;
+        int enemy_soubi_shogo_kou = 0;
+        int enemy_soubi_shogo_bou = 0;
+        int enemy_soubi_shogo_soku = 0;
+        int enemy_soubi_shogo_chiryoku = 0;
 
         private void ResetAllskills()
         {
-            passive1.Text = "";
-            passive1_fig.Text = "";
-            passive2.Text = "";
-            passive2_fig.Text = "";
-            passive3.Text = "";
-            passive3_fig.Text = "";
-            passive4.Text = "";
-            passive4_fig.Text = "";
-            passive5.Text = "";
-            passive5_fig.Text = "";
-            passive6.Text = "";
-            passive6_fig.Text = "";
-            passive7.Text = "";
-            passive7_fig.Text = "";
-            passive8.Text = "";
-            passive8_fig.Text = "";
-            shogo1.Text = "";
-            shogo1_fig.Text = "";
-            shogo2.Text = "";
-            shogo2_fig.Text = "";
+            for (int i = 1; i <= 8; i++)
+            {
+                ((TextBox)FindName($"passive{i}"))!.Text = "";
+                ((TextBox)FindName($"passive{i}_fig"))!.Text = "";
+            }
 
-            leader1.Text = "";
-            leader1_fig.Text = "";
-            leader2.Text = "";
-            leader2_fig.Text = "";
-            equipment1_skill1.Text = "";
-            equipment1_skill1_fig.Text = "";
-            equipment1_skill2.Text = "";
-            equipment1_skill2_fig.Text = "";
-            equipment2_skill1.Text = "";
-            equipment2_skill1_fig.Text = "";
-            equipment2_skill2.Text = "";
-            equipment2_skill2_fig.Text = "";
-            ryoshoku_name.Text = "";
-            ryoshoku_fig_box.Text = "";
-            final1.Text = "";
-            final1_fig.Text = "";
-            final2.Text = "";
-            final2_fig.Text = "";
-            final3.Text = "";
-            final3_fig.Text = "";
-            final4.Text = "";
-            final4_fig.Text = "";
-            final5.Text = "";
-            final5_fig.Text = "";
-            final6.Text = "";
-            final6_fig.Text = "";
-            final7.Text = "";
-            final7_fig.Text = "";
-            final8.Text = "";
-            final8_fig.Text = "";
-            final9.Text = "";
-            final9_fig.Text = "";
-            final10.Text = "";
-            final10_fig.Text = "";
-            final11.Text = "";
-            final11_fig.Text = "";
+            // shogo系
+            for (int i = 1; i <= 2; i++)
+            {
+                ((TextBox)FindName($"shogo{i}"))!.Text = "";
+                ((TextBox)FindName($"shogo{i}_fig"))!.Text = "";
+            }
 
-            final12.Text = "";
-            final12_fig.Text = "";
-            final13.Text = "";
-            final13_fig.Text = "";
-            final14.Text = "";
-            final14_fig.Text = "";
-            final15.Text = "";
-            final15_fig.Text = "";
-            final16.Text = "";
-            final16_fig.Text = "";
-            final17.Text = "";
-            final17_fig.Text = "";
-            final18.Text = "";
-            final18_fig.Text = "";
-            final19.Text = "";
-            final19_fig.Text = "";
-            final20.Text = "";
-            final20_fig.Text = "";
-            final21.Text = "";
-            final21_fig.Text = "";
+            // leader系
+            for (int i = 1; i <= 2; i++)
+            {
+                ((TextBox)FindName($"leader{i}"))!.Text = "";
+                ((TextBox)FindName($"leader{i}_fig"))!.Text = "";
+            }
 
+            // equipment系
+            for (int i = 1; i <= 2; i++)
+            {
+                for (int j = 1; j <= 2; j++)
+                {
+                    ((TextBox)FindName($"equipment{i}_skill{j}"))!.Text = "";
+                    ((TextBox)FindName($"equipment{i}_skill{j}_fig"))!.Text = "";
+                }
+            }
+
+            // ryoshoku
+            ((TextBox)FindName("ryoshoku_name"))!.Text = "";
+            ((TextBox)FindName("ryoshoku_fig_box"))!.Text = "";
+
+            // final系
+            for (int i = 1; i <= 21; i++)
+            {
+                ((TextBox)FindName($"final{i}"))!.Text = "";
+                ((TextBox)FindName($"final{i}_fig"))!.Text = "";
+            }
             soubi_shogo_kou = 0;
             soubi_shogo_bou = 0;
             soubi_shogo_soku = 0;
             soubi_shogo_chiryoku = 0;
+        }
 
+        private void enemy_ResetAllskills()
+        {
+            for (int i = 1; i <= 8; i++)
+            {
+                ((TextBox)FindName($"enemy_passive{i}"))!.Text = "";
+                ((TextBox)FindName($"enemy_passive{i}_fig"))!.Text = "";
+            }
+            // leader系
+            for (int i = 1; i <= 2; i++)
+            {
+                ((TextBox)FindName($"enemy_leader{i}"))!.Text = "";
+                ((TextBox)FindName($"enemy_leader{i}_fig"))!.Text = "";
+            }
+
+            // equipment系
+            for (int i = 1; i <= 2; i++)
+            {
+                for (int j = 1; j <= 2; j++)
+                {
+                    ((TextBox)FindName($"enemy_equipment{i}_skill{j}"))!.Text = "";
+                    ((TextBox)FindName($"enemy_equipment{i}_skill{j}_fig"))!.Text = "";
+                }
+            }
+
+    // ryoshoku
+            ((TextBox)FindName("enemy_ryoshoku_name"))!.Text = "";
+            ((TextBox)FindName("enemy_ryoshoku_fig_box"))!.Text = "";
+
+            // final系
+            for (int i = 1; i <= 19; i++)
+            {
+                ((TextBox)FindName($"enemy_final{i}"))!.Text = "";
+                ((TextBox)FindName($"enemy_final{i}_fig"))!.Text = "";
+            }
+            enemy_soubi_shogo_kou = 0;
+            enemy_soubi_shogo_bou = 0;
+            enemy_soubi_shogo_soku = 0;
+            enemy_soubi_shogo_chiryoku = 0;
         }
 
         private void status_calc(string hp, string kou, string bou, string soku, string chiryoku, string cost, string rank)
@@ -226,6 +242,79 @@ namespace VBV_calc
             bougyobox.Text = bou_status.ToString();
             chiryokubox.Text = chi_status.ToString();
         }
+
+        private void enemy_status_calc(string hp, string kou, string bou, string soku, string chiryoku, string cost, string rank)
+        {
+            double keikenti = 0;
+            // 空文字または数値でない場合は初期値をセットして終了
+            if (string.IsNullOrEmpty(hp) || !double.TryParse(hp, out _) ||
+                string.IsNullOrEmpty(soku) || !double.TryParse(soku, out _) ||
+                string.IsNullOrEmpty(kou) || !double.TryParse(kou, out _) ||
+                string.IsNullOrEmpty(bou) || !double.TryParse(bou, out _) ||
+                string.IsNullOrEmpty(chiryoku) || !double.TryParse(chiryoku, out _) ||
+                string.IsNullOrEmpty(cost) || !double.TryParse(cost, out _) ||
+                string.IsNullOrEmpty(rank))
+            {
+                _isProgrammaticChange = true;
+                enemy_levelbox.Text = "1";
+                _isProgrammaticChange = false;
+                enemy_hpbox.Text = "1";
+                enemy_sokudobox.Text = "1";
+                enemy_kougekibox.Text = "1";
+                enemy_bougyobox.Text = "1";
+                enemy_chiryokubox.Text = "1";
+                return;
+            }
+            int level = 0;
+            if (rank == "S")
+            {
+                keikenti += 1110050;
+                level = 150;
+            }
+            if (rank == "A")
+            {
+                keikenti += 966050;
+                level = 140;
+            }
+            if (rank == "B")
+            {
+                keikenti += 832050;
+                level = 130;
+            }
+            if (rank == "C")
+            {
+                keikenti += 708050;
+                level = 120;
+            }
+            if (rank == "D")
+            {
+                keikenti += 594050;
+                level = 110;
+            }
+            if (rank == "E")
+            {
+                keikenti += 490050;
+                level = 100;
+            }
+            double buko = 75 / 2 / (Math.Sqrt(double.Parse(cost)));
+            double level1 = 1 + Math.Sqrt(keikenti) / 1000;
+            double level2 = Math.Sqrt(keikenti) / 50;
+
+            //int hp_status = (int)(double.Parse(hp) * ((double)(level)/4.0) + 1.0);
+            int hp_status = (int)(double.Parse(hp) * ((double)(level) + 1.0) / 4.0);
+            int kou_status = (int)((double.Parse(kou) + buko) * level1 + level2) + enemy_soubi1_status.kougeki + enemy_soubi2_status.kougeki + enemy_ryoshoku_status.kougeki;
+            int bou_status = (int)((double.Parse(bou) + buko) * level1 + level2) + enemy_soubi1_status.bougyo + enemy_soubi2_status.bougyo + enemy_ryoshoku_status.bougyo;
+            int soku_status = (int)((double.Parse(soku)) * level1 + level2) + enemy_soubi1_status.sokudo + enemy_soubi2_status.sokudo + enemy_ryoshoku_status.sokudo;
+            int chi_status = (int)((double.Parse(chiryoku)) * level1 + level2) + enemy_soubi1_status.tiryoku + enemy_soubi2_status.tiryoku + enemy_ryoshoku_status.tiryoku;
+            _isProgrammaticChange = true;
+            enemy_levelbox.Text = level.ToString();
+            _isProgrammaticChange = false;
+            enemy_hpbox.Text = hp_status.ToString();
+            enemy_sokudobox.Text = soku_status.ToString();
+            enemy_kougekibox.Text = kou_status.ToString();
+            enemy_bougyobox.Text = bou_status.ToString();
+            enemy_chiryokubox.Text = chi_status.ToString();
+        }
         private void status_calc_fix()
         {
             double keikenti = 0;
@@ -288,6 +377,68 @@ namespace VBV_calc
             bougyobox.Text = bou_status.ToString();
             chiryokubox.Text = chi_status.ToString();
         }
+        private void enemy_status_calc_fix()
+        {
+            double keikenti = 0;
+            int hp, soku, kou, bou, chiryoku, cost;
+            string rank;
+            enemy_current_Character_Status.get_status(out hp, out kou, out bou, out soku, out chiryoku, out cost, out rank);
+            int level = 0;
+            if (rank == "S")
+            {
+                keikenti += 1110050;
+                level = 150;
+            }
+            if (rank == "A")
+            {
+                keikenti += 966050;
+                level = 140;
+            }
+            if (rank == "B")
+            {
+                keikenti += 832050;
+                level = 130;
+            }
+            if (rank == "C")
+            {
+                keikenti += 708050;
+                level = 120;
+            }
+            if (rank == "D")
+            {
+                keikenti += 594050;
+                level = 110;
+            }
+            if (rank == "E")
+            {
+                keikenti += 490050;
+                level = 100;
+            }
+            double buko = 75.0 / 2.0 / (Math.Sqrt(cost));
+            double level1 = 1.0 + Math.Sqrt(keikenti) / 1000.0;
+            double level2 = Math.Sqrt(keikenti) / 50.0;
+
+            double temp = (level - 1.0) / 4.0 + 1.0;
+            int hp_status = (int)(hp * ((level - 1.0) / 4.0 + 1.0));
+            int kou_status = (int)((kou + buko ) * level1 + level2) + enemy_soubi1_status.kougeki + enemy_soubi2_status.kougeki + enemy_ryoshoku_status.kougeki;
+            int bou_status = (int)((bou + buko ) * level1 + level2) + enemy_soubi1_status.bougyo + enemy_soubi2_status.bougyo + enemy_ryoshoku_status.bougyo;
+            int soku_status = (int)((soku ) * level1 + level2) + enemy_soubi1_status.sokudo + enemy_soubi2_status.sokudo + enemy_ryoshoku_status.sokudo;
+            int chi_status = (int)((chiryoku ) * level1 + level2) + enemy_soubi1_status.tiryoku + enemy_soubi2_status.tiryoku + enemy_ryoshoku_status.tiryoku;
+
+            if (chi_status < 1) chi_status = 1;
+            if (soku_status < 1) soku_status = 1;
+            if (kou_status < 1) kou_status = 1;
+            if (bou_status < 1) bou_status = 1;
+
+            _isProgrammaticChange = true;
+            enemy_levelbox.Text = level.ToString();
+            _isProgrammaticChange = false;
+            enemy_hpbox.Text = hp_status.ToString();
+            enemy_sokudobox.Text = soku_status.ToString();
+            enemy_kougekibox.Text = kou_status.ToString();
+            enemy_bougyobox.Text = bou_status.ToString();
+            enemy_chiryokubox.Text = chi_status.ToString();
+        }
 
 
         private void status_calc_box(int level_value,int bukou_value)
@@ -326,72 +477,84 @@ namespace VBV_calc
                 chiryokubox.Text = chi_status.ToString();
             }
         }
+        private void enemy_status_calc_box(int level_value)
+        {
+            int hp, soku, kou, bou, chiryoku, cost;
+            string rank;
+            int bukou_value = 25;//enemyは固定
+
+            enemy_current_Character_Status.get_status(out hp, out kou, out bou, out soku, out chiryoku, out cost, out rank);
+            double keikenti = 50 * (level_value * level_value) - (100 * level_value) + 50;
+            double buko = (bukou_value - 25.0) / 2.0 / (Math.Sqrt(cost));
+            double level1 = 1.0 + Math.Sqrt(keikenti) / 1000.0;
+            double level2 = Math.Sqrt(keikenti) / 50.0;
+
+            double temp = (level_value - 1.0) / 4.0 + 1.0;
+            int hp_status = (int)(hp * ((level_value - 1.0) / 4.0 + 1.0));
+            int kou_status = (int)((kou + buko ) * level1 + level2) + enemy_soubi1_status.kougeki + enemy_soubi2_status.kougeki + enemy_ryoshoku_status.kougeki;
+            int bou_status = (int)((bou + buko ) * level1 + level2) + enemy_soubi1_status.bougyo + enemy_soubi2_status.bougyo + enemy_ryoshoku_status.bougyo;
+            int soku_status = (int)((soku ) * level1 + level2) + enemy_soubi1_status.sokudo + enemy_soubi2_status.sokudo + enemy_ryoshoku_status.sokudo;
+            int chi_status = (int)((chiryoku ) * level1 + level2) + enemy_soubi1_status.tiryoku + enemy_soubi2_status.tiryoku + enemy_ryoshoku_status.tiryoku;
+
+            if (chi_status < 1) chi_status = 1;
+            if (soku_status < 1) soku_status = 1;
+            if (kou_status < 1) kou_status = 1;
+            if (bou_status < 1) bou_status = 1;
+
+            if (enemy_hpbox != null && enemy_sokudobox != null && enemy_kougekibox != null && enemy_chiryokubox != null && enemy_bougyobox != null)
+            {
+                enemy_hpbox.Text = hp_status.ToString();
+                enemy_sokudobox.Text = soku_status.ToString();
+                enemy_kougekibox.Text = kou_status.ToString();
+                enemy_bougyobox.Text = bou_status.ToString();
+                enemy_chiryokubox.Text = chi_status.ToString();
+            }
+        }
 
         /* デフォルトのキャラクターの能力 */
         CurrentCharacterStatus current_Character_Status = new CurrentCharacterStatus();
-        private void ComboBox_SelectionChanged_character(object sender, SelectionChangedEventArgs e)
-        {
-            // labelに現在コンボ選択の内容を表示
-            //ItemSet tmp = ((ItemSet)CharacterBox.SelectedItem);//表示名はキャストして取りだす
-            int count = characters.Count;
-            ResetAllskills();
-            var selectedPerson = CharacterBox.SelectedItem as CharacterJson;
+        CurrentCharacterStatus enemy_current_Character_Status = new CurrentCharacterStatus();
 
+        //enemyとの共用。渡された数値で場所を決める
+        private void ComboBox_SelectionChanged_character_func(int enemy_flag, CharacterJson selectedPerson)
+        {
+
+            string targetName = "";
+            if (enemy_flag == 0)
+            {
+                targetName = "";
+            }
+            else
+            {
+                targetName = "enemy_";
+            }
+            int count = characters.Count;
+            if (enemy_flag == 0)
+            {
+                ResetAllskills();
+            }
+            else
+            {
+                enemy_ResetAllskills();
+            }
             if (selectedPerson != null)
             {
                 for (int i = 0; i < count; i++)
                 {
                     string skill_name = "";
                     int skill_value = 0;
-                    if (characters[i].名称 == selectedPerson.名称 && characters[i].名称!="")
+                    if (characters[i].名称 == selectedPerson.名称 && characters[i].名称 != "")
                     {
-                        //Passive1 = characters[i].パッシブスキル[0];
-                        (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(characters[i].パッシブスキル[0]);
-                        passive1.Text = skill_name;
-                        passive1_fig.Text = skill_value.ToString();
-
-                        (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(characters[i].パッシブスキル[1]);
-                        passive2.Text = skill_name;
-                        passive2_fig.Text = skill_value.ToString();
-
-                        (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(characters[i].パッシブスキル[2]);
-                        passive3.Text = skill_name;
-                        passive3_fig.Text = skill_value.ToString();
-
-                        (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(characters[i].パッシブスキル[3]);
-                        passive4.Text = skill_name;
-                        passive4_fig.Text = skill_value.ToString();
-
-                        (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(characters[i].パッシブスキル[4]);
-                        passive5.Text = skill_name;
-                        passive5_fig.Text = skill_value.ToString();
-
-                        if (characters[i].パッシブスキル.Count > 5)
+                        if (enemy_flag == 0)
                         {
-                            (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(characters[i].パッシブスキル[5]);
-                            passive6.Text = skill_name;
-                            passive6_fig.Text = skill_value.ToString();
+                            SetSkillTexts(characters[i].パッシブスキル, "passive", 8);
+                            SetSkillTexts(characters[i].リーダースキル, "leader", 2);
                         }
-                        if (characters[i].パッシブスキル.Count > 6)
+                        else
                         {
-                            (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(characters[i].パッシブスキル[6]);
-                            passive7.Text = skill_name;
-                            passive7_fig.Text = skill_value.ToString();
+                            SetSkillTexts(characters[i].パッシブスキル, "enemy_passive", 8);
+                            SetSkillTexts(characters[i].リーダースキル, "enemy_leader", 2);
                         }
-                        if (characters[i].パッシブスキル.Count > 7)
-                        {
-                            (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(characters[i].パッシブスキル[7]);
-                            passive8.Text = skill_name;
-                            passive8_fig.Text = skill_value.ToString();
-                        }
-
-                        (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(characters[i].リーダースキル[0]);
-                        leader1.Text = skill_name;
-                        leader1_fig.Text = skill_value.ToString();
-
-                        (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(characters[i].リーダースキル[1]);
-                        leader2.Text = skill_name;
-                        leader2_fig.Text = skill_value.ToString();
 
                         int hp = 0, kou = 0, bou = 0, soku = 0, chi = 0, cost = 0;
                         // HP
@@ -466,20 +629,37 @@ namespace VBV_calc
                                 cost = 0;
                             }
                         }
-                        status_calc(characters[i].基本パラメータ_HP, characters[i].基本パラメータ_攻, characters[i].基本パラメータ_防, characters[i].基本パラメータ_速, characters[i].基本パラメータ_知, characters[i].コスト, characters[i].ランク);
-                        //current_Character_Status.set_status(int.Parse(characters[i].基本パラメータ_HP),int.Parse(characters[i].基本パラメータ_攻),int.Parse(characters[i].基本パラメータ_防),int.Parse(characters[i].基本パラメータ_速), characters[i].基本パラメータ_知), int.Parse(characters[i].基本パラメータ_コスト),characters[i].ランク);
-                        current_Character_Status.set_status(hp, kou, bou, soku, chi, cost, characters[i].ランク, characters[i].種族, characters[i].特攻);
-                        shuzoku_box.Text = characters[i].種族;
-                        tokko_box.Text = characters[i].特攻;
-                        shokugyo_box.Text = characters[i].職業;
-                        src_shogo1.Clear();
-                        src_shogo2.Clear();
-                        //src_shogo1.Add(null);
-                        //src_shogo2.Add(null);
+                        
+                        if (enemy_flag == 0)
+                        {
+                            status_calc(characters[i].基本パラメータ_HP, characters[i].基本パラメータ_攻, characters[i].基本パラメータ_防, characters[i].基本パラメータ_速, characters[i].基本パラメータ_知, characters[i].コスト, characters[i].ランク);
+                            current_Character_Status.set_status(hp, kou, bou, soku, chi, cost, characters[i].ランク, characters[i].種族, characters[i].特攻);
+                            shuzoku_box.Text = characters[i].種族;
+                            tokko_box.Text = characters[i].特攻;
+                            shokugyo_box.Text = characters[i].職業;
+                            src_shogo1.Clear();
+                            src_shogo2.Clear();
 
-                        src_shogo1.Add(new ItemSet(null, null));
-                        src_shogo2.Add(new ItemSet(null, null));
-
+                            src_shogo1.Add(new ItemSet(null, null));
+                            src_shogo2.Add(new ItemSet(null, null));
+                        }
+                        else
+                        {
+                            enemy_status_calc(characters[i].基本パラメータ_HP, characters[i].基本パラメータ_攻, characters[i].基本パラメータ_防, characters[i].基本パラメータ_速, characters[i].基本パラメータ_知, characters[i].コスト, characters[i].ランク);
+                            enemy_current_Character_Status.set_status(hp, kou, bou, soku, chi, cost, characters[i].ランク, characters[i].種族, characters[i].特攻);
+                            if (enemy_mode == 0)
+                            {
+                                enemy_shuzoku_box.Text = characters[i].種族;
+                                enemy_tokko_box.Text = characters[i].特攻;
+                                enemy_shokugyo_box.Text = characters[i].職業;
+                            }
+                            if (enemy_mode == 1)
+                            {
+                                enemy_shuzoku_box2.Text = characters[i].種族;
+                                enemy_tokko_box.Text = characters[i].特攻;
+                                enemy_shokugyo_box2.Text = characters[i].職業;
+                            }
+                        }
                         string rank = characters[i].ランク;
                         int rank_value = 0;
                         if (rank == "S")
@@ -495,47 +675,50 @@ namespace VBV_calc
                         if (rank == "E")
                             rank_value = 2;
                         // 問題の箇所を修正
-                        foreach (var kvp in all_shogo)
+                        if (enemy_flag == 0)
                         {
-                            var key = kvp.Key;
-                            var shogoList = kvp.Value;
-                            int count_shogo = all_shogo[key].Count;
-                            if (count_shogo > 0)
+                            foreach (var kvp in all_shogo)
                             {
-                                if ((key.ToString() != "キャラクター" && characters[i].キャラクター != true) || (key.ToString() == "キャラクター" && characters[i].キャラクター == true))
+                                var key = kvp.Key;
+                                var shogoList = kvp.Value;
+                                int count_shogo = all_shogo[key].Count;
+                                if (count_shogo > 0)
                                 {
-                                    src_shogo1.Add(new ItemSet("", "※" + key.ToString()));
-                                    src_shogo2.Add(new ItemSet("", "※" + key.ToString()));
-
-                                    for (int h = 0; h < count_shogo; h++)
+                                    if ((key.ToString() != "キャラクター" && characters[i].キャラクター != true) || (key.ToString() == "キャラクター" && characters[i].キャラクター == true))
                                     {
-                                        if (int.Parse(all_shogo[key][h].レア) <= rank_value)
+                                        src_shogo1.Add(new ItemSet("", "※" + key.ToString()));
+                                        src_shogo2.Add(new ItemSet("", "※" + key.ToString()));
+
+                                        for (int h = 0; h < count_shogo; h++)
                                         {
-                                            string tempkey = all_shogo[key][h].二つ名;
-                                            string tempvalue = "";
-                                            if (all_shogo[key][h].能力付与.ContainsKey("追加スキル"))
+                                            if (int.Parse(all_shogo[key][h].レア) <= rank_value)
                                             {
-                                                if (all_shogo[key][h].能力付与["追加スキル"] != null)
+                                                string tempkey = all_shogo[key][h].二つ名;
+                                                string tempvalue = "";
+                                                if (all_shogo[key][h].能力付与.ContainsKey("追加スキル"))
                                                 {
-                                                    string addSkill = all_shogo[key][h].能力付与["追加スキル"];
-                                                    tempkey += "(" + addSkill + ")";
-                                                    tempvalue = addSkill + "," + all_shogo[key][h].ステータス変化["攻撃"] + "," + all_shogo[key][h].ステータス変化["防御"] + "," + all_shogo[key][h].ステータス変化["速度"] + "," + all_shogo[key][h].ステータス変化["知力"] + "," + all_shogo[key][h].ステータス変化["特攻"];
+                                                    if (all_shogo[key][h].能力付与["追加スキル"] != null)
+                                                    {
+                                                        string addSkill = all_shogo[key][h].能力付与["追加スキル"];
+                                                        tempkey += "(" + addSkill + ")";
+                                                        tempvalue = addSkill + "," + all_shogo[key][h].ステータス変化["攻撃"] + "," + all_shogo[key][h].ステータス変化["防御"] + "," + all_shogo[key][h].ステータス変化["速度"] + "," + all_shogo[key][h].ステータス変化["知力"] + "," + all_shogo[key][h].ステータス変化["特攻"];
+                                                    }
                                                 }
-                                            }
-                                            // 接続リストの内容を判定
-                                            if (all_shogo[key][h].接続 != null && all_shogo[key][h].接続.Count > 0)
-                                            {
-                                                // 接頭
-
-                                                if (all_shogo[key][h].接続["接頭"] == "●")
-
+                                                // 接続リストの内容を判定
+                                                if (all_shogo[key][h].接続 != null && all_shogo[key][h].接続.Count > 0)
                                                 {
-                                                    src_shogo1.Add(new ItemSet(tempvalue, tempkey));
-                                                }
-                                                // 接尾
-                                                if (all_shogo[key][h].接続.Count > 1 && all_shogo[key][h].接続["接尾"] == "●")
-                                                {
-                                                    src_shogo2.Add(new ItemSet(tempvalue, tempkey));
+                                                    // 接頭
+
+                                                    if (all_shogo[key][h].接続["接頭"] == "●")
+
+                                                    {
+                                                        src_shogo1.Add(new ItemSet(tempvalue, tempkey));
+                                                    }
+                                                    // 接尾
+                                                    if (all_shogo[key][h].接続.Count > 1 && all_shogo[key][h].接続["接尾"] == "●")
+                                                    {
+                                                        src_shogo2.Add(new ItemSet(tempvalue, tempkey));
+                                                    }
                                                 }
                                             }
                                         }
@@ -543,58 +726,156 @@ namespace VBV_calc
                                 }
                             }
                         }
-                        src_equipment1.Clear();
-                        src_equipment2.Clear();
-                        int count_equip = all_equipments[characters[i].装備[0]].Count;
-                        src_equipment1.Add(new ItemSet(null,null));
-                        src_equipment2.Add(new ItemSet(null, null));
-                        //EquipmentBox1.Items.Clear();:
-                        for (int j = 0; j < count_equip; j++)
+                        if (enemy_flag==0)
                         {
-                            if (all_equipments[characters[i].装備[0]][j].能力付加.Count > 1)
+                            src_equipment1.Clear();
+                            src_equipment2.Clear();
+                            int count_equip = all_equipments[characters[i].装備[0]].Count;
+                            src_equipment1.Add(new ItemSet(null, null));
+                            src_equipment2.Add(new ItemSet(null, null));
+                            //EquipmentBox1.Items.Clear();:
+                            for (int j = 0; j < count_equip; j++)
                             {
-                                //Debug.WriteLine("all_equipments[characters[i].装備[0]=" + all_equipments[characters[i].装備[0]][j].名称+"(" + all_equipments[characters[i].装備[0]][j].能力付加[0] + ","+ all_equipments[characters[i].装備[0]][j].能力付加[1] + ")");
-                                string tempkey = all_equipments[characters[i].装備[0]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[0]][j].能力付加[1].ToString() + ")";
-                                string tempvalue = all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[0]][j].能力付加[1].ToString() + "," + all_equipments[characters[i].装備[0]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[0]][j].性能変化_防 + "," + all_equipments[characters[i].装備[0]][j].性能変化_速 + "," + all_equipments[characters[i].装備[0]][j].性能変化_知;
-                                src_equipment1.Add(new ItemSet(tempvalue, tempkey));
+                                if (all_equipments[characters[i].装備[0]][j].能力付加.Count > 1)
+                                {
+                                    //Debug.WriteLine("all_equipments[characters[i].装備[0]=" + all_equipments[characters[i].装備[0]][j].名称+"(" + all_equipments[characters[i].装備[0]][j].能力付加[0] + ","+ all_equipments[characters[i].装備[0]][j].能力付加[1] + ")");
+                                    string tempkey = all_equipments[characters[i].装備[0]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[0]][j].能力付加[1].ToString() + ")";
+                                    string tempvalue = all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[0]][j].能力付加[1].ToString() + "," + all_equipments[characters[i].装備[0]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[0]][j].性能変化_防 + "," + all_equipments[characters[i].装備[0]][j].性能変化_速 + "," + all_equipments[characters[i].装備[0]][j].性能変化_知;
+                                    src_equipment1.Add(new ItemSet(tempvalue, tempkey));
+                                }
+                                else
+                                {
+                                    string tempkey = all_equipments[characters[i].装備[0]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + ")";
+                                    string tempvalue = all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + "," + all_equipments[characters[i].装備[0]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[0]][j].性能変化_防 + "," + all_equipments[characters[i].装備[0]][j].性能変化_速 + "," + all_equipments[characters[i].装備[0]][j].性能変化_知;
+                                    src_equipment1.Add(new ItemSet(tempvalue, tempkey));
+                                }
+                                if (all_equipments[characters[i].装備[1]][j].能力付加.Count > 1)
+                                {
+                                    //Debug.WriteLine("all_equipments[characters[i].装備[0]=" + all_equipments[characters[i].装備[1]][j].名称 + "(" + all_equipments[characters[i].装備[1]][j].能力付加[0] + "," + all_equipments[characters[i].装備[1]][j].能力付加[1] + ")");
+                                    string tempkey = all_equipments[characters[i].装備[1]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[1]][j].能力付加[1].ToString() + ")";
+                                    string tempvalue = all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[1]][j].能力付加[1].ToString() + "," + all_equipments[characters[i].装備[1]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[1]][j].性能変化_防 + "," + all_equipments[characters[i].装備[1]][j].性能変化_速 + "," + all_equipments[characters[i].装備[1]][j].性能変化_知;
+                                    src_equipment2.Add(new ItemSet(tempvalue, tempkey));
+                                }
+                                else
+                                {
+                                    string tempkey = all_equipments[characters[i].装備[1]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + ")";
+                                    string tempvalue = all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + "," + "," + all_equipments[characters[i].装備[1]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[1]][j].性能変化_防 + "," + all_equipments[characters[i].装備[1]][j].性能変化_速 + "," + all_equipments[characters[i].装備[1]][j].性能変化_知; ;
+                                    src_equipment2.Add(new ItemSet(tempvalue, tempkey));
+                                }
                             }
-                            else
-                            {
-                                string tempkey = all_equipments[characters[i].装備[0]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + ")";
-                                string tempvalue = all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + "," + all_equipments[characters[i].装備[0]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[0]][j].性能変化_防 + "," + all_equipments[characters[i].装備[0]][j].性能変化_速 + "," + all_equipments[characters[i].装備[0]][j].性能変化_知;
-                                src_equipment1.Add(new ItemSet(tempvalue, tempkey));
-                            }
-                            if (all_equipments[characters[i].装備[1]][j].能力付加.Count > 1)
-                            {
-                                //Debug.WriteLine("all_equipments[characters[i].装備[0]=" + all_equipments[characters[i].装備[1]][j].名称 + "(" + all_equipments[characters[i].装備[1]][j].能力付加[0] + "," + all_equipments[characters[i].装備[1]][j].能力付加[1] + ")");
-                                string tempkey = all_equipments[characters[i].装備[1]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[1]][j].能力付加[1].ToString() + ")";
-                                string tempvalue = all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[1]][j].能力付加[1].ToString() + "," + all_equipments[characters[i].装備[1]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[1]][j].性能変化_防 + "," + all_equipments[characters[i].装備[1]][j].性能変化_速 + "," + all_equipments[characters[i].装備[1]][j].性能変化_知;
-                                src_equipment2.Add(new ItemSet(tempvalue, tempkey));
-                            }
-                            else
-                            {
-                                string tempkey = all_equipments[characters[i].装備[1]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + ")";
-                                string tempvalue = all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + "," + "," + all_equipments[characters[i].装備[1]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[1]][j].性能変化_防 + "," + all_equipments[characters[i].装備[1]][j].性能変化_速 + "," + all_equipments[characters[i].装備[1]][j].性能変化_知; ;
-                                src_equipment2.Add(new ItemSet(tempvalue, tempkey));
-                            }
-
+                            ryoshokuBox.SelectedIndex = -1;
                         }
-                        ryoshokuBox.SelectedIndex = -1;
-                        //src_equipment1.Add(new ItemSet(all_equipments[characters[i].装備[0]], all_equipments[characters[i].装備[0]]);
-
-                        //Debug.WriteLine("all_equipments[characters[i].装備[0]=" + all_equipments[characters[i].装備[0]]);
-                        //Debug.WriteLine("all_equipments[characters[i].装備[1]=" + all_equipments[characters[i].装備[1]]);
-
+                        else
+                        {
+                            enemy_src_equipment1.Clear();
+                            enemy_src_equipment2.Clear();
+                            int count_equip = all_equipments[characters[i].装備[0]].Count;
+                            enemy_src_equipment1.Add(new ItemSet(null, null));
+                            enemy_src_equipment2.Add(new ItemSet(null, null));
+                            //EquipmentBox1.Items.Clear();:
+                            for (int j = 0; j < count_equip; j++)
+                            {
+                                if (all_equipments[characters[i].装備[0]][j].能力付加.Count > 1)
+                                {
+                                    //Debug.WriteLine("all_equipments[characters[i].装備[0]=" + all_equipments[characters[i].装備[0]][j].名称+"(" + all_equipments[characters[i].装備[0]][j].能力付加[0] + ","+ all_equipments[characters[i].装備[0]][j].能力付加[1] + ")");
+                                    string tempkey = all_equipments[characters[i].装備[0]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[0]][j].能力付加[1].ToString() + ")";
+                                    string tempvalue = all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[0]][j].能力付加[1].ToString() + "," + all_equipments[characters[i].装備[0]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[0]][j].性能変化_防 + "," + all_equipments[characters[i].装備[0]][j].性能変化_速 + "," + all_equipments[characters[i].装備[0]][j].性能変化_知;
+                                    enemy_src_equipment1.Add(new ItemSet(tempvalue, tempkey));
+                                }
+                                else
+                                {
+                                    string tempkey = all_equipments[characters[i].装備[0]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + ")";
+                                    string tempvalue = all_equipments[characters[i].装備[0]][j].能力付加[0].ToString() + "," + "," + all_equipments[characters[i].装備[0]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[0]][j].性能変化_防 + "," + all_equipments[characters[i].装備[0]][j].性能変化_速 + "," + all_equipments[characters[i].装備[0]][j].性能変化_知;
+                                    enemy_src_equipment1.Add(new ItemSet(tempvalue, tempkey));
+                                }
+                                if (all_equipments[characters[i].装備[1]][j].能力付加.Count > 1)
+                                {
+                                    //Debug.WriteLine("all_equipments[characters[i].装備[0]=" + all_equipments[characters[i].装備[1]][j].名称 + "(" + all_equipments[characters[i].装備[1]][j].能力付加[0] + "," + all_equipments[characters[i].装備[1]][j].能力付加[1] + ")");
+                                    string tempkey = all_equipments[characters[i].装備[1]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[1]][j].能力付加[1].ToString() + ")";
+                                    string tempvalue = all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + "," + all_equipments[characters[i].装備[1]][j].能力付加[1].ToString() + "," + all_equipments[characters[i].装備[1]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[1]][j].性能変化_防 + "," + all_equipments[characters[i].装備[1]][j].性能変化_速 + "," + all_equipments[characters[i].装備[1]][j].性能変化_知;
+                                    enemy_src_equipment2.Add(new ItemSet(tempvalue, tempkey));
+                                }
+                                else
+                                {
+                                    string tempkey = all_equipments[characters[i].装備[1]][j].名称.ToString() + "(" + all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + ")";
+                                    string tempvalue = all_equipments[characters[i].装備[1]][j].能力付加[0].ToString() + "," + "," + all_equipments[characters[i].装備[1]][j].性能変化_攻 + "," + all_equipments[characters[i].装備[1]][j].性能変化_防 + "," + all_equipments[characters[i].装備[1]][j].性能変化_速 + "," + all_equipments[characters[i].装備[1]][j].性能変化_知; ;
+                                    enemy_src_equipment2.Add(new ItemSet(tempvalue, tempkey));
+                                }
+                            }
+                            enemy_ryoshokuBox.SelectedIndex = -1;
+                        }
                     }
                 }
             }
-            //labelValue.Text = CharacterBox.SelectedValue.ToString();//値はそのまま取りだせる
+
+
+        }
+        void SetSkillTexts(List<string>? skills, string baseName, int maxCount)
+        {
+            // null または空リストならすぐ抜ける
+            if (skills == null || skills.Count == 0)
+            {
+                // 表示欄を空白で初期化（存在すれば）
+                for (int j = 0; j < maxCount; j++)
+                {
+                    if (FindName($"{baseName}{j + 1}") is TextBox nameBox)
+                        nameBox.Text = "";
+                    if (FindName($"{baseName}{j + 1}_fig") is TextBox valueBox)
+                        valueBox.Text = "";
+                }
+                return;
+            }
+
+            // データがある場合
+            for (int j = 0; j < maxCount; j++)
+            {
+                if (j < skills.Count && skills[j] != null)
+                {
+                    // nullでないスキルだけセット
+                    var (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(skills[j]);
+                    if (FindName($"{baseName}{j + 1}") is TextBox nameBox)
+                        nameBox.Text = skill_name;
+                    if (FindName($"{baseName}{j + 1}_fig") is TextBox valueBox)
+                        valueBox.Text = skill_value.ToString();
+                }
+                else
+                {
+                    // スキルが存在しない場合は空にする
+                    if (FindName($"{baseName}{j + 1}") is TextBox nameBox)
+                        nameBox.Text = "";
+                    if (FindName($"{baseName}{j + 1}_fig") is TextBox valueBox)
+                        valueBox.Text = "";
+                }
+            }
+        }
+
+        private void ComboBox_SelectionChanged_character(object sender, SelectionChangedEventArgs e)
+        {
+            // labelに現在コンボ選択の内容を表示
+            //ItemSet tmp = ((ItemSet)CharacterBox.SelectedItem);//表示名はキャストして取りだす
+            int count = characters.Count;
+            ResetAllskills();
+            var selectedPerson = CharacterBox.SelectedItem as CharacterJson;
+            ComboBox_SelectionChanged_character_func(0,selectedPerson);
             Resync_finalskil();
             calc_final_attack_mag();
             calc_damage();
-
+            save_character_name_box.Text = "";
         }
+        private void enemy_ComboBox_SelectionChanged_character(object sender, SelectionChangedEventArgs e)
+        {
+            enemy_enablePassiveChange = false;
+            // labelに現在コンボ選択の内容を表示
+            //ItemSet tmp = ((ItemSet)CharacterBox.SelectedItem);//表示名はキャストして取りだす
+            int count = characters.Count;
+            var selectedPerson = enemy_CharacterBox.SelectedItem as CharacterJson;
 
+            ComboBox_SelectionChanged_character_func(1, selectedPerson);
+            enemy_Resync_finalskil();
+            calc_final_attack_mag();
+            calc_damage();
+            enemy_enablePassiveChange = true;
+        }
         // 修正内容: ComboBox の DataSource, DisplayMember, ValueMember は WPF には存在しません。
         // WPF では ItemsSource, DisplayMemberPath, SelectedValuePath を使います。
 
@@ -668,12 +949,20 @@ namespace VBV_calc
         ObservableCollection<ItemSet> src_shogo1;
         ObservableCollection<ItemSet> src_shogo2;
         ObservableCollection<ItemSet> src_asistskills;
+
         ObservableCollection<ItemSet> src_asistskill1;
         ObservableCollection<ItemSet> src_asistskill2;
         ObservableCollection<ItemSet> src_asistskill3;
-        ObservableCollection<String> enemy_stancelist;
         ObservableCollection<String> stancelist;
+
         ObservableCollection<String> enemy_shokugholist;
+        ObservableCollection<ItemSet> enemy_src_asistskill1;
+        ObservableCollection<ItemSet> enemy_src_asistskill2;
+        ObservableCollection<ItemSet> enemy_src_asistskill3;
+        ObservableCollection<String> enemy_stancelist;
+        ObservableCollection<ItemSet> enemy_src_equipment1;
+        ObservableCollection<ItemSet> enemy_src_equipment2;
+        List<ItemSet> enemy_src_ryoshoku;
 
         List<ItemSet> src_ryoshoku;
         Dictionary<string, List<EquipmentJson>> all_equipments; // ここで宣言
@@ -693,7 +982,12 @@ namespace VBV_calc
         private double calc_shokugyo_bairitu()
         {
             string shokugyo = shokugyo_box.Text;
-            string enemy_shokugyo = enemy_shokugyo_box.SelectedItem as string;
+
+            string enemy_shokugyo ="";
+            if(enemy_mode ==0)
+                enemy_shokugyo = enemy_shokugyo_box.SelectedItem as string;
+            if (enemy_mode == 1)
+                enemy_shokugyo = enemy_shokugyo_box2.SelectedItem as string;
             //ItemSet tmp = (enemy_shokugyo_box.SelectedItem);//表示名はキャストして取りだす
 
             if (shokugyo != "" && enemy_shokugyo != "")
@@ -729,7 +1023,11 @@ namespace VBV_calc
         private double calc_stance_bairitu()
         {
             string stance = stance_box.SelectedItem as string;
-            string enemy_stance = enemy_stance_box.SelectedItem as string; ;
+            string enemy_stance = "";
+            if (enemy_mode==0)
+              enemy_stance = enemy_stance_box.SelectedItem as string; ;
+            if (enemy_mode == 1)
+                enemy_stance = enemy_stance_box2.SelectedItem as string; ;
             if (stance != "" && enemy_stance != "")
             {
                 if (stance == "進撃" && enemy_stance == "計略")
@@ -765,6 +1063,7 @@ namespace VBV_calc
             load_json_equipment_func(@"./json/equipments\soubi_dougu.json", "道具");
             load_json_equipment_func(@"./json/equipments\soubi_ryoushoku.json", "糧食");
             src_ryoshoku.Add(new ItemSet(null, null));
+            enemy_src_ryoshoku.Add(new ItemSet(null, null));
 
             if (all_equipments["糧食"] != null && all_equipments["糧食"].Count > 0)
             {
@@ -774,6 +1073,20 @@ namespace VBV_calc
                     string tempkey = all_equipments["糧食"][i].名称 + "(" + all_equipments["糧食"][i].能力付加[0] + ")";
                     string tempvalue = all_equipments["糧食"][i].能力付加[0] + "," + all_equipments["糧食"][i].性能変化_攻 + "," + all_equipments["糧食"][i].性能変化_防 + "," + all_equipments["糧食"][i].性能変化_速 + "," + all_equipments["糧食"][i].性能変化_知;
                     src_ryoshoku.Add(new ItemSet(tempvalue, tempkey));
+                    // ここで要素を処理
+                    // 例: Console.WriteLine($"処理中の要素: {numbers[i]}");
+                }
+                //Debug.WriteLine(characters[0].パッシブスキル);
+                //Debug.WriteLine(characters[0].職業);
+            }
+            if (all_equipments["糧食"] != null && all_equipments["糧食"].Count > 0)
+            {
+                int count = all_equipments["糧食"].Count;
+                for (int i = 0; i < count; i++)
+                {
+                    string tempkey = all_equipments["糧食"][i].名称 + "(" + all_equipments["糧食"][i].能力付加[0] + ")";
+                    string tempvalue = all_equipments["糧食"][i].能力付加[0] + "," + all_equipments["糧食"][i].性能変化_攻 + "," + all_equipments["糧食"][i].性能変化_防 + "," + all_equipments["糧食"][i].性能変化_速 + "," + all_equipments["糧食"][i].性能変化_知;
+                    enemy_src_ryoshoku.Add(new ItemSet(tempvalue, tempkey));
                     // ここで要素を処理
                     // 例: Console.WriteLine($"処理中の要素: {numbers[i]}");
                 }
@@ -896,6 +1209,7 @@ namespace VBV_calc
             src_ryoshoku = new List<ItemSet>();
 
             src_asistskills = new ObservableCollection<ItemSet>();
+            src_asistskills.Add(new ItemSet(null, null));
             src_asistskill1 = new ObservableCollection<ItemSet>();
             src_asistskill2 = new ObservableCollection<ItemSet>();
             src_asistskill3 = new ObservableCollection<ItemSet>();
@@ -905,6 +1219,12 @@ namespace VBV_calc
             enemy_shokugholist = new ObservableCollection<String>();
 
 
+            enemy_src_equipment1 = new ObservableCollection<ItemSet>();
+            enemy_src_equipment2 = new ObservableCollection<ItemSet>();
+            enemy_src_ryoshoku = new List<ItemSet>();
+            enemy_src_asistskill1 = new ObservableCollection<ItemSet>();
+            enemy_src_asistskill2 = new ObservableCollection<ItemSet>();
+            enemy_src_asistskill3 = new ObservableCollection<ItemSet>();
             //src_character.Add(new ItemSet("Number1", "Number1"));
             //src_character.Add(new ItemSet("Number2", "Number2"));
             //src_character.Add(new ItemSet("Number3", "Number3"));
@@ -957,10 +1277,14 @@ namespace VBV_calc
 
             enemy_stance_box.ItemsSource = STANCE_LIST;
             enemy_stance_box.SelectedIndex = -1;
+            enemy_stance_box2.ItemsSource = STANCE_LIST;
+            enemy_stance_box2.SelectedIndex = -1;
             stance_box.ItemsSource = STANCE_LIST;
             stance_box.SelectedIndex = -1;
             enemy_shokugyo_box.ItemsSource = SHOKUGYO_LIST;
             enemy_shokugyo_box.SelectedIndex = -1;
+            enemy_shokugyo_box2.ItemsSource = SHOKUGYO_LIST;
+            enemy_shokugyo_box2.SelectedIndex = -1;
 
             //passive1.DataContext = src_character;
 
@@ -997,11 +1321,96 @@ namespace VBV_calc
             .Select(line => line.Split(','))
             .ToDictionary(parts => parts[1], parts => parts[2]);
             features = featureDict.Select(kv => new ImageFeature { Id = kv.Key, Feature = kv.Value }).ToList();
-            
+
+            inputName = session.InputMetadata.Keys.First();
+            //using var dummyTensor = NamedOnnxValue.CreateFromTensor(inputName, new DenseTensor<float>(reusableTensorBuffer, new[] { 1, 224, 224, 3 }));
+            //using var dummyResult = session.Run(new[] { dummyTensor });
+
+            //enemy側の初期化処理
+
+            enemy_CharacterBox.ItemsSource = characters;
+
+            enemy_EquipmentBox1.ItemsSource = enemy_src_equipment1;
+            enemy_EquipmentBox1.DisplayMemberPath = "ItemDisp";
+            enemy_EquipmentBox1.SelectedValuePath = "ItemValue";
+
+            enemy_EquipmentBox2.ItemsSource = enemy_src_equipment2;
+            enemy_EquipmentBox2.DisplayMemberPath = "ItemDisp";
+            enemy_EquipmentBox2.SelectedValuePath = "ItemValue";
+
+            enemy_ryoshokuBox.ItemsSource = enemy_src_ryoshoku;
+            enemy_ryoshokuBox.DisplayMemberPath = "ItemDisp";
+            enemy_ryoshokuBox.SelectedValuePath = "ItemValue";
+
+            enemy_assistskill1_box.ItemsSource = src_asistskills;
+            enemy_assistskill1_box.DisplayMemberPath = "ItemDisp";
+            enemy_assistskill1_box.SelectedValuePath = "ItemValue";
+            enemy_assistskill2_box.ItemsSource = src_asistskills;
+            enemy_assistskill2_box.DisplayMemberPath = "ItemDisp";
+            enemy_assistskill2_box.SelectedValuePath = "ItemValue";
+            enemy_assistskill3_box.ItemsSource = src_asistskills;
+            enemy_assistskill3_box.DisplayMemberPath = "ItemDisp";
+            enemy_assistskill3_box.SelectedValuePath = "ItemValue";
+            _engine_number.SetVariable("tessedit_char_whitelist", "0123456789"); // 数字のみ
+
+            this.Loaded += MainWindow_Loaded;
+
             _isInitialized = true; // 初期化完了
         }
-        List<ImageFeature> features;
 
+        private bool enablePassiveChange = true;   // 味方パッシブスキル用
+        private bool enemy_enablePassiveChange = true;     // 敵パッシブスキル用
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            foreach (var gb in new[] { passiveGroupBox, leaderGroupBox, shogoGroupBox, assistGroupBox, equipGroupBox })
+            {
+                AttachTextChangedHandlersLogical(gb, PassiveSkillsChange);
+            }
+            foreach (var gb in new[] { enemy_passiveGroupBox, enemy_leaderGroupBox, enemy_assistGroupBox, enemy_equipGroupBox })
+            {
+                AttachTextChangedHandlersLogical(gb, enemy_PassiveSkillsChange);
+            }
+        }
+
+        private void AttachTextChangedHandlersLogical(DependencyObject parent, TextChangedEventHandler handler)
+        {
+            foreach (var child in LogicalTreeHelper.GetChildren(parent))
+            {
+                if (child is TextBox tb)
+                    tb.TextChanged += handler;
+                else if (child is DependencyObject dobj)
+                    AttachTextChangedHandlersLogical(dobj, handler);
+            }
+        }
+
+        private void PassiveSkillsChange(object sender, TextChangedEventArgs e)
+        {
+            if (!enablePassiveChange) return;  // OFFなら何もしない
+            passive_skills_change();
+        }
+        private void enemy_PassiveSkillsChange(object sender, TextChangedEventArgs e)
+        {
+
+            if (!enemy_enablePassiveChange) return;    // OFFなら無効
+            enemy_passive_skills_change();
+        }
+
+        private void passive_skills_change()
+        {
+            Resync_finalskil();
+            calc_final_attack_mag();
+            calc_damage();
+        }
+
+        private void enemy_passive_skills_change()
+        {
+            enemy_Resync_finalskil();
+            calc_final_attack_mag();
+            calc_damage();
+        }
+
+        List<ImageFeature> features;
         private string _Passive1;
 
 
@@ -1034,16 +1443,33 @@ namespace VBV_calc
                     // 変換できなかった場合はデフォルト値（1.0）のまま
                 }
             }
-            if (enemy_sokudo_box != null && !string.IsNullOrEmpty(enemy_sokudo_box.Text))
+            if (enemy_mode == 0)
             {
-                if (double.TryParse(enemy_sokudo_box.Text, out enemy_sokudo))
+                if (enemy_sokudo_box != null && !string.IsNullOrEmpty(enemy_sokudo_box.Text))
                 {
-                }
-                else
-                {
-                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                    if (double.TryParse(enemy_sokudo_box.Text, out enemy_sokudo))
+                    {
+                    }
+                    else
+                    {
+                        // 変換できなかった場合はデフォルト値（1.0）のまま
+                    }
                 }
             }
+            else
+            {
+                if (enemy_sokudobox != null && !string.IsNullOrEmpty(enemy_sokudobox.Text))
+                {
+                    if (double.TryParse(enemy_sokudobox.Text, out enemy_sokudo))
+                    {
+                    }
+                    else
+                    {
+                        // 変換できなかった場合はデフォルト値（1.0）のまま
+                    }
+                }
+            }
+
             sokudo = status_bairitu * sokudo;
             hissatu_kakuritu = Math.Sqrt(sokudo) * 3.0 - Math.Sqrt(enemy_sokudo);
             return (int)hissatu_kakuritu;
@@ -1552,6 +1978,27 @@ namespace VBV_calc
 
             return ibeido_mushi_value;
         }
+
+
+
+        private int paring_mushi_calc(int unmei_value)
+        {
+            int paring_mushi_value = 0;
+            double tadanti = 0.0;
+            double tadan = get_tadan_value();
+            int tadan_value = 0;
+            if (tadan != 1.0)
+            {
+                tadanti = (tadan - 1.0) / 0.35;
+                tadan_value = (int)(tadanti + 1) * 5;
+            }
+            int bousou = get_bousou_value(unmei_value);
+            paring_mushi_value = tadan_value + bousou;
+
+            return paring_mushi_value;
+        }
+
+
         private bool enkaku_check()
         {
             for (int i = 1; i <= FINALSKILL_NUM; i++)
@@ -1568,6 +2015,37 @@ namespace VBV_calc
             return false;
         }
 
+        private int GetFinalSkillValue(string prefix, string skillName)
+        {
+            for (int i = 1; i <= 21; i++) // 味方側は21まで、敵側は19までだが多めでOK
+            {
+                var nameBox = (TextBox)this.FindName($"{prefix}final{i}");
+                var figBox = (TextBox)this.FindName($"{prefix}final{i}_fig");
+
+                if (nameBox == null || figBox == null)
+                    continue;
+
+                if (nameBox.Text == skillName)
+                {
+                    if (int.TryParse(figBox.Text, out int value))
+                        return value;
+                    else
+                        return 0;
+                }
+            }
+
+            return 0; // 見つからなかった
+        }
+        private bool HasFinalSkill(string prefix, string skillName)
+        {
+            for (int i = 1; i <= 21; i++)
+            {
+                var nameBox = (TextBox)this.FindName($"{prefix}final{i}");
+                if (nameBox != null && nameBox.Text == skillName)
+                    return true;
+            }
+            return false;
+        }
         bool shinma_flag = false;
         bool shuyaku_flag = false;
         bool enkaku_flag = false;
@@ -1575,6 +2053,504 @@ namespace VBV_calc
         double hissatu_bougyo_bairitu = 0.0;
         double hissatu_kakuritu = 0.0;
         int ibeido_mushi = 0;
+
+
+
+
+        //めんどくさいのでもう1から作る。通常ダメージ期待値のほうもそのうちこちらに寄せて共通化
+        private void hangeki_calc_damage()
+        {
+            int tousho_value = 0;
+            int seisen_value = 0;
+            int tokkou_value = 0;
+            int kenshu_value = 0;
+            int mukei_value = 0;
+            int shinma_value = 0;
+            int jigenshoheki_value = 0;
+            int hissatu_taisei_value = 0;
+            int chimei_taisei_value = 0;
+            int ibeido_value = 0;
+            int block_value = 0;
+            int waisho_value = 0;
+            int sikou_value = 0;
+            int unmei_value = 0;
+            int paring_value = 0;
+            int kyohu_value = 0;
+            int jigenzangeki_value = 0;
+            int kyousensi_value = 0;
+            int kyohon_value = 0;
+            int kasoku_value = 0;
+            int hangekitaisei_value = 0;
+            int zenryoku_value = 0;
+            bool senshu_flag = false;
+
+
+            int enemy_tousho_value = 0;
+            int enemy_seisen_value = 0;
+            int enemy_unmei_value = 0;
+            int enemy_jigenzangeki_value = 0;
+            int enemy_hangekibaika_value = 0;
+            int enemy_shinkaku_value = 0;
+            int enemy_kyojingari_value = 0;
+            int enemy_hissatuzouka_value = 0;
+            int enemy_timei_value = 0;
+            int enemy_kyousensi_value = 0;
+            int enemy_kyohon_value = 0;
+            int enemy_kasoku_value = 0;
+            
+            bool enemy_senshu_flag = false;
+            bool enemy_shuyaku_flag = false;
+            bool enemy_enkaku_flag = false;
+
+
+
+            //防御側の反撃計算のための初期化と取得
+            //選択モードから取得した場合。ちゃんと自分の輪と改変を足す
+            if (int.TryParse(enemy_unmei_box2.Text, out enemy_unmei_value))
+            {
+            }
+            else
+            {
+                // 変換できなかった場合はデフォルト値（0）のまま
+            }
+            enemy_unmei_value += GetFinalSkillValue("enemy_", "運命改変");
+            enemy_unmei_value += GetFinalSkillValue("enemy_", "運命の輪");
+            //その他の防御スキル
+            enemy_tousho_value = GetFinalSkillValue("enemy_", "凍傷気流");
+            enemy_seisen_value = GetFinalSkillValue("enemy_", "聖戦の導き");
+            enemy_jigenzangeki_value = GetFinalSkillValue("enemy_", "次元斬撃");
+
+            enemy_hangekibaika_value = GetFinalSkillValue("enemy_", "反撃倍加");
+            enemy_shinkaku_value = GetFinalSkillValue("enemy_", "心核穿ち");
+            enemy_kyojingari_value = GetFinalSkillValue("enemy_", "巨人狩り");
+            enemy_hissatuzouka_value = GetFinalSkillValue("enemy_", "必殺増加");
+            enemy_timei_value = GetFinalSkillValue("enemy_", "致命必殺");
+            //ステータス関係
+            enemy_kyousensi_value = GetFinalSkillValue("enemy_", "狂戦士化");
+            enemy_kyohon_value = GetFinalSkillValue("enemy_", "狂奔の牙");
+            enemy_kasoku_value = GetFinalSkillValue("enemy_", "加速進化");
+
+            enemy_senshu_flag = HasFinalSkill("enemy_", "専守防衛");
+            enemy_shuyaku_flag = HasFinalSkill("enemy_", "集約攻撃");
+            enemy_enkaku_flag = HasFinalSkill("enemy_", "遠隔攻撃");
+
+            //攻撃側の反撃計算のための初期化と取得
+            tousho_value = GetFinalSkillValue("", "凍傷気流");
+            seisen_value = GetFinalSkillValue("", "聖戦の導き");
+            tokkou_value = GetFinalSkillValue("", "特攻防御");
+            kenshu_value = GetFinalSkillValue("", "堅守体躯");
+            mukei_value = GetFinalSkillValue("", "無形体躯");
+            shinma_value = GetFinalSkillValue("", "神魔体躯");
+            jigenshoheki_value = GetFinalSkillValue("", "次元障壁");
+            hangekitaisei_value = GetFinalSkillValue("", "反撃耐性");
+            hissatu_taisei_value = GetFinalSkillValue("", "必殺耐性");
+            chimei_taisei_value = GetFinalSkillValue("", "致命耐性");
+            block_value = GetFinalSkillValue("", "ブロック");
+            ibeido_value = GetFinalSkillValue("", "イベイド");
+            sikou_value = GetFinalSkillValue("", "至高の盾");
+            waisho_value = GetFinalSkillValue("", "矮小体躯");
+            kyohu_value = GetFinalSkillValue("", "恐怖の瞳");
+            paring_value = GetFinalSkillValue("", "パリング");
+            jigenzangeki_value = GetFinalSkillValue("", "次元斬撃");
+            kyousensi_value = GetFinalSkillValue("", "狂戦士化");
+            kyohon_value = GetFinalSkillValue("", "狂奔の牙");
+            kasoku_value = GetFinalSkillValue("", "加速進化");
+            zenryoku_value = GetFinalSkillValue("", "全力攻撃");
+            senshu_flag = HasFinalSkill("", "専守防衛");
+            bool use_kenshu = false;
+
+            unmei_value = get_unmei_value();
+
+            DebugTextBox_damage.Text += "==反撃ダメージ計算==\n";
+
+            //まずはステータス倍率をそれぞれ計算
+
+            double enemy_status_bairitu = 1.0 * ((100.0+6*enemy_kyohon_value)/100.0) * ((100.0 + enemy_kyousensi_value) / 100.0) * ((100.0 + 6 * enemy_kasoku_value) / 100.0);
+            double status_bairitu = 1.0 * ((100.0 + 6 * kyohon_value) / 100.0) * ((100.0 + kyousensi_value) / 100.0) * ((100.0 + 6 * kasoku_value) / 100.0);
+
+            int enemy_sokudo = 1;
+            if (enemy_sokudobox != null && !string.IsNullOrEmpty(enemy_sokudobox.Text))
+            {
+                if (int.TryParse(enemy_sokudobox.Text, out enemy_sokudo))
+                {
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+            }
+            int sokudo = 1;
+            if (sokudobox != null && !string.IsNullOrEmpty(sokudobox.Text))
+            {
+                if (int.TryParse(sokudobox.Text, out sokudo))
+                {
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+            }
+            int fix_enemy_sokudo = (int)(enemy_sokudo * enemy_status_bairitu);
+            int fix_sokudo =(int) (sokudo * status_bairitu);
+
+            //まずはクリティカルの計算
+            int enemy_critical_status_kakuritu = (int)(Math.Sqrt(fix_enemy_sokudo) * 3 - Math.Sqrt(fix_sokudo));
+            //運命値足す
+            if (enemy_hissatuzouka_value != 0)
+                enemy_hissatuzouka_value += enemy_unmei_value;
+            if (hissatu_taisei_value != 0)
+                hissatu_taisei_value += unmei_value;
+            //クリティカルの確率と致命を考慮したクリダメ倍率の算出
+            int enemy_critical_kakuritu = enemy_critical_status_kakuritu + enemy_hissatuzouka_value - hissatu_taisei_value;
+            int enemy_critical_damage_bairitu = enemy_critical_status_kakuritu + enemy_timei_value - chimei_taisei_value;
+
+            //クリティカルの上限を決定、上限以上を切る
+            //今は心核穿ちの上限は機能させない
+            int enemy_critical_jougen = 50;
+            if(enemy_hissatuzouka_value > 0)
+            {
+                enemy_critical_jougen = 75;
+            }
+            if(mukei_value > 60) 
+                mukei_value = 60;
+            enemy_critical_jougen -= mukei_value;
+            if (enemy_critical_jougen < 5) 
+                enemy_critical_jougen = 5;
+            if (enemy_critical_kakuritu > enemy_critical_jougen)
+                enemy_critical_kakuritu = enemy_critical_jougen;
+            if (enemy_critical_kakuritu < 5)
+                enemy_critical_kakuritu = 5;
+            if (enemy_critical_damage_bairitu < 50)
+                enemy_critical_damage_bairitu = 50;
+
+            //次に攻撃倍率の計算
+
+            double enemy_kougeki_bairitu = 1.0 ;
+
+            enemy_kougeki_bairitu *= (100.0 + enemy_shinkaku_value) / 100.0;
+            DebugTextBox_damage.Text += "心核倍率:" + (100.0 + enemy_shinkaku_value) / 100.0 + "\n";
+            enemy_kougeki_bairitu *= (100.0 + 100*enemy_hangekibaika_value) / 100.0;
+            DebugTextBox_damage.Text += "反撃倍加倍率:" + (100.0 + enemy_hangekibaika_value) / 100.0 + "\n";
+
+            //防御倍率の計算
+            double bougyo_bairitu = 1.0;
+
+            //防御倍率の計算
+            shinma_flag = false;
+            //堅守の場合上限92
+            if (kenshu_value > 92)
+            {
+                kenshu_value = 92;
+            }
+            //神魔体躯の場合上限98
+            if (shinma_value > 98)
+            {
+                shinma_value = 98;
+            }
+
+            //神魔を使うか堅守を使うか。同値なら神魔体躯を使う
+            if (kenshu_value > shinma_value)
+            {
+                use_kenshu = true;
+            }
+            else
+            {
+                use_kenshu = false;
+            }
+            //特攻防御はしんまと加算
+            tokkou_value += shinma_value;
+            //最大100
+            if (tokkou_value > 100) tokkou_value = 100;
+
+            if (enemy_shinkaku_value > 0)
+                mukei_value -= 25;
+            if (mukei_value < 0)
+                mukei_value = 0;
+
+            if (hangekitaisei_value > 95)
+                hangekitaisei_value = 95;
+            if (use_kenshu) {
+                bougyo_bairitu = bougyo_bairitu * ((100.0 - mukei_value) / 100.0) * ((100.0 - mukei_value) / 100.0) * ((100.0 - kenshu_value + 10) / 100.0) * ((100.0 - hangekitaisei_value) / 100.0) ;
+            }
+            else
+            {
+                bougyo_bairitu = bougyo_bairitu * ((100.0 - mukei_value) / 100.0) * ((100.0 - mukei_value) / 100.0) * ((100.0 - shinma_value) / 100.0) * ((100.0 - hangekitaisei_value) / 100.0);
+            }
+            if (senshu_flag)
+            {
+                bougyo_bairitu *= 0.5;
+            }
+
+            if (zenryoku_value > 0)
+            {
+                bougyo_bairitu *= ((100.0 + zenryoku_value) / 100.0);
+
+            }
+
+            //城壁による防御計算
+            double joheki = 0.0;
+            if (double.TryParse(joheki_box.Text, out joheki))
+            {
+
+            }
+            double joheki_bougyo = Math.Sqrt(joheki);
+
+
+            //特攻倍率の計算
+            String shuzoku_str = "";
+            shuzoku_str = shuzoku_box.Text;
+
+            Dictionary<string, int> parse_enemy_shuzoku = new Dictionary<string, int>();
+            for (int i = 0; i < shuzoku_str.Length; i++)
+            {
+                //parse_enemy_shuzokuに存在する場合+1する
+                if (parse_enemy_shuzoku.ContainsKey(shuzoku_str[i].ToString()))
+                {
+                    parse_enemy_shuzoku[shuzoku_str[i].ToString()]++;
+                }
+                else
+                {
+                    parse_enemy_shuzoku.Add(shuzoku_str[i].ToString(), 1);
+                }
+            }
+            string player_tokko_str = enemy_tokko_box.Text;
+            //一文字ずつなめて確認、あれば倍率を+1.0
+            double tokko_bairitu = 1.0;
+            for (int i = 0; i < player_tokko_str.Length; i++)
+            {
+                if (parse_enemy_shuzoku.ContainsKey(player_tokko_str[i].ToString()))
+                {
+                    //倍率を+1.0
+                    tokko_bairitu += 1.0;
+                }
+                else if (player_tokko_str[i].ToString() == "全")
+                {
+                    tokko_bairitu += parse_enemy_shuzoku.Count;
+                }
+            }
+            tokko_bairitu = 1.0 + (tokko_bairitu - 1.0) * (100 - tokkou_value) / 100.0;
+            DebugTextBox_damage.Text += "特攻倍率:" + tokko_bairitu + "\n";
+
+            //ブロック値は次元障壁、至高の盾と加算
+            double block_bairitu = 1.0;
+            block_value += (int)jigenshoheki_value;
+            block_value += (int)sikou_value;
+            if (block_value > 0)
+                block_value = block_value + enemy_unmei_value;
+            if (get_shuyaku_value() != 1.0)
+            {
+                //集約攻撃が入っている場合は、ブロックは無視する
+            }
+            else
+            {
+                if (block_value > 0)
+                {
+                    //ブロックが入っている場合は、ブロック値を使う
+                    if (block_value > 75) block_value = 75;
+                    block_bairitu = 1.0 * (100.0 - block_value) / 100.0 + 0.25 * (block_value) / 100.0;
+                    DebugTextBox_damage.Text += "ブロック倍率:" + block_bairitu + "\n";
+                }
+                else
+                {
+                    //ブロックが入っていない場合は1.0
+                    block_bairitu = 1.0;
+                }
+            }
+
+            //イベイド無視は反撃に存在しない
+            ibeido_value += (int)jigenshoheki_value;
+            ibeido_value += sikou_value;
+            if (ibeido_value > 0)
+                ibeido_value = ibeido_value + unmei_value;
+            if (ibeido_value < 0) ibeido_value = 0;
+            if (ibeido_value > 100) ibeido_value = 100;
+            //enkaku_flag = enkaku_check();
+            double ibeido_bairitu = 1.0;
+            if (enemy_enkaku_flag == true || enemy_jigenzangeki_value > 0)
+            {
+                DebugTextBox_damage.Text += "イベイド確率:" + ibeido_value + "\n";
+                ibeido_bairitu = (100.0 - ibeido_value) / 100.0;
+            }
+            else
+            {
+                DebugTextBox_damage.Text += "イベイド確率:0\n";
+            }
+
+            //凍傷と聖戦
+            double seisen_bairitu = 1.0;
+            double enemy_seisen_bairitu = 1.0;
+            double toushou_bairitu = 1.0;
+            double enemy_toushou_bairitu = 1.0;
+            int temp_toushou_bairitu = (int)(toushou_bairitu * 100.0 - 100) - (int)enemy_tousho_value;
+            int temp_seisen_bairitu = (int)(seisen_bairitu * 100.0 - 100) - (int)enemy_seisen_value;
+            if (temp_toushou_bairitu > 30) temp_toushou_bairitu = 30;
+            if (temp_toushou_bairitu < -30) temp_toushou_bairitu = -30;
+            if (temp_seisen_bairitu > 30) temp_seisen_bairitu = 30;
+            if (temp_seisen_bairitu < -30) temp_seisen_bairitu = -30;
+
+            if (temp_seisen_bairitu > 0)
+            {
+                seisen_bairitu = (100.0 + temp_seisen_bairitu) / 100.0;
+                enemy_seisen_bairitu = 1.0;
+            }
+            else if (temp_seisen_bairitu < 0)
+            {
+                seisen_bairitu = 1.0;
+                enemy_seisen_bairitu = (100.0 + temp_seisen_bairitu) / 100.0;
+            }
+            else
+            {
+                seisen_bairitu = 1.0;
+                enemy_seisen_bairitu = 1.0;
+            }
+
+            if (temp_toushou_bairitu < 0)
+            {
+                string p_shuzoku = shuzoku_box.Text;
+                toushou_bairitu = 1.0;
+                if (Regex.IsMatch(p_shuzoku, "炎|氷|星"))
+                {
+                    enemy_toushou_bairitu = 1.0;
+                }
+                else
+                {
+                    enemy_toushou_bairitu = (100.0 + temp_toushou_bairitu) / 100.0;
+                }
+            }
+            else if (temp_toushou_bairitu > 0)
+            {
+                if (Regex.IsMatch(shuzoku_str, "炎|氷|星"))
+                {
+                    toushou_bairitu = 1.0;
+                }
+                else
+                {
+                    toushou_bairitu = (100.0 + temp_toushou_bairitu) / 100.0;
+                }
+                enemy_toushou_bairitu = 1.0;
+            }
+            else
+            {
+                toushou_bairitu = 1.0;
+                enemy_toushou_bairitu = 1.0;
+            }
+            //職業とスタンスの計算
+            double shokugyo_bairitu = calc_shokugyo_bairitu();
+            double stance_bairitu = calc_stance_bairitu();
+            if (shokugyo_bairitu > 1.0)
+            {
+                DebugTextBox_damage.Text += "職業補正:" + shokugyo_bairitu + "\n";
+            }
+            if (stance_bairitu > 1.0)
+            {
+                DebugTextBox_damage.Text += "スタンス補正:" + stance_bairitu + "\n";
+            }
+
+
+            //パリングの運命値、至高の盾をチェック。運命値は次元斬撃の前。
+            double paring_bairitu = 1.0;
+            int enemy_paring_value_total = paring_value + sikou_value;
+
+            if (enemy_paring_value_total > 0)
+            {
+                enemy_paring_value_total += enemy_unmei_value;
+            }
+            enemy_paring_value_total += enemy_jigenzangeki_value;
+
+            //次元斬撃があるならは絶対0になる
+            if (enemy_jigenzangeki_value > 0)
+                enemy_paring_value_total = 0;
+            if (enemy_paring_value_total > 100) enemy_paring_value_total = 100;
+            if (enemy_paring_value_total < 0) enemy_paring_value_total = 0;
+
+            paring_bairitu = (100.0 - enemy_paring_value_total) / 100.0;
+
+
+            //恐怖の瞳の運命値とチェック
+            if (kyohu_value != 0)
+            {
+                kyohu_value += unmei_value;
+            }
+            if (kyohu_value > 50)
+                kyohu_value = 50;
+            double enemy_kyohu_bairitu = 1.0;
+            string shuzoku_txt = enemy_shuzoku_box.Text;
+            string[] kyohu_keywords = { "器", "竜", "夜" };
+            bool kyohu_containsAny = kyohu_keywords.Any(k => shuzoku_txt.Contains(k));
+            if (!kyohu_containsAny)
+            {
+                if (!HasFinalSkill("enemy_", "狂戦士化") && !HasFinalSkill("enemy_", "勇猛果敢") && !HasFinalSkill("enemy_", "恐怖の瞳") && !HasFinalSkill("enemy_", "決戦領域") && !HasFinalSkill("enemy_", "英雄覇気"))
+                {
+                    enemy_kyohu_bairitu = (100.0 - kyohu_value) / 100.0;
+                }
+            }
+
+            bougyo_bairitu *= enemy_kyohu_bairitu;
+
+            //攻撃倍率の計算
+            enemy_kougeki_bairitu = enemy_kougeki_bairitu * shokugyo_bairitu * stance_bairitu;
+            DebugTextBox_damage.Text += "防御スキル倍率:" + bougyo_bairitu + "\n";
+
+            //致命だけ防御を減算。防御値の最小値は1
+            double chimei_bairitu = 1.0;
+            if (enemy_timei_value != 0)
+            {
+                chimei_bairitu = ((100 - 25) / 100);
+
+            }
+            //防御側の攻撃と攻撃側の防御をとってくる
+
+            double enemy_kougeki = 1.0;
+            double bougyo = 1.0;
+            double.TryParse(enemy_kougekibox.Text, out enemy_kougeki);
+            double.TryParse(bougyobox.Text, out bougyo);
+
+            int enemy_kougeki_fix =(int)(enemy_kougeki * enemy_status_bairitu);
+            int bougyo_fix= (int)(bougyo * status_bairitu);
+
+            //クリティカルなしのダメージ
+            double temp_bougyo_bairitu = 1.0;
+            
+            double enemy_bougyo_value_temp = bougyo_fix;
+            if (enemy_bougyo_value_temp < 1.0)
+                enemy_bougyo_value_temp = 1.0;
+            double critical_nasi_damage = ((2.0 * enemy_kougeki_fix  + 5.0) * Math.Sqrt(double.Parse(enemy_hpbox.Text)*paring_bairitu * tokko_bairitu * bougyo_bairitu * block_bairitu * enemy_kougeki_bairitu/3) / (2.0 + bougyo_fix + joheki_bougyo));
+
+            //クリティカルありのダメージ計算
+            int bougyo_value_temp = (int)(bougyo_fix);
+            if (enemy_timei_value > 0)
+            {
+                bougyo_fix = (int)(bougyo_fix * 0.75);
+            }
+            
+            double critical_ari_damage = ((2.0 * enemy_kougeki_fix + 5.0) * Math.Sqrt(double.Parse(enemy_hpbox.Text) * tokko_bairitu * bougyo_bairitu * block_bairitu * ((100.0+enemy_critical_damage_bairitu)/100.0) * enemy_kougeki_bairitu / 3) / (2.0 + bougyo_fix + joheki_bougyo));
+            //統合する。ここでパリングも考慮する。クリティカルなしの時に倍率でかけてしまえばいい。
+            DebugTextBox_damage.Text += "敵攻撃力:" + enemy_kougeki_fix + "\n";
+            DebugTextBox_damage.Text += "クリ時ダメージ:" + (int)critical_ari_damage+ "\n";
+            DebugTextBox_damage.Text += "通常ダメージ:" + (int)critical_nasi_damage + "\n";
+            DebugTextBox_damage.Text += "クリティカル確率:" + enemy_critical_kakuritu + "\n";
+            DebugTextBox_damage.Text += "味方防御力:" + bougyo_fix+ "\n";
+
+            int damage_value = (int)(critical_ari_damage * (enemy_critical_kakuritu) / 100);
+            damage_value += (int)(critical_nasi_damage * ((100.0 - (double)(enemy_paring_value_total)) / 100.0) * ((100.0 - enemy_critical_kakuritu)/100.0));
+            damage_value = (int)(damage_value*ibeido_bairitu);
+            //damage_value = damage_value / 3;
+            if (jigenzangeki_value > 0)
+            {
+                hangeki_damage_min_box.Text = "0(0)";
+            }
+            else if (enkaku_flag)
+            {
+                hangeki_damage_min_box.Text = "0(" + damage_value + ")";
+
+            }
+            else
+            {
+                hangeki_damage_min_box.Text = damage_value + "(" + damage_value + ")";
+            }
+
+        }
+
         private void calc_damage()
         {
             if (isLoad)
@@ -1611,131 +2587,205 @@ namespace VBV_calc
             int enemy_waisho_value = 0;
             int enemy_sikou_value = 0;
             int enemy_unmei_value = 0;
-            if (double.TryParse(tokkobogyo_box.Text, out enemy_tokkou_value))
+            int enemy_paring_value = 0;
+            int enemy_kyohu_value = 0;
+            int unmei_value = 0;
+            int enemy_jigenzangeki_value = 0;
+            int enemy_hangekibaika_value = 0;
+            int enemy_shinkaku_value = 0;
+            int enemy_kyojingari_value =0;
+            int enemy_hissatuzouka_value =0;
+            int enemy_timei_value = 0;
+            bool enemy_senshu_flag = false;
+            bool enemy_shuyaku_flag = false;
+            bool enemy_enkaku_flag = false;
+
+            if (enemy_mode == 0)
             {
-                // enermy_bougyo に変換された値が入る
+                if (double.TryParse(tokkobogyo_box.Text, out enemy_tokkou_value))
+                {
+                    // enermy_bougyo に変換された値が入る
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (double.TryParse(kenshutaiku_box.Text, out enemy_kenshu_value))
+                {
+                    // enermy_bougyo に変換された値が入る
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (double.TryParse(mukeitaiku_box.Text, out enemy_mukei_value))
+                {
+                    // enermy_bougyo に変換された値が入る
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (double.TryParse(shinmataiku_box.Text, out enemy_shinma_value))
+                {
+                    // enermy_bougyo に変換された値が入る
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (double.TryParse(jigenshoheki_box.Text, out enemy_jigenshoheki_value))
+                {
+                    // enermy_bougyo に変換された値が入る
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (double.TryParse(hissatutaisei_box.Text, out enemy_hissatu_taisei_value))
+                {
+                    // enermy_bougyo に変換された値が入る
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (double.TryParse(chimeitaisei_box.Text, out enemy_chimei_taisei_value))
+                {
+                    // enermy_bougyo に変換された値が入る
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (double.TryParse(tosho_box.Text, out enemy_tousho_value))
+                {
+                    // enermy_bougyo に変換された値が入る
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (double.TryParse(seisen_box.Text, out enemy_seisen_value))
+                {
+                    // enermy_bougyo に変換された値が入る
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (double.TryParse(ibeido_box.Text, out enemy_ibeido_value))
+                {
+                    // enermy_bougyo に変換された値が入る
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (double.TryParse(ukenagashi_box.Text, out enemy_ukenagashi_value))
+                {
+                    // enermy_bouga に変換された値が入る
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (double.TryParse(block_box.Text, out enemy_block_value))
+                {
+                    // enermy_bougyo に変換された値が入る
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (int.TryParse(enemy_unmei_box.Text, out enemy_unmei_value))
+                {
+                    // enermy_bougyo に変換された値が入る
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+
+                //ステータス値の取得
+                if (double.TryParse(enemy_bougyo_box.Text, out enermy_bougyo))
+                {
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (int.TryParse(enemy_sikou_box.Text, out enemy_sikou_value))
+                {
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (int.TryParse(enemy_waisho_box.Text, out enemy_waisho_value))
+                {
+                }
+                if (int.TryParse(enemy_kyohu_box.Text, out enemy_kyohu_value))
+                {
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                if (int.TryParse(enemy_paring_box.Text, out enemy_paring_value))
+                {
+
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（1.0）のまま
+                }
+                //運命の輪、運命改変の値を取得
+                unmei_value = get_unmei_value();
             }
             else
             {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (double.TryParse(kenshutaiku_box.Text, out enemy_kenshu_value))
-            {
-                // enermy_bougyo に変換された値が入る
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (double.TryParse(mukeitaiku_box.Text, out enemy_mukei_value))
-            {
-                // enermy_bougyo に変換された値が入る
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (double.TryParse(shinmataiku_box.Text, out enemy_shinma_value))
-            {
-                // enermy_bougyo に変換された値が入る
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (double.TryParse(jigenshoheki_box.Text, out enemy_jigenshoheki_value))
-            {
-                // enermy_bougyo に変換された値が入る
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (double.TryParse(hissatutaisei_box.Text, out enemy_hissatu_taisei_value))
-            {
-                // enermy_bougyo に変換された値が入る
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (double.TryParse(chimeitaisei_box.Text, out enemy_chimei_taisei_value))
-            {
-                // enermy_bougyo に変換された値が入る
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (double.TryParse(tosho_box.Text, out enemy_tousho_value))
-            {
-                // enermy_bougyo に変換された値が入る
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (double.TryParse(seisen_box.Text, out enemy_seisen_value))
-            {
-                // enermy_bougyo に変換された値が入る
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (double.TryParse(ibeido_box.Text, out enemy_ibeido_value))
-            {
-                // enermy_bougyo に変換された値が入る
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (double.TryParse(ukenagashi_box.Text, out enemy_ukenagashi_value))
-            {
-                // enermy_bouga に変換された値が入る
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (double.TryParse(block_box.Text, out enemy_block_value))
-            {
-                // enermy_bougyo に変換された値が入る
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (int.TryParse(enemy_unmei_box.Text, out enemy_unmei_value))
-            {
-                // enermy_bougyo に変換された値が入る
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
+                //選択モードから取得した場合。ちゃんと自分の輪と改変を足す
+                if (int.TryParse(enemy_unmei_box2.Text, out enemy_unmei_value))
+                {
+                }
+                else
+                {
+                    // 変換できなかった場合はデフォルト値（0）のまま
+                }
+                //反撃計算でも使うやつら
+                enemy_unmei_value += GetFinalSkillValue("enemy_", "運命改変");
+                enemy_unmei_value += GetFinalSkillValue("enemy_", "運命の輪");
+                enemy_jigenzangeki_value = GetFinalSkillValue("enemy_", "次元斬撃");
+                enemy_tousho_value = GetFinalSkillValue("enemy_", "凍傷気流");
+                enemy_seisen_value = GetFinalSkillValue("enemy_", "聖戦の導き");
+                //その他の防御スキル
+                enemy_tokkou_value = GetFinalSkillValue("enemy_", "特攻防御");
+                enemy_kenshu_value = GetFinalSkillValue("enemy_", "堅守体躯");
+                enemy_mukei_value = GetFinalSkillValue("enemy_", "無形体躯");
+                enemy_shinma_value = GetFinalSkillValue("enemy_", "神魔体躯");
+                enemy_jigenshoheki_value = GetFinalSkillValue("enemy_", "次元障壁");
+                enemy_ukenagashi_value = GetFinalSkillValue("enemy_", "受け流し");
+                enemy_hissatu_taisei_value = GetFinalSkillValue("enemy_", "必殺耐性");
+                enemy_chimei_taisei_value = GetFinalSkillValue("enemy_", "致命耐性");
+                enemy_block_value = GetFinalSkillValue("enemy_", "ブロック");
+                enemy_ibeido_value = GetFinalSkillValue("enemy_", "イベイド");
+                enemy_sikou_value = GetFinalSkillValue("enemy_", "至高の盾");
+                enemy_waisho_value = GetFinalSkillValue("enemy_", "矮小体躯");
+                enemy_kyohu_value = GetFinalSkillValue("enemy_", "恐怖の瞳");
+                enemy_paring_value = GetFinalSkillValue("enemy_", "パリング");
+                //以下反撃計算用
+                enemy_hangekibaika_value = GetFinalSkillValue("enemy_", "反撃倍加");                
+                enemy_shinkaku_value = GetFinalSkillValue("enemy_", "心核穿ち");
+                enemy_kyojingari_value = GetFinalSkillValue("enemy_", "巨人狩り");
+                enemy_hissatuzouka_value = GetFinalSkillValue("enemy_", "必殺増加");
+                enemy_timei_value = GetFinalSkillValue("enemy_", "致命必殺");
+                enemy_senshu_flag = HasFinalSkill("enemy_", "専守防衛");
+                enemy_shuyaku_flag = HasFinalSkill("enemy_", "集約攻撃");
+                enemy_enkaku_flag = HasFinalSkill("enemy_", "遠隔攻撃");
             }
 
-            //ステータス値の取得
-            if (double.TryParse(enemy_bougyo_box.Text, out enermy_bougyo))
-            {
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (int.TryParse(enemy_sikou_box.Text, out enemy_sikou_value))
-            {
-            }
-            else
-            {
-                // 変換できなかった場合はデフォルト値（1.0）のまま
-            }
-            if (int.TryParse(enemy_waisho_box.Text, out enemy_waisho_value))
-            {
-            }
-
-
+            unmei_value = get_unmei_value();
             double player_kougeki = 1.0;
             if (double.TryParse(kougekibox.Text, out player_kougeki))
             {
@@ -1746,9 +2796,6 @@ namespace VBV_calc
                 // 変換できなかった場合はデフォルト値（1.0）のまま
             }
 
-            //運命の輪、運命改変の値を取得
-            int unmei_value = 0;
-            unmei_value = get_unmei_value();
             //防御倍率の計算
             bool use_kenshu = false;
             shinma_flag = false;
@@ -1788,6 +2835,7 @@ namespace VBV_calc
             double enemy_toushou_bairitu = 1.0;
 
             unmei_value = get_unmei_value();
+            int hangeki_taisei_value = 0;
 
             //まずはステータスが変化する倍率を計算。攻撃のステータス値にかかる。
             p_status_bairitu *= get_kasoku_value();
@@ -1853,9 +2901,9 @@ namespace VBV_calc
             //心核は無形の必殺上限をどうにかする機能はない模様
             //運命値も無視
             int bougyo_mukei_sinkaku = 0;
+            if (enemy_mukei_value > 60) enemy_mukei_value = 60;
             if (enemy_mukei_value > 0)
                 bougyo_mukei_sinkaku = (int)(enemy_mukei_value) ;
-            if (enemy_mukei_value > 60) enemy_mukei_value = 60;
 
             //必殺の上限値から無形体躯の値を減算
             hissatu_jougen -= (int)enemy_mukei_value;
@@ -1886,12 +2934,26 @@ namespace VBV_calc
 
             //城壁による防御計算
             double joheki = 0.0;
-            if (double.TryParse(enemy_joheki_box.Text, out joheki))
+            if (enemy_mode == 0)
             {
+                if (double.TryParse(enemy_joheki_box.Text, out joheki))
+                {
 
+                }
+                else
+                {
+                }
             }
             else
             {
+                if (double.TryParse(enemy_joheki_box2.Text, out joheki))
+                {
+
+                }
+                else
+                {
+                }
+
             }
             double joheki_bougyo = Math.Sqrt(joheki);
 
@@ -1912,7 +2974,12 @@ namespace VBV_calc
                 bougyo_skill_bairitu = senshu * ((100.0 - enemy_shinma_value) / 100.0) * ((100.0 - enemy_mukei_value) / 100.0);
 
             //特攻倍率の計算
-            String shuzoku_str = enemy_shuzoku_box.Text;
+            String shuzoku_str = "";
+            if (enemy_mode==0)
+                shuzoku_str = enemy_shuzoku_box.Text;
+            else
+                shuzoku_str = enemy_shuzoku_box2.Text;
+
             Dictionary<string, int> parse_enemy_shuzoku = new Dictionary<string, int>();
             for (int i = 0; i < shuzoku_str.Length; i++)
             {
@@ -2090,6 +3157,46 @@ namespace VBV_calc
             DebugTextBox_damage.Text += "矮小値:" + enemy_waisho_value + "\n";
             bougyo_skill_bairitu *= enemy_waisho_bairitu;
 
+            //恐怖の瞳の運命値とチェック
+            if(enemy_kyohu_value != 0)
+            {
+                enemy_kyohu_value += unmei_value;
+            }
+            if (enemy_kyohu_value > 50)
+                enemy_kyohu_value = 50;
+            double enemy_kyohu_bairitu = 1.0;
+            string shuzoku_txt = shuzoku_box.Text;
+            string[] kyohu_keywords = { "器", "竜", "夜" };
+            bool kyohu_containsAny = kyohu_keywords.Any(k => shuzoku_txt.Contains(k));
+            if (!kyohu_containsAny)
+            {
+                if (!HasFinalSkill("", "狂戦士化") && !HasFinalSkill("", "勇猛果敢") && !HasFinalSkill("", "恐怖の瞳") && !HasFinalSkill("", "決戦領域") && !HasFinalSkill("", "英雄覇気")) {
+                    enemy_kyohu_bairitu = (100.0 - enemy_kyohu_value) / 100.0;
+                }
+            }
+            DebugTextBox_damage.Text += "恐怖の瞳倍率:" + enemy_kyohu_bairitu + "\n";
+
+            //パリングの運命値、至高の盾をチェック。運命値は次元斬撃の前。
+            double enemy_paring_bairitu = 1.0;
+            int enemy_paring_value_total = enemy_paring_value + enemy_sikou_value;
+
+            if (enemy_paring_value_total>0)
+            {
+                enemy_paring_value_total += enemy_unmei_value;
+            }
+            enemy_paring_value_total += enemy_jigenzangeki_value;
+
+            //パリングの減算を計算
+            int paring_mushi = paring_mushi_calc(unmei_value);
+            enemy_paring_value_total -= paring_mushi;
+            //次元斬撃があるならは絶対0になる
+            if (get_jigenzangeki_value() > 0)
+                enemy_paring_value_total=0;
+            if (enemy_paring_value_total > 100) enemy_paring_value_total = 100;
+            if (enemy_paring_value_total < 0) enemy_paring_value_total = 0;
+            DebugTextBox_damage.Text += "パリング値:" + enemy_paring_value_total + "\n";
+
+
             //職業とスタンスの計算
             double shokugyo_bairitu = calc_shokugyo_bairitu();
             double stance_bairitu = calc_stance_bairitu();
@@ -2105,12 +3212,26 @@ namespace VBV_calc
 
             DebugTextBox_damage.Text += "防御スキル倍率:" + bougyo_skill_bairitu + "\n";
 
-            if (double.TryParse(enemy_bougyo_box.Text, out enemy_bougyo_value))
+            //敵の防御ステータスの取得
+            if (enemy_mode == 0)
             {
+                if (double.TryParse(enemy_bougyo_box.Text, out enemy_bougyo_value))
+                {
+                }
+                else
+                {
+                }
             }
             else
             {
+                if (double.TryParse(enemy_bougyobox.Text, out enemy_bougyo_value))
+                {
+                }
+                else
+                {
+                }
             }
+
             /*防御値の最小値は1*/
             if (get_chimei_value() != 0.0)
             {
@@ -2135,16 +3256,21 @@ namespace VBV_calc
             if (enemy_bougyo_value_temp < 1.0)
                 enemy_bougyo_value_temp = 1.0;
             double critical_ari_damage = ((2.0 * player_kougeki * status_bairitu + 5.0) * Math.Sqrt(double.Parse(hpbox.Text)) / (2.0 + enemy_bougyo_value_temp + joheki_bougyo)) * tokko_bairitu * bougyo_skill_bairitu * block_bairitu * critical_damage_bairitu * kougeki_bairitu;
-            //統合する
-            damage_value = critical_ari_damage * (critical_kakuritu) / 100 + critical_nasi_damage * (100 - critical_kakuritu) / 100;
+            //統合する。ここでパリングも考慮する。クリティカルなしの時に倍率でかけてしまえばいい。
+            damage_value = critical_ari_damage * (critical_kakuritu) / 100 + (((100.0-(double)enemy_paring_value_total)/100.0)*critical_nasi_damage * (100 - critical_kakuritu)) / 100;
 
             //イベイドの確率で最大0になる
             if (enkaku_flag == true && ibeido_value != 0)
             {
                 damage_value = (100 - ibeido_value) * damage_value / 100.0;
             }
-
+            //矮小の確率で0になる
             damage_value = damage_value * enemy_waisho_kakuritu;
+
+            //恐怖の瞳。なかったり無効なら1.0が入ってるはず。
+            damage_value = damage_value * enemy_kyohu_bairitu;
+
+
 
             double tuigeki = 0;
             if (get_kenkon_value(kougeki_kaisu, unmei_value) != 1.0)
@@ -2155,6 +3281,7 @@ namespace VBV_calc
             {
                 tuigeki = 1.0 + kougeki_kaisu;
             }
+
 
 
             damage_kaisu_kitaiti_box.Text = tuigeki.ToString();
@@ -2193,6 +3320,8 @@ namespace VBV_calc
             damage_kaisu_min_box.Text = tuigeki.ToString();
             damage_min_box.Text = Math.Truncate(min_damage_value).ToString();
 
+            if(enemy_mode==1)
+                hangeki_calc_damage();
 
         }
 
@@ -2356,8 +3485,17 @@ namespace VBV_calc
 
             //種族特攻の計算
             String shuzoku_str = "";
-            if (enemy_shuzoku_box != null && !string.IsNullOrEmpty(enemy_shuzoku_box.Text))
-                shuzoku_str = enemy_shuzoku_box.Text;
+            if (enemy_mode == 0)
+            {
+                if (enemy_shuzoku_box != null && !string.IsNullOrEmpty(enemy_shuzoku_box.Text))
+                    shuzoku_str = enemy_shuzoku_box.Text;
+            }
+            else
+            {
+                if (enemy_shuzoku_box2 != null && !string.IsNullOrEmpty(enemy_shuzoku_box2.Text))
+                    shuzoku_str = enemy_shuzoku_box2.Text;
+
+            }
             Dictionary<string, int> parse_enemy_shuzoku = new Dictionary<string, int>();
             for (int i = 0; i < shuzoku_str.Length; i++)
             {
@@ -2402,6 +3540,180 @@ namespace VBV_calc
 
         }
         Boolean leader_flag;
+        Boolean enemy_leader_flag;
+
+        void SetKeyValueTexts(IEnumerable<KeyValuePair<string, int>> data, string baseName)
+        {
+            int i = 1;
+            foreach (var kv in data)
+            {
+                if (FindName($"{baseName}{i}") is TextBox nameBox)
+                    nameBox.Text = kv.Key ?? "";
+
+                if (FindName($"{baseName}{i}_fig") is TextBox valueBox)
+                    valueBox.Text = kv.Value.ToString();
+
+                i++;
+            }
+        }
+
+        void ClearTextBoxes(string baseName, int count)
+        {
+            for (int i = 1; i <= count; i++)
+            {
+                if (FindName($"{baseName}{i}") is TextBox nameBox)
+                    nameBox.Text = "";
+                if (FindName($"{baseName}{i}_fig") is TextBox valueBox)
+                    valueBox.Text = "";
+            }
+        }
+
+        private void CollectFinalSkills(
+            string prefix,
+            Dictionary<string, int> finalskills,
+            bool leader_flag,
+            dynamic current_Character_Status,
+            TextBox tokko_box
+        )
+        {
+            // ---------- passive系 ----------
+            for (int j = 1; j <= 8; j++)
+            {
+                var textBox = (TextBox)this.FindName($"{prefix}passive{j}");
+                var valueBox = (TextBox)this.FindName($"{prefix}passive{j}_fig");
+
+                if (textBox == null || string.IsNullOrEmpty(textBox.Text)) continue;
+
+                double value = 0;
+                if (valueBox != null && !string.IsNullOrEmpty(valueBox.Text))
+                    double.TryParse(valueBox.Text, out value);
+
+                if (finalskills.ContainsKey(textBox.Text))
+                    finalskills[textBox.Text] += (int)value;
+                else
+                    finalskills[textBox.Text] = (int)value;
+            }
+
+            // ---------- leader系 ----------
+            if (leader_flag)
+            {
+                for (int k = 1; k <= 2; k++)
+                {
+                    var leaderNameBox = (TextBox)this.FindName($"{prefix}leader{k}");
+                    var leaderValueBox = (TextBox)this.FindName($"{prefix}leader{k}_fig");
+                    if (leaderNameBox == null || string.IsNullOrEmpty(leaderNameBox.Text)) continue;
+
+                    int value = 0;
+                    if (leaderValueBox != null && int.TryParse(leaderValueBox.Text, out int tmp)) value = tmp;
+
+                    if (finalskills.ContainsKey(leaderNameBox.Text))
+                        finalskills[leaderNameBox.Text] += value;
+                    else
+                        finalskills[leaderNameBox.Text] = value;
+                }
+            }
+
+            // ---------- shogo系 ----------
+            string temp_tokko = "";
+            for (int k = 1; k <= 2; k++)
+            {
+                var shogoNameBox = (TextBox)this.FindName($"{prefix}shogo{k}");
+                var shogoValueBox = (TextBox)this.FindName($"{prefix}shogo{k}_fig");
+                if (shogoNameBox == null || string.IsNullOrEmpty(shogoNameBox.Text)) continue;
+
+                int value = 0;
+                if (shogoValueBox != null && int.TryParse(shogoValueBox.Text, out int tmp)) value = tmp;
+
+                if (finalskills.ContainsKey(shogoNameBox.Text))
+                    finalskills[shogoNameBox.Text] += value;
+                else
+                    finalskills[shogoNameBox.Text] = value;
+
+                // tokko情報（存在すれば）
+                var statusField = this.GetType().GetField($"{prefix}shogo{k}_status");
+                if (statusField != null)
+                {
+                    dynamic status = statusField.GetValue(this);
+                    if (status != null && status.tokko != null)
+                        temp_tokko += status.tokko;
+                }
+            }
+
+            // ---------- 種族・特攻の反映 ----------
+            if (current_Character_Status != null)
+            {
+                string shuzoku, tokko;
+                current_Character_Status.get_shuzoku_tokko(out shuzoku, out tokko);
+                if (tokko_box != null)
+                    tokko_box.Text = tokko + temp_tokko;
+            }
+
+            // ---------- equipment系 ----------
+            for (int eq = 1; eq <= 2; eq++)
+            {
+                for (int sk = 1; sk <= 2; sk++)
+                {
+                    var eqNameBox = (TextBox)this.FindName($"{prefix}equipment{eq}_skill{sk}");
+                    var eqValueBox = (TextBox)this.FindName($"{prefix}equipment{eq}_skill{sk}_fig");
+                    if (eqNameBox == null || string.IsNullOrEmpty(eqNameBox.Text)) continue;
+
+                    int value = 0;
+                    if (eqValueBox != null && int.TryParse(eqValueBox.Text, out int tmp)) value = tmp;
+
+                    if(prefix=="")
+                        equipment_tokko_plus(eqNameBox.Text, eqValueBox?.Text ?? "");
+                    else
+                        enemy_equipment_tokko_plus(eqNameBox.Text, eqValueBox?.Text ?? "");
+
+                    if (finalskills.ContainsKey(eqNameBox.Text))
+                        finalskills[eqNameBox.Text] += value;
+                    else
+                        finalskills[eqNameBox.Text] = value;
+                }
+            }
+
+            // ---------- ryoshoku ----------
+            var ryoshokuNameBox = (TextBox)this.FindName($"{prefix}ryoshoku_name");
+            var ryoshokuFigBox = (TextBox)this.FindName($"{prefix}ryoshoku_fig_box");
+            if (ryoshokuNameBox != null && !string.IsNullOrEmpty(ryoshokuNameBox.Text))
+            {
+                int value = 0;
+                if (ryoshokuFigBox != null && int.TryParse(ryoshokuFigBox.Text, out int tmp)) value = tmp;
+
+                if (finalskills.ContainsKey(ryoshokuNameBox.Text))
+                    finalskills[ryoshokuNameBox.Text] += value;
+                else
+                    finalskills[ryoshokuNameBox.Text] = value;
+            }
+
+            // ---------- assist系 ----------
+            for (int a = 1; a <= 3; a++)
+            {
+                var assistNameBox = (TextBox)this.FindName($"{prefix}assist{a}_name");
+                var assistFigBox = (TextBox)this.FindName($"{prefix}assist{a}_fig_box");
+                if (assistNameBox == null || string.IsNullOrEmpty(assistNameBox.Text)) continue;
+
+                int value = 0;
+                if (assistFigBox != null && int.TryParse(assistFigBox.Text, out int tmp)) value = tmp;
+
+                if (finalskills.ContainsKey(assistNameBox.Text))
+                    finalskills[assistNameBox.Text] += value;
+                else
+                    finalskills[assistNameBox.Text] = value;
+            }
+
+            // ---------- 運命改変 ----------
+            var unmeiBox = (TextBox)this.FindName($"{prefix}unmei_box");
+            if (unmeiBox != null && int.TryParse(unmeiBox.Text, out int unmeiValue))
+            {
+                if (finalskills.ContainsKey("運命改変"))
+                    finalskills["運命改変"] += unmeiValue;
+                else
+                    finalskills["運命改変"] = unmeiValue;
+            }
+        }
+
+
         // 修正内容: Resync_finalskil メソッドの構文エラーと Dictionary の使い方の誤りを修正
         private void Resync_finalskil()
         {
@@ -2412,429 +3724,42 @@ namespace VBV_calc
             // Dictionary の宣言と初期化
             Dictionary<string, int> finalskills = new Dictionary<string, int>();
 
-            // TextBox コントロールは MainWindow のフィールドとして宣言されているため、アクセス可能
-            // Dictionary に値を追加する場合は Add メソッドを使う
+            int skill_count = finalskills.Count;
+            int i = 0; 
+            CollectFinalSkills("", finalskills, leader_flag, current_Character_Status, tokko_box);
+            ClearTextBoxes("final", 21);
+            SetKeyValueTexts(finalskills, "final");
+            int level_value = 1;
+            int bukou_value = 1;
 
-            for (int j = 1; j <= 8; j++)
+            int.TryParse(levelbox.Text, out level_value);
+            int.TryParse(bukobox.Text, out bukou_value);
+            status_calc_box(level_value,bukou_value);
+            //status_calc_fix();
+            // 必要に応じて他のスキルも追加可能
+            // finalskills.Add(passive2.Text, passive2_fig.Text);
+            // finalskills.Add(passive3.Text, passive3_fig.Text);
+            // ... など
+        }
+        private void enemy_Resync_finalskil()
+        {
+            if (isLoad)
             {
-                var textBox = (TextBox)this.FindName($"passive{j}");
-                if (textBox != null)
-                {
-                    double value;
-                    var valueBox = (TextBox)this.FindName($"passive{j}_fig");
-                    if (double.TryParse(valueBox.Text, out value))
-                    {
-                        if (!finalskills.ContainsKey(textBox.Text))
-                        {
-                            finalskills.Add(textBox.Text, int.Parse(valueBox.Text));
-                        }
-                        else
-                        {
-                            finalskills[textBox.Text] += int.Parse(valueBox.Text);
-                        }
-                    }
-                    else
-                    {
-
-                    }
-                }
+                return;
             }
-            if (leader_flag == true)
-            {
-                if (leader1_fig.Text != "")
-                {
-                    if (finalskills.ContainsKey(leader1.Text))
-                    {
-                        if (leader1_fig.Text != "")
-                            finalskills[leader1.Text] = int.Parse(leader1_fig.Text) + finalskills[leader1.Text];
-                    }
-                    else
-                    {
-                        if (leader1_fig.Text != "")
-                            finalskills.Add(leader1.Text, int.Parse(leader1_fig.Text));
-                    }
-                }
-                else
-                {
-                    finalskills.Add(leader1.Text, 0);
-                }
-                if (leader2_fig.Text != "")
-                {
-                    if (finalskills.ContainsKey(leader2.Text))
-                    {
-                        if (leader2_fig.Text != "")
-                            finalskills[leader2.Text] = int.Parse(leader2_fig.Text) + finalskills[leader2.Text];
-                    }
-                    else
-                    {
-                        if (leader2_fig.Text != "")
-                            finalskills.Add(leader2.Text, int.Parse(leader2_fig.Text));
-                    }
-                }
-                else
-                {
-                    if (!finalskills.ContainsKey(leader2.Text))
-                    {
-
-                        finalskills.Add(leader2.Text, 0);
-                    }
-                }
-            }
-            string temp_tokko = "";
-            if (shogo1.Text != "")
-            {
-                if (finalskills.ContainsKey(shogo1.Text))
-                {
-                    if (shogo1_fig.Text != "")
-                        finalskills[shogo1.Text] = int.Parse(shogo1_fig.Text) + finalskills[shogo1.Text];
-                }
-                else
-                {
-                    if (shogo1_fig.Text != "")
-                        finalskills.Add(shogo1.Text, int.Parse(shogo1_fig.Text));
-                    else
-                        finalskills.Add(shogo1.Text, 0);
-                }
-                temp_tokko = temp_tokko + shogo1_status.tokko;
-            }
-            if (shogo2.Text != "")
-            {
-                if (finalskills.ContainsKey(shogo2.Text))
-                {
-                    if (shogo2_fig.Text != "")
-                        finalskills[shogo2.Text] = int.Parse(shogo2_fig.Text) + finalskills[shogo2.Text];
-                }
-                else
-                {
-                    if (shogo2_fig.Text != "")
-                        finalskills.Add(shogo2.Text, int.Parse(shogo2_fig.Text));
-                    else
-                        finalskills.Add(shogo2.Text, 0);
-                }
-                temp_tokko = temp_tokko + shogo2_status.tokko;
-            }
-            string tokko, shuzoku = "";
-            current_Character_Status.get_shuzoku_tokko(out shuzoku, out tokko);
-            tokko_box.Text = tokko + temp_tokko;
-            if (equipment1_skill1.Text != "")
-            {
-                if (finalskills.ContainsKey(equipment1_skill1.Text))
-                {
-                    equipment_tokko_plus(equipment1_skill1.Text, equipment1_skill1_fig.Text);
-                    if (equipment1_skill1_fig.Text != "")
-                        finalskills[equipment1_skill1.Text] = int.Parse(equipment1_skill1_fig.Text) + finalskills[equipment1_skill1.Text];
-                }
-                else
-                {
-                    equipment_tokko_plus(equipment1_skill1.Text, equipment1_skill1_fig.Text);
-                    if (equipment1_skill1_fig.Text != "")
-                        finalskills.Add(equipment1_skill1.Text, int.Parse(equipment1_skill1_fig.Text));
-                    else
-                        finalskills.Add(equipment1_skill1.Text, 0);
-
-                }
-            }
-            if (equipment1_skill2.Text != "")
-            {
-                if (finalskills.ContainsKey(equipment1_skill2.Text))
-                {
-                    equipment_tokko_plus(equipment1_skill2.Text, equipment1_skill2_fig.Text);
-                    if (equipment1_skill2_fig.Text != "")
-                        finalskills[equipment1_skill2.Text] = int.Parse(equipment1_skill2_fig.Text) + finalskills[equipment1_skill2.Text];
-                }
-                else
-                {
-                    equipment_tokko_plus(equipment1_skill2.Text, equipment1_skill2_fig.Text);
-                    if (equipment1_skill2_fig.Text != "")
-                        finalskills.Add(equipment1_skill2.Text, int.Parse(equipment1_skill2_fig.Text));
-                    else
-                        finalskills.Add(equipment1_skill2.Text, 0);
-                }
-            }
-            if (equipment2_skill1.Text != "")
-            {
-                if (finalskills.ContainsKey(equipment2_skill1.Text))
-                {
-                    equipment_tokko_plus(equipment2_skill1.Text, equipment2_skill1_fig.Text);
-                    if (equipment2_skill1_fig.Text != "")
-                        finalskills[equipment2_skill1.Text] = int.Parse(equipment2_skill1_fig.Text) + finalskills[equipment2_skill1.Text];
-                }
-                else
-                {
-                    equipment_tokko_plus(equipment2_skill1.Text, equipment2_skill1_fig.Text);
-                    if (equipment2_skill1_fig.Text != "")
-                        finalskills.Add(equipment2_skill1.Text, int.Parse(equipment2_skill1_fig.Text));
-                    else finalskills.Add(equipment2_skill1.Text, 0);
-
-                }
-            }
-            if (equipment2_skill2.Text != "")
-            {
-                if (finalskills.ContainsKey(equipment2_skill2.Text))
-                {
-                    equipment_tokko_plus(equipment2_skill2.Text, equipment2_skill2_fig.Text);
-                    if (equipment2_skill2_fig.Text != "")
-                        finalskills[equipment2_skill2.Text] = int.Parse(equipment2_skill2_fig.Text) + finalskills[equipment2_skill2.Text];
-                }
-                else
-                {
-                    equipment_tokko_plus(equipment2_skill2.Text, equipment2_skill2_fig.Text);
-                    if (equipment2_skill2_fig.Text != "")
-                        finalskills.Add(equipment2_skill2.Text, int.Parse(equipment2_skill2_fig.Text));
-                    else
-                        finalskills[equipment2_skill2.Text] = 0;
-                }
-            }
-            if (ryoshoku_name.Text != "")
-            {
-                if (finalskills.ContainsKey(ryoshoku_name.Text))
-                {
-                    if (ryoshoku_fig_box.Text != "")
-                        finalskills[ryoshoku_name.Text] = int.Parse(ryoshoku_fig_box.Text) + finalskills[ryoshoku_name.Text];
-                }
-                else
-                {
-                    if (ryoshoku_fig_box.Text != "")
-                        finalskills.Add(ryoshoku_name.Text, int.Parse(ryoshoku_fig_box.Text));
-                    else
-                        finalskills[ryoshoku_name.Text] = 0;
-                }
-            }
-            if (assist1_name.Text != "")
-            {
-                if (finalskills.ContainsKey(assist1_name.Text))
-                {
-                    if (assist1_fig_box.Text != "")
-                        finalskills[assist1_name.Text] = int.Parse(assist1_fig_box.Text) + finalskills[assist1_name.Text];
-                }
-                else
-                {
-                    if (assist1_fig_box.Text != "")
-                        finalskills.Add(assist1_name.Text, int.Parse(assist1_fig_box.Text));
-                    else
-                        finalskills[assist1_name.Text] = 0;
-                }
-            }
-            if (assist2_name.Text != "")
-            {
-                if (finalskills.ContainsKey(assist2_name.Text))
-                {
-                    if (assist2_fig_box.Text != "")
-                        finalskills[assist2_name.Text] = int.Parse(assist2_fig_box.Text) + finalskills[assist2_name.Text];
-                }
-                else
-                {
-                    if (assist2_fig_box.Text != "")
-                        finalskills.Add(assist2_name.Text, int.Parse(assist2_fig_box.Text));
-                    else
-                        finalskills[assist2_name.Text] = 0;
-                }
-            }
-            if (assist3_name.Text != "")
-            {
-                if (finalskills.ContainsKey(assist3_name.Text))
-                {
-                    if (assist3_fig_box.Text != "")
-                        finalskills[assist3_name.Text] = int.Parse(assist3_fig_box.Text) + finalskills[assist3_name.Text];
-                }
-                else
-                {
-                    if (assist3_fig_box.Text != "")
-                        finalskills.Add(assist3_name.Text, int.Parse(assist3_fig_box.Text));
-                    else
-                        finalskills[assist3_name.Text] = 0;
-                }
-            }
-            if (unmei_box.Text != "")
-            {
-                if (finalskills.ContainsKey("運命改変"))
-                {
-                    if (unmei_box.Text != "")
-                    {
-                        int value;
-                        if (int.TryParse(unmei_box.Text, out value))
-                            finalskills["運命改変"] = value + finalskills["運命改変"];
-                    }
-                }
-                else
-                {
-                    if (unmei_box.Text != "")
-                    {
-                        int value;
-                        if (int.TryParse(unmei_box.Text, out value))
-                            finalskills.Add("運命改変", value);
-                    }
-                }
-            }
-
+            // Dictionary の宣言と初期化
+            Dictionary<string, int> finalskills = new Dictionary<string, int>();
 
             int skill_count = finalskills.Count;
             int i = 0;
+            CollectFinalSkills("enemy_", finalskills, enemy_leader_flag, enemy_current_Character_Status, enemy_tokko_box);
+            ClearTextBoxes("enemy_final", 21);
+            SetKeyValueTexts(finalskills, "enemy_final");
+            int level_value = 1;
 
-            final1.Text = null;
-            final1_fig.Text = null;
-
-            final2.Text = null;
-            final2_fig.Text = null;
-
-            final3.Text = null;
-            final3_fig.Text = null;
-            final4.Text = null;
-            final4_fig.Text = null;
-
-            final5.Text = null;
-            final5_fig.Text = null;
-
-            final6.Text = null;
-            final6_fig.Text = null;
-            final7.Text = null;
-            final7_fig.Text = null;
-
-            final8.Text = null;
-            final8_fig.Text = null;
-
-            final9.Text = null;
-            final9_fig.Text = null;
-            final10.Text = null;
-            final10_fig.Text = null;
-
-            final11.Text = null;
-            final11_fig.Text = null;
-            final12.Text = null;
-            final12_fig.Text = null;
-            final13.Text = null;
-            final13_fig.Text = null;
-            final14.Text = null;
-            final14_fig.Text = null;
-            final15.Text = null;
-            final15_fig.Text = null;
-            final16.Text = null;
-            final16_fig.Text = null;
-            final17.Text = null;
-            final17_fig.Text = null;
-            final18.Text = null;
-            final18_fig.Text = null;
-            final19.Text = null;
-            final19_fig.Text = null;
-            final20.Text = null;
-            final20_fig.Text = null;
-            final21.Text = null;
-            final21_fig.Text = null;
-
-
-            foreach (var key in finalskills)
-            {
-                if (i == 0)
-                {
-                    final1.Text = key.Key;
-                    final1_fig.Text = key.Value.ToString();
-                }
-                else if (i == 1)
-                {
-                    final2.Text = key.Key;
-                    final2_fig.Text = key.Value.ToString();
-                }
-                else if (i == 2)
-                {
-                    final3.Text = key.Key;
-                    final3_fig.Text = key.Value.ToString();
-
-                }
-                else if (i == 3)
-                {
-                    final4.Text = key.Key;
-                    final4_fig.Text = key.Value.ToString();
-                }
-                else if (i == 4)
-                {
-                    final5.Text = key.Key;
-                    final5_fig.Text = key.Value.ToString();
-                }
-                else if (i == 5)
-                {
-                    final6.Text = key.Key;
-                    final6_fig.Text = key.Value.ToString();
-                }
-                else if (i == 6)
-                {
-                    final7.Text = key.Key;
-                    final7_fig.Text = key.Value.ToString();
-                }
-                else if (i == 7)
-                {
-                    final8.Text = key.Key;
-                    final8_fig.Text = key.Value.ToString();
-                }
-                else if (i == 8)
-                {
-                    final9.Text = key.Key;
-                    final9_fig.Text = key.Value.ToString();
-                }
-                else if (i == 9)
-                {
-                    final10.Text = key.Key;
-                    final10_fig.Text = key.Value.ToString();
-                }
-                else if (i == 10)
-                {
-                    final11.Text = key.Key;
-                    final11_fig.Text = key.Value.ToString();
-                }
-                else if (i == 11)
-                {
-                    final12.Text = key.Key;
-                    final12_fig.Text = key.Value.ToString();
-                }
-                else if (i == 12)
-                {
-                    final13.Text = key.Key;
-                    final13_fig.Text = key.Value.ToString();
-                }
-                else if (i == 13)
-                {
-                    final14.Text = key.Key;
-                    final14_fig.Text = key.Value.ToString();
-                }
-                else if (i == 14)
-                {
-                    final15.Text = key.Key;
-                    final15_fig.Text = key.Value.ToString();
-                }
-                else if (i == 15)
-                {
-                    final16.Text = key.Key;
-                    final16_fig.Text = key.Value.ToString();
-                }
-                else if (i == 16)
-                {
-                    final17.Text = key.Key;
-                    final17_fig.Text = key.Value.ToString();
-                }
-                else if (i == 17)
-                {
-                    final18.Text = key.Key;
-                    final18_fig.Text = key.Value.ToString();
-                }
-                else if (i == 18)
-                {
-                    final19.Text = key.Key;
-                    final19_fig.Text = key.Value.ToString();
-                }
-                else if (i == 19)
-                {
-                    final20.Text = key.Key;
-                    final20_fig.Text = key.Value.ToString();
-                }
-                else if (i == 20)
-                {
-                    final21.Text = key.Key;
-                    final21_fig.Text = key.Value.ToString();
-                }
-
-                i++;
-
-            }
-            status_calc_fix();
+            int.TryParse(enemy_levelbox.Text, out level_value);
+            enemy_status_calc_box(level_value);
+            //enemy_status_calc_fix();
             // 必要に応じて他のスキルも追加可能
             // finalskills.Add(passive2.Text, passive2_fig.Text);
             // finalskills.Add(passive3.Text, passive3_fig.Text);
@@ -2853,6 +3778,22 @@ namespace VBV_calc
                 for (int i = 0; i < temp_tokko_value; i++)
                 {
                     tokko_box.Text += temp_tokko;
+                }
+            }
+        }
+
+        private void enemy_equipment_tokko_plus(string skillname, string skillvalue)
+        {
+            //装備のスキル名に特攻があれば、tokko_boxに追加する
+            if (skillname.Contains("特攻") && !skillname.Contains("特攻防御"))
+            {
+                int temp_tokko_value = 0;
+                string temp_tokko = skillname[0].ToString();
+                //:で分割
+                temp_tokko_value = int.Parse(skillvalue);
+                for (int i = 0; i < temp_tokko_value; i++)
+                {
+                    enemy_tokko_box.Text += temp_tokko;
                 }
             }
         }
@@ -2879,6 +3820,31 @@ namespace VBV_calc
             calc_final_attack_mag();
             calc_damage();
         }
+
+        private void enemy_leader_CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            // sender を ToggleButton (CheckBox) としてキャストし、IsChecked プロパティを使う
+            var checkBox = sender as CheckBox;
+            if (checkBox != null && checkBox.IsChecked == true)
+            {
+                enemy_leader_flag = true;
+            }
+            else
+            {
+                enemy_leader_flag = false;
+            }
+            enemy_Resync_finalskil();
+            calc_final_attack_mag();
+            calc_damage();
+        }
+        private void enemy_leader_CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            enemy_leader_flag = false;
+            enemy_Resync_finalskil();
+            calc_final_attack_mag();
+            calc_damage();
+        }
+
 
         bool enemy_senshu_flag = false;
 
@@ -2907,6 +3873,12 @@ namespace VBV_calc
         ShogoStatus shogo1_status = new ShogoStatus(0, 0, 0, 0, "");
         ShogoStatus shogo2_status = new ShogoStatus(0, 0, 0, 0, "");
         ShogoStatus ryoshoku_status = new ShogoStatus(0, 0, 0, 0, "");
+
+        ShogoStatus enemy_soubi1_status = new ShogoStatus(0, 0, 0, 0, "");
+        ShogoStatus enemy_soubi2_status = new ShogoStatus(0, 0, 0, 0, "");
+        ShogoStatus enemy_shogo1_status = new ShogoStatus(0, 0, 0, 0, "");
+        ShogoStatus enemy_shogo2_status = new ShogoStatus(0, 0, 0, 0, "");
+        ShogoStatus enemy_ryoshoku_status = new ShogoStatus(0, 0, 0, 0, "");
 
         private void exec_equipment1_box()
         {
@@ -2964,9 +3936,71 @@ namespace VBV_calc
         }
         private void ComboBox_SelectionChanged_EquipmentBox1(object sender, SelectionChangedEventArgs e)
         {
+            enablePassiveChange = false;
             exec_equipment1_box();
+            enablePassiveChange = true;
         }
 
+        private void enemy_exec_equipment1_box()
+        {
+            // labelに現在コンボ選択の内容を表示
+            enemy_soubi1_status.change_status(0, 0, 0, 0);
+            ItemSet tmp = ((ItemSet)enemy_EquipmentBox1.SelectedItem);//表示名はキャストして取りだす
+            if (tmp != null)
+            {
+                if (tmp.ItemValue != null)
+                {
+
+                    string[] temp_skillname = tmp.ItemValue.Split(',');
+                    string[] temp_skill1 = temp_skillname[0].Split(':');
+                    enemy_equipment1_skill1.Text = temp_skill1[0];
+                    if (temp_skill1.Length > 1)
+                    {
+                        enemy_equipment1_skill1_fig.Text = temp_skill1[1];
+                        enemy_soubi1_status.change_status(int.Parse(temp_skillname[2]), int.Parse(temp_skillname[3]), int.Parse(temp_skillname[4]), int.Parse(temp_skillname[5]));
+                    }
+                    else
+                    {
+                        enemy_equipment1_skill1_fig.Text = null;
+                    }
+                    if (temp_skillname.Length > 1)
+                    {
+                        string[] temp_skill2 = temp_skillname[1].Split(':');
+                        enemy_equipment1_skill2.Text = temp_skill2[0];
+                        if (temp_skill2.Length > 1)
+                        {
+                            enemy_equipment1_skill2_fig.Text = temp_skill2[1];
+                        }
+                        else
+                        {
+                            enemy_equipment1_skill2_fig.Text = null;
+                        }
+                        enemy_soubi1_status.change_status(int.Parse(temp_skillname[2]), int.Parse(temp_skillname[3]), int.Parse(temp_skillname[4]), int.Parse(temp_skillname[5]));
+                    }
+                    else
+                    {
+                        enemy_equipment1_skill2.Text = null;
+                        enemy_equipment1_skill2_fig.Text = null;
+                    }
+                }
+                else
+                {
+                    enemy_equipment1_skill1.Text = "";
+                    enemy_equipment1_skill1_fig.Text = "";
+                    enemy_equipment1_skill2.Text = "";
+                    enemy_equipment1_skill2_fig.Text = "";
+                }
+                enemy_Resync_finalskil();
+                calc_final_attack_mag();
+                calc_damage();
+            }
+        }
+        private void enemy_ComboBox_SelectionChanged_EquipmentBox1(object sender, SelectionChangedEventArgs e)
+        {
+            enemy_enablePassiveChange = false;
+            enemy_exec_equipment1_box();
+            enemy_enablePassiveChange = true;
+        }
         private void exec_equipment2_box()
         {
             // labelに現在コンボ選択の内容を表示
@@ -3023,9 +4057,75 @@ namespace VBV_calc
                 calc_damage();
             }
         }
+        private void enemy_exec_equipment2_box()
+        {
+            // labelに現在コンボ選択の内容を表示
+            ItemSet tmp = ((ItemSet)enemy_EquipmentBox2.SelectedItem);//表示名はキャストして取りだす
+
+            enemy_soubi2_status.change_status(0, 0, 0, 0);
+
+            if (tmp != null)
+            {
+                if (tmp.ItemValue != null)
+                {
+
+                    string[] temp_skillname = tmp.ItemValue.Split(',');
+                    string[] temp_skill1 = temp_skillname[0].Split(':');
+                    enemy_equipment2_skill1.Text = temp_skill1[0];
+                    if (temp_skill1.Length > 1)
+                    {
+                        enemy_equipment2_skill1_fig.Text = temp_skill1[1];
+                        enemy_soubi2_status.change_status(int.Parse(temp_skillname[2]), int.Parse(temp_skillname[3]), int.Parse(temp_skillname[4]), int.Parse(temp_skillname[5]));
+                    }
+                    else
+                    {
+                        enemy_equipment2_skill1_fig.Text = null;
+                    }
+                    if (temp_skillname.Length > 1)
+                    {
+                        string[] temp_skill2 = temp_skillname[1].Split(':');
+                        enemy_equipment2_skill2.Text = temp_skill2[0];
+                        if (temp_skill2.Length > 1)
+                        {
+                            enemy_equipment2_skill2_fig.Text = temp_skill2[1];
+                        }
+                        else
+                        {
+                            enemy_equipment2_skill2_fig.Text = null;
+                        }
+                        enemy_soubi2_status.change_status(int.Parse(temp_skillname[2]), int.Parse(temp_skillname[3]), int.Parse(temp_skillname[4]), int.Parse(temp_skillname[5]));
+                    }
+                    else
+                    {
+                        enemy_equipment2_skill2.Text = null;
+                        enemy_equipment2_skill2_fig.Text = null;
+                    }
+                }
+                else
+                {
+                    enemy_equipment2_skill1.Text = "";
+                    enemy_equipment2_skill1_fig.Text = "";
+                    enemy_equipment2_skill2.Text = "";
+                    enemy_equipment2_skill2_fig.Text = "";
+                }
+                enemy_Resync_finalskil();
+                calc_final_attack_mag();
+                calc_damage();
+            }
+        }
         private void ComboBox_SelectionChanged_EquipmentBox2(object sender, SelectionChangedEventArgs e)
         {
+            enablePassiveChange = false;
             exec_equipment2_box();
+            enablePassiveChange = true;
+
+        }
+
+        private void enemy_ComboBox_SelectionChanged_EquipmentBox2(object sender, SelectionChangedEventArgs e)
+        {
+            enemy_enablePassiveChange = false;
+            enemy_exec_equipment2_box();
+            enemy_enablePassiveChange = true;
         }
 
         private void TextBox_TextChanged_12(object sender, TextChangedEventArgs e)
@@ -3070,11 +4170,53 @@ namespace VBV_calc
             }
 
         }
+        private void enemy_exec_ryoshoku_box()
+        {
+            // labelに現在コンボ選択の内容を表示
+            ItemSet tmp = ((ItemSet)enemy_ryoshokuBox.SelectedItem);//表示名はキャストして取りだす
+            if (tmp != null)
+            {
+                if (tmp.ItemValue != null)
+                {
+
+                    string[] temp_status = tmp.ItemValue.Split(',');
+                    string[] temp_skillname = temp_status[0].Split(':');
+                    if (temp_skillname.Length > 1)
+                    {
+                        enemy_ryoshoku_name.Text = temp_skillname[0];
+                        enemy_ryoshoku_fig_box.Text = temp_skillname[1];
+                        enemy_ryoshoku_status.change_status(int.Parse(temp_status[1]), int.Parse(temp_status[2]), int.Parse(temp_status[3]), int.Parse(temp_status[4]));
+                    }
+                    else if (temp_skillname.Length == 1)
+                    {
+                        enemy_ryoshoku_name.Text = temp_skillname[0];
+                    }
+                }
+                else
+                {
+                    enemy_ryoshoku_name.Text = "";
+                    enemy_ryoshoku_fig_box.Text = "";
+                }
+                enemy_Resync_finalskil();
+                calc_final_attack_mag();
+                calc_damage();
+            }
+
+        }
         private void ComboBox_SelectionChanged_ryoshokuBox(object sender, SelectionChangedEventArgs e)
         {
+            enablePassiveChange = false;
             exec_ryoshoku_box();
+            enablePassiveChange = true;
         }
 
+        private void enemy_ComboBox_SelectionChanged_ryoshokuBox(object sender, SelectionChangedEventArgs e)
+        {
+            enemy_enablePassiveChange = false;
+            enemy_exec_ryoshoku_box();
+            enemy_enablePassiveChange = true;
+
+        }
         private void exec_shogo1_box()
         {
             ItemSet tmp = ((ItemSet)shogo1Box.SelectedItem);//表示名はキャストして取りだす
@@ -3118,8 +4260,9 @@ namespace VBV_calc
         }
         private void shogo1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            enablePassiveChange = false;
             exec_shogo1_box();
-
+            enablePassiveChange = true;
         }
         private void enemy_status_changed(object sender, TextChangedEventArgs e)
         {
@@ -3171,7 +4314,9 @@ namespace VBV_calc
         }
         private void shogo2_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            enablePassiveChange = false;
             exec_shogo2_box();
+            enablePassiveChange = true;
         }
 
         String filter_shokugyo = "";//職業フィルター
@@ -3362,7 +4507,7 @@ namespace VBV_calc
         {
 
         }
-
+        /*
         private void Saved_Button_Click(object sender, RoutedEventArgs e)
         {
             savedata tempdata;
@@ -3521,6 +4666,325 @@ namespace VBV_calc
                 tempdata.leader_flag = leader_flag;
                 all_save_data.Add(tempdata);
 
+            }
+        }
+        */
+        /*
+        /// <summary>
+        /// ItemSetを持つComboBoxの選択内容をsafeに取り出して処理する
+        /// </summary>
+        private void SetItemData(ComboBox comboBox, Action<ItemSet> setter)
+        {
+            if (comboBox?.SelectedItem is ItemSet item)
+                setter(item);
+            else
+                setter(new ItemSet { ItemValue = "", ItemDisp = "" });
+        }
+
+        /// <summary>
+        /// アシストスキル用の共通処理
+        /// </summary>
+        /// 
+        private void SetAssistData(ComboBox comboBox, TextBox chiryokuBox, Action<string> setter)
+        {
+            if (comboBox?.SelectedItem is ItemSet item)
+                setter(item.ItemValue);
+            else
+                setter("");
+        }
+        /*
+        private void Saved_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (CharacterBox.SelectedItem is not CharacterJson selectedCharacter)
+                return;
+
+            var tempdata = new savedata
+            {
+                character_name = selectedCharacter.名称,
+                character_id = $"{selectedCharacter.名称} ({DateTime.Now:yyyy/MM/dd HH:mm:ss})",
+                leader_flag = leader_flag
+            };
+
+            // 各項目を共通関数でセット
+            SetItemData(EquipmentBox1, v => { tempdata.equipment1 = v.ItemValue; tempdata.equipment1_name = v.ItemDisp; });
+            SetItemData(EquipmentBox2, v => { tempdata.equipment2 = v.ItemValue; tempdata.equipment2_name = v.ItemDisp; });
+            SetItemData(ryoshokuBox, v => { tempdata.ryoshoku = v.ItemValue; tempdata.ryoshoku_name = v.ItemDisp; });
+            SetItemData(shogo1Box, v => { tempdata.shogo1 = v.ItemValue; tempdata.shogo1_name = v.ItemDisp; });
+            SetItemData(shogo2Box, v => { tempdata.shogo2 = v.ItemValue; tempdata.shogo2_name = v.ItemDisp; });
+
+            SetAssistData(assistskill1_box, assistskill1_chiryoku_box, v => { tempdata.assist1 = v; tempdata.assist1_chiryoku = assistskill1_chiryoku_box.Text ?? ""; });
+            SetAssistData(assistskill2_box, assistskill2_chiryoku_box, v => { tempdata.assist2 = v; tempdata.assist2_chiryoku = assistskill2_chiryoku_box.Text ?? ""; });
+            SetAssistData(assistskill3_box, assistskill3_chiryoku_box, v => { tempdata.assist3 = v; tempdata.assist3_chiryoku = assistskill3_chiryoku_box.Text ?? ""; });
+
+            tempdata.unmei = unmei_box.Text ?? "";
+
+            all_save_data.Add(tempdata);
+        }*/
+
+        /*       
+               private string GenerateUniqueName(string baseName)
+               {
+                   int counter = 1;
+                   string newName = baseName;
+
+                   while (all_save_data.Any(x => x.character_id == newName))
+                   {
+                       newName = $"{baseName}({counter})";
+                       counter++;
+                   }
+
+                   return newName;
+
+               }
+               private void Saved_Button_Click(object sender, RoutedEventArgs e)
+               {
+                   if (CharacterBox.SelectedItem is not CharacterJson selectedCharacter)
+                       return;
+
+                   string enteredName = save_character_name_box.Text?.Trim();
+
+                   // 名前ボックスが空ならキャラ名を基本に
+                   string baseName = string.IsNullOrEmpty(enteredName)
+                       ? selectedCharacter.名称
+                       : enteredName;
+
+                   string saveName = GenerateUniqueName(baseName); // (1), (2)… を自動付与
+
+                   var tempdata = new savedata
+                   {
+                       character_name = selectedCharacter.名称,
+                       character_id = saveName,
+                       leader_flag = leader_flag
+                   };
+
+                   // 各装備・称号などのデータをセット
+                   SetItemData(EquipmentBox1, v => { tempdata.equipment1 = v.ItemValue; tempdata.equipment1_name = v.ItemDisp; });
+                   SetItemData(EquipmentBox2, v => { tempdata.equipment2 = v.ItemValue; tempdata.equipment2_name = v.ItemDisp; });
+                   SetItemData(ryoshokuBox, v => { tempdata.ryoshoku = v.ItemValue; tempdata.ryoshoku_name = v.ItemDisp; });
+                   SetItemData(shogo1Box, v => { tempdata.shogo1 = v.ItemValue; tempdata.shogo1_name = v.ItemDisp; });
+                   SetItemData(shogo2Box, v => { tempdata.shogo2 = v.ItemValue; tempdata.shogo2_name = v.ItemDisp; });
+
+                   SetAssistData(assistskill1_box, assistskill1_chiryoku_box, v => { tempdata.assist1 = v; tempdata.assist1_chiryoku = assistskill1_chiryoku_box.Text ?? ""; });
+                   SetAssistData(assistskill2_box, assistskill2_chiryoku_box, v => { tempdata.assist2 = v; tempdata.assist2_chiryoku = assistskill2_chiryoku_box.Text ?? ""; });
+                   SetAssistData(assistskill3_box, assistskill3_chiryoku_box, v => { tempdata.assist3 = v; tempdata.assist3_chiryoku = assistskill3_chiryoku_box.Text ?? ""; });
+
+                   tempdata.unmei = unmei_box.Text ?? "";
+
+                   // --- 🔽 同名チェック ---
+                   var existing = all_save_data.FirstOrDefault(x => x.character_id == baseName);
+                   if (existing != null)
+                   {
+                       var result = MessageBox.Show(
+                           $"「{baseName}」は既に存在します。\n上書きしますか？",
+                           "保存確認",
+                           MessageBoxButton.YesNoCancel,
+                           MessageBoxImage.Question,
+                           MessageBoxResult.Cancel);
+
+                       switch (result)
+                       {
+                           case MessageBoxResult.Yes:
+                               all_save_data.Remove(existing);
+                               tempdata.character_id = baseName;
+                               all_save_data.Add(tempdata);
+                               MessageBox.Show("上書きしました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                               break;
+
+                           case MessageBoxResult.No:
+                               all_save_data.Add(tempdata);
+                               MessageBox.Show($"別名「{saveName}」で保存しました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                               break;
+
+                           case MessageBoxResult.Cancel:
+                               return;
+                       }
+                   }
+                   else
+                   {
+                       all_save_data.Add(tempdata);
+                       MessageBox.Show($"「{saveName}」として保存しました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                   }
+               }
+        */
+
+        /*
+        private void Saved_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (CharacterBox.SelectedItem is not CharacterJson selectedCharacter)
+                return;
+
+            string enteredName = save_character_name_box.Text?.Trim();
+
+            // 名前ボックスが空なら自動生成
+            string saveName = string.IsNullOrEmpty(enteredName)
+                ? $"{selectedCharacter.名称} ({DateTime.Now:yyyy/MM/dd HH:mm:ss})"
+                : enteredName;
+
+            var tempdata = new savedata
+            {
+                character_name = selectedCharacter.名称,
+                character_id = saveName,
+                leader_flag = leader_flag
+            };
+
+            // 各装備・称号などを共通関数で代入
+            SetItemData(EquipmentBox1, v => { tempdata.equipment1 = v.ItemValue; tempdata.equipment1_name = v.ItemDisp; });
+            SetItemData(EquipmentBox2, v => { tempdata.equipment2 = v.ItemValue; tempdata.equipment2_name = v.ItemDisp; });
+            SetItemData(ryoshokuBox, v => { tempdata.ryoshoku = v.ItemValue; tempdata.ryoshoku_name = v.ItemDisp; });
+            SetItemData(shogo1Box, v => { tempdata.shogo1 = v.ItemValue; tempdata.shogo1_name = v.ItemDisp; });
+            SetItemData(shogo2Box, v => { tempdata.shogo2 = v.ItemValue; tempdata.shogo2_name = v.ItemDisp; });
+
+            SetAssistData(assistskill1_box, assistskill1_chiryoku_box, v => { tempdata.assist1 = v; tempdata.assist1_chiryoku = assistskill1_chiryoku_box.Text ?? ""; });
+            SetAssistData(assistskill2_box, assistskill2_chiryoku_box, v => { tempdata.assist2 = v; tempdata.assist2_chiryoku = assistskill2_chiryoku_box.Text ?? ""; });
+            SetAssistData(assistskill3_box, assistskill3_chiryoku_box, v => { tempdata.assist3 = v; tempdata.assist3_chiryoku = assistskill3_chiryoku_box.Text ?? ""; });
+
+            tempdata.unmei = unmei_box.Text ?? "";
+
+            // --- 🔽 同名チェック（3択ダイアログ） ---
+            var existing = all_save_data.FirstOrDefault(x => x.character_id == saveName);
+            if (existing != null)
+            {
+                var result = MessageBox.Show(
+                    $"「{saveName}」は既に存在します。\nどうしますか？",
+                    "保存確認",
+                    MessageBoxButton.YesNoCancel,
+                    MessageBoxImage.Question,
+                    MessageBoxResult.Cancel);
+
+                switch (result)
+                {
+                    case MessageBoxResult.Yes: // 上書き
+                        all_save_data.Remove(existing);
+                        all_save_data.Add(tempdata);
+                        MessageBox.Show("上書きしました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                        break;
+
+                    case MessageBoxResult.No: // 別名保存
+                        string newName = GenerateUniqueName(saveName);
+                        tempdata.character_id = newName;
+                        all_save_data.Add(tempdata);
+                        MessageBox.Show($"別名「{newName}」で保存しました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                        break;
+
+                    case MessageBoxResult.Cancel: // キャンセル
+                        return;
+                }
+            }
+            else
+            {
+                // 同名がなければ普通に追加
+                all_save_data.Add(tempdata);
+                MessageBox.Show("保存しました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        */
+        private void SetItemData(ComboBox comboBox, Action<ItemSet> setter)
+        {
+            if (comboBox?.SelectedItem is ItemSet item)
+                setter(item);
+            else
+                setter(new ItemSet("", ""));
+        }
+
+        private void SetAssistData(ComboBox comboBox, TextBox chiryokuBox, Action<string> setter)
+        {
+            if (comboBox?.SelectedItem is ItemSet item)
+                setter(item.ItemValue);
+            else
+                setter("");
+        }
+
+        private string GenerateUniqueName(string baseName)
+        {
+            // 末尾に (数字) があれば除去
+            string nameWithoutNumber = System.Text.RegularExpressions.Regex.Replace(baseName, @"\(\d+\)$", "");
+
+            string newName = nameWithoutNumber;
+            int counter = 1;
+
+            while (all_save_data.Any(x => x.character_id == newName))
+            {
+                newName = $"{nameWithoutNumber}({counter})";
+                counter++;
+            }
+
+            return newName;
+        }
+
+        private void Saved_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (CharacterBox.SelectedItem is not CharacterJson selectedCharacter)
+                return;
+
+            string enteredName = save_character_name_box.Text?.Trim();
+            string baseName = string.IsNullOrEmpty(enteredName) ? selectedCharacter.名称 : enteredName;
+
+            // 保存用データ生成
+            var tempdata = new savedata
+            {
+                character_name = selectedCharacter.名称,
+                leader_flag = leader_flag
+            };
+
+            // 装備・称号などのデータセット
+            SetItemData(EquipmentBox1, v => { tempdata.equipment1 = v.ItemValue; tempdata.equipment1_name = v.ItemDisp; });
+            SetItemData(EquipmentBox2, v => { tempdata.equipment2 = v.ItemValue; tempdata.equipment2_name = v.ItemDisp; });
+            SetItemData(ryoshokuBox, v => { tempdata.ryoshoku = v.ItemValue; tempdata.ryoshoku_name = v.ItemDisp; });
+            SetItemData(shogo1Box, v => { tempdata.shogo1 = v.ItemValue; tempdata.shogo1_name = v.ItemDisp; });
+            SetItemData(shogo2Box, v => { tempdata.shogo2 = v.ItemValue; tempdata.shogo2_name = v.ItemDisp; });
+
+            SetAssistData(assistskill1_box, assistskill1_chiryoku_box, v => { tempdata.assist1 = v; tempdata.assist1_chiryoku = assistskill1_chiryoku_box.Text ?? ""; });
+            SetAssistData(assistskill2_box, assistskill2_chiryoku_box, v => { tempdata.assist2 = v; tempdata.assist2_chiryoku = assistskill2_chiryoku_box.Text ?? ""; });
+            SetAssistData(assistskill3_box, assistskill3_chiryoku_box, v => { tempdata.assist3 = v; tempdata.assist3_chiryoku = assistskill3_chiryoku_box.Text ?? ""; });
+
+            tempdata.unmei = unmei_box.Text ?? "";
+
+            // --- 同名チェック ---
+            var existing = all_save_data.FirstOrDefault(x => x.character_id == baseName);
+
+            if (existing != null)
+            {
+                // SaveWindow を表示
+                Debug.WriteLine("直前のBasename:"+baseName);
+                var saveWindow = new SaveWindow(baseName);
+                saveWindow.Owner = this;
+                bool? dialogResult = saveWindow.ShowDialog();
+
+                if (dialogResult == true)
+                {
+                    switch (saveWindow.Choice)
+                    {
+                        case SaveWindow.SaveChoice.Overwrite:
+                            all_save_data.Remove(existing);
+                            tempdata.character_id = baseName;
+                            all_save_data.Add(tempdata);
+                            MessageBox.Show("上書きしました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                            break;
+
+                        case SaveWindow.SaveChoice.SaveAsNew:
+                            string newName = GenerateUniqueName(baseName);
+                            tempdata.character_id = newName;
+                            all_save_data.Add(tempdata);
+                            MessageBox.Show($"別名「{newName}」で保存しました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                            save_character_name_box.Text = newName;
+                            break;
+                    }
+                }
+                else
+                {
+                    // Cancel → 何もしない
+                    return;
+                }
+            }
+            else
+            {
+                // 同名なし → baseName で保存
+                tempdata.character_id = baseName;
+                all_save_data.Add(tempdata);
+                MessageBox.Show($"「{baseName}」として保存しました。", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                save_character_name_box.Text = baseName;
+                saved_list.SelectedItem = tempdata;
             }
         }
         public bool isLoad = false;
@@ -3754,12 +5218,13 @@ namespace VBV_calc
                 Resync_finalskil();
                 calc_final_attack_mag();
                 calc_damage();
+                save_character_name_box.Text = selected.character_id;
             }
         }
 
-        private int calc_chiryoku_assist(string fig, int number)
+        private int calc_chiryoku_assist(string fig, int number,string prefix)
         {
-            var chiryokuBox = (TextBox)this.FindName($"assistskill{number}_chiryoku_box");
+            var chiryokuBox = (TextBox)this.FindName($"{prefix}assistskill{number}_chiryoku_box");
             int temp_fig = 0;
             int chiryoku = 1;
             if (chiryokuBox != null && !string.IsNullOrEmpty(chiryokuBox.Text) && int.TryParse(chiryokuBox.Text, out int parsedChiryoku))
@@ -3771,100 +5236,57 @@ namespace VBV_calc
         }
 
 
-        private void assistskill1()
+        private void SetAssistSkill(int index, string prefix = "")
         {
-            // labelに現在コンボ選択の内容を表示
-            ItemSet tmp = ((ItemSet)assistskill1_box.SelectedItem);//表示名はキャストして取りだす
-            if (tmp != null)
+            // 例: assistskill1_box, assistskill2_box ...
+            var comboBox = (ComboBox)this.FindName($"{prefix}assistskill{index}_box");
+            var nameBox = (TextBox)this.FindName($"{prefix}assist{index}_name");
+            var figBox = (TextBox)this.FindName($"{prefix}assist{index}_fig_box");
+
+            if (comboBox == null || nameBox == null || figBox == null) return;
+
+            ItemSet tmp = comboBox.SelectedItem as ItemSet;
+
+            if (tmp?.ItemValue != null)
             {
-                if (tmp.ItemValue != null)
+                string[] temp_skillname = tmp.ItemValue.Split(',');
+                string[] temp_skill = temp_skillname[0].Split(':');
+
+                nameBox.Text = temp_skill[0];
+
+                if (temp_skill.Length > 1)
                 {
+                    int temp = calc_chiryoku_assist(temp_skill[1], index,prefix);
+                    // 上限25
+                    if (temp > 25) temp = 25;
+                    // 心核穿ちは5固定
+                    if (nameBox.Text == "心核穿ち") temp = 5;
 
-                    string[] temp_skillname = tmp.ItemValue.Split(',');
-                    string[] temp_skill1 = temp_skillname[0].Split(':');
-                    assist1_name.Text = temp_skill1[0];
-                    if (temp_skill1.Length > 1)
-                    {
-                        int temp = calc_chiryoku_assist(temp_skill1[1], 1);
-                        //とりあえずすべて25上限
-                        if (temp > 25) temp = 25;
-                        if (assist1_name.Text == "心核穿ち") temp = 5; //心核穿ちは5固定
-                        assist1_fig_box.Text = temp.ToString();
-                    }
-                    else
-                    {
-                        assist1_fig_box.Text = null;
-                    }
-
+                    figBox.Text = temp.ToString();
+                }
+                else
+                {
+                    figBox.Text = null;
                 }
             }
-            Resync_finalskil();
-            calc_final_attack_mag();
-            calc_damage();
-
-        }
-        private void assistskill2()
-        {
-            // labelに現在コンボ選択の内容を表示
-            ItemSet tmp = ((ItemSet)assistskill2_box.SelectedItem);//表示名はキャストして取りだす
-            if (tmp != null)
+            else
             {
-                if (tmp.ItemValue != null)
-                {
-
-                    string[] temp_skillname = tmp.ItemValue.Split(',');
-                    string[] temp_skill2 = temp_skillname[0].Split(':');
-                    assist2_name.Text = temp_skill2[0];
-                    if (temp_skill2.Length > 1)
-                    {
-                        int temp = calc_chiryoku_assist(temp_skill2[1], 2);
-                        //とりあえずすべて25上限
-                        if (temp > 25) temp = 25;
-                        if (assist2_name.Text == "心核穿ち") temp = 5; //心核穿ちは5固定
-                        assist2_fig_box.Text = temp.ToString();
-                    }
-                    else
-                    {
-                        assist2_fig_box.Text = null;
-                    }
-
-                }
+                nameBox.Text = null;
+                figBox.Text = null;
             }
-            Resync_finalskil();
+            if (prefix == "")
+                Resync_finalskil();
+            else
+                enemy_Resync_finalskil();
             calc_final_attack_mag();
             calc_damage();
         }
-        private void assistskill3()
-        {
-            // labelに現在コンボ選択の内容を表示
-            ItemSet tmp = ((ItemSet)assistskill3_box.SelectedItem);//表示名はキャストして取りだす
-            if (tmp != null)
-            {
-                if (tmp.ItemValue != null)
-                {
-
-                    string[] temp_skillname = tmp.ItemValue.Split(',');
-                    string[] temp_skill3 = temp_skillname[0].Split(':');
-                    assist3_name.Text = temp_skill3[0];
-                    if (temp_skill3.Length > 1)
-                    {
-                        int temp = calc_chiryoku_assist(temp_skill3[1], 3);
-                        //とりあえずすべて25上限
-                        if (temp > 25) temp = 25;
-                        if (assist3_name.Text == "心核穿ち") temp = 5; //心核穿ちは5固定
-                        assist3_fig_box.Text = temp.ToString();
-                    }
-                    else
-                    {
-                        assist3_fig_box.Text = null;
-                    }
-
-                }
-            }
-            Resync_finalskil();
-            calc_final_attack_mag();
-            calc_damage();
-        }
+        private void assistskill1() => SetAssistSkill(1);
+        private void assistskill2() => SetAssistSkill(2);
+        private void assistskill3() => SetAssistSkill(3);
+        private void enemy_assistskill1() => SetAssistSkill(1, "enemy_");
+        private void enemy_assistskill2() => SetAssistSkill(2, "enemy_");
+        private void enemy_assistskill3() => SetAssistSkill(3, "enemy_");
 
         private void assistskill1_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -3880,6 +5302,19 @@ namespace VBV_calc
             assistskill3();
         }
 
+        private void enemy_assistskill1_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            enemy_assistskill1();
+        }
+        private void enemy_assistskill2_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            enemy_assistskill2();
+        }
+
+        private void enemy_assistskill3_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            enemy_assistskill3();
+        }
         private void assistskill1_chiryoku_box_TextChanged(object sender, TextChangedEventArgs e)
         {
             assistskill1();
@@ -3896,9 +5331,25 @@ namespace VBV_calc
             assistskill3();
         }
 
+        private void enemy_assistskill1_chiryoku_box_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            enemy_assistskill1();
+
+        }
+
+        private void enemy_assistskill2_chiryoku_box_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            enemy_assistskill2();
+        }
+
+        private void enemy_assistskill3_chiryoku_box_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            enemy_assistskill3();
+        }
+
         private void enemy_unmei_changed(object sender, TextChangedEventArgs e)
         {
-            Resync_finalskil();
+            enemy_Resync_finalskil();
             calc_damage();
         }
 
@@ -3912,36 +5363,57 @@ namespace VBV_calc
         private void Delete_Button_Click(object sender, RoutedEventArgs e)
         {
             // 選択された savedata を取得
-            var selected = saved_list.SelectedItem as savedata;
-            if (selected != null)
+            var selectedItems = saved_list.SelectedItems.Cast<savedata>().ToList();
+            if (selectedItems.Count > 0)
             {
-                // 削除前に現在のインデックスを取得
+                // 削除前に一番上の選択インデックスを覚えておく
                 int index = saved_list.SelectedIndex;
 
-                // リストから削除
-                all_save_data.Remove(selected);
+                // all_save_data からまとめて削除
+                foreach (var item in selectedItems)
+                {
+                    all_save_data.Remove(item);
+                }
 
                 // 新しい選択を決める
                 if (all_save_data.Count > 0)
                 {
-                    // 下のアイテムがあれば選択
-                    if (index < all_save_data.Count)
-                    {
-                        saved_list.SelectedIndex = index; // 下のアイテム
-                    }
-                    else
-                    {
-                        saved_list.SelectedIndex = all_save_data.Count - 1; // 上のアイテム
-                    }
+                    if (index >= all_save_data.Count)
+                        index = all_save_data.Count - 1;
+
+                    saved_list.SelectedIndex = index; // 次の候補を選択
                 }
                 else
                 {
-                    // リストが空なら選択をクリア
-                    saved_list.SelectedIndex = -1;
+                    saved_list.SelectedIndex = -1; // 全部消えたら選択解除
                 }
             }
         }
+        private int enemy_mode = 0;
+        private void enemy_section_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.Source is TabControl tabControl && tabControl.SelectedItem is TabItem tabItem)
+            {
 
+                // 選択されたタブ
+                var selectedTab = tabControl.SelectedItem as TabItem;
+                if (selectedTab != null)
+                {
+                    string header = selectedTab.Header.ToString();
+                    if (header == "敵キャラ選択モード")
+                    {
+                        enemy_mode = 1;
+                    }
+                    else
+                    {
+                        enemy_mode = 0;
+                    }
+                }
+
+                calc_final_attack_mag();
+                calc_damage();
+            }
+        }
         private void Write_File_Button_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -4027,9 +5499,21 @@ namespace VBV_calc
                 if (int.TryParse(bukobox.Text, out buko))
                 {
                 }
-                status_calc_box(level, buko);
+                status_calc_box(level, buko); 
             }
         }
+        private void enemy_levelbox_TextChanged(object sender, TextChangedEventArgs e)
+       {
+            int level = 1;
+            if (enemy_levelbox != null && _isProgrammaticChange == false)
+            {
+                if (int.TryParse(enemy_levelbox.Text, out level))
+                {
+                }
+                enemy_status_calc_box(level);
+            }
+        }
+
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -4175,45 +5659,107 @@ namespace VBV_calc
             if (bestMatch != null)
                 CharacterBox.SelectedItem = bestMatch;
         }
-        public void SelectMostSimilarEquipment(string input,int shurui)
+        // クラス内で一度だけバッファとダミーBitmapを用意
+        private Bitmap reusableBitmap = new Bitmap(224, 224);
+        private float[] reusableTensorBuffer = new float[3 * 224 * 224]; // RGB 224x224
+        private string inputName;
+
+        public void SelectMostSimilarEquipment(string input,int shurui,int number)
         {
-            System.Collections.IEnumerable target;
+            if (number == 0)
+            {
+                System.Collections.IEnumerable target;
+                if (shurui == 0)
+                {
+                    target = EquipmentBox1.ItemsSource;
+                }
+                else if (shurui == 1)
+                {
+                    target = EquipmentBox2.ItemsSource;
+                }
+                else
+                {
+                    target = ryoshokuBox.ItemsSource;
+
+                }
+                if (string.IsNullOrWhiteSpace(input) || target is not IEnumerable<ItemSet> items)
+                    return;
+
+                input = Normalize(input);
+
+                var bestMatch = items
+                    .Where(e => !string.IsNullOrWhiteSpace(e?.ItemDisp))
+                    .Select(e => new
+                    {
+                        Item = e,
+                        Score = JaroWinklerSimilarity(Normalize(e.ItemDisp), input)
+                    })
+                    .OrderByDescending(x => x.Score) // スコアが高いほど似ている
+                    .FirstOrDefault()?.Item;
+
+                if (bestMatch != null)
+                {
+                    if (shurui == 0)
+                        EquipmentBox1.SelectedItem = bestMatch;
+                    else if (shurui == 1)
+                        EquipmentBox2.SelectedItem = bestMatch;
+                    else if (shurui == 2)
+                        ryoshokuBox.SelectedItem = bestMatch;
+                }
+            }
+            else if(number ==1)
+            {
+                System.Collections.IEnumerable target;
+                if (shurui == 0)
+                {
+                    target = enemy_EquipmentBox1.ItemsSource;
+                }
+                else if (shurui == 1)
+                {
+                    target = enemy_EquipmentBox2.ItemsSource;
+                }
+                else
+                {
+                    target = enemy_ryoshokuBox.ItemsSource;
+
+                }
+                if (string.IsNullOrWhiteSpace(input) || target is not IEnumerable<ItemSet> items)
+                    return;
+
+                input = Normalize(input);
+
+                var bestMatch = items
+                    .Where(e => !string.IsNullOrWhiteSpace(e?.ItemDisp))
+                    .Select(e => new
+                    {
+                        Item = e,
+                        Score = JaroWinklerSimilarity(Normalize(e.ItemDisp), input)
+                    })
+                    .OrderByDescending(x => x.Score) // スコアが高いほど似ている
+                    .FirstOrDefault()?.Item;
+
+                if (bestMatch != null)
+                {
+                    if (shurui == 0)
+                        enemy_EquipmentBox1.SelectedItem = bestMatch;
+                    else if (shurui == 1)
+                        enemy_EquipmentBox2.SelectedItem = bestMatch;
+                    else if (shurui == 2)
+                        enemy_ryoshokuBox.SelectedItem = bestMatch;
+                }
+
+            }
+        }
+        public void Set_SimilarVariable(string input, int shurui)
+        {
+            int level = 0;
             if (shurui == 0)
             {
-                target = EquipmentBox1.ItemsSource;
-            }
-            else if (shurui == 1)
-            {
-                target = EquipmentBox2.ItemsSource;
-            }
-            else
-            {
-                target = ryoshokuBox.ItemsSource;
-
-            }
-            if (string.IsNullOrWhiteSpace(input) || target is not IEnumerable<ItemSet> items)
-                return;
-
-            input = Normalize(input);
-
-            var bestMatch = items
-                .Where(e => !string.IsNullOrWhiteSpace(e?.ItemDisp))
-                .Select(e => new
+                int.TryParse(input, out level);
+                if (level != 0)
                 {
-                    Item = e,
-                    Score = JaroWinklerSimilarity(Normalize(e.ItemDisp), input)
-                })
-                .OrderByDescending(x => x.Score) // スコアが高いほど似ている
-                .FirstOrDefault()?.Item;
-
-            if (bestMatch != null)
-            {
-                if(shurui == 0)
-                    EquipmentBox1.SelectedItem = bestMatch;
-                else if (shurui == 1)
-                    EquipmentBox2.SelectedItem = bestMatch;
-                else if (shurui == 2)
-                    ryoshokuBox.SelectedItem = bestMatch;
+                    enemy_levelbox.Text = level.ToString();
+                }
             }
         }
         bool IsBinarizedImageMostlyBlack(Bitmap binarized, double blackRatioThreshold = 0.98)
@@ -4236,7 +5782,7 @@ namespace VBV_calc
             return blackRatio > blackRatioThreshold;
         }
         private static readonly TesseractEngine _engine = new TesseractEngine(@"./tessdata", "jpn", EngineMode.LstmOnly);
-
+        private static readonly TesseractEngine _engine_number = new TesseractEngine(@"./tessdata", "digits", EngineMode.Default);
     public string cropedAndselect(System.Drawing.Rectangle cropRect,int kakudai,int threathold)
         {
             string path = @".\Temp\capture.png";
@@ -4262,6 +5808,33 @@ namespace VBV_calc
             //binarized.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
             return noSpace;
         }
+        public string cropedAndselect_number(System.Drawing.Rectangle cropRect, int kakudai, int threathold)
+        {
+            string path = @".\Temp\capture.png";
+            using Bitmap bmp = new Bitmap(path);
+            using Bitmap cropped = bmp.Clone(cropRect, bmp.PixelFormat);
+            // グレースケール
+            using Bitmap gray = ToGrayscale(cropped);
+            // 漢字対応：2倍拡大（3倍だと潰れる）
+            using Bitmap enlarged = ResizeBitmap(gray, kakudai);
+            // 軽め二値化（線を太らせない）
+            using Bitmap binarized = AdaptiveThreshold(enlarged, threathold);
+            if (IsBinarizedImageMostlyBlack(enlarged))
+                return "";
+
+            // OCR処理
+            using var pix = BitmapToPix(binarized);
+            _engine_number.DefaultPageSegMode = PageSegMode.SingleLine;
+            using var page = _engine_number.Process(pix);
+            string text = page.GetText();
+            string noSpace = text.Replace(" ", "");  // 半角スペースを削除
+            Debug.WriteLine($"OCR結果: {noSpace}");
+            string inputText = noSpace;
+            string debugPath = @".\Temp\cropped_debug.png";
+            binarized.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
+            return noSpace;
+        }
+
         private double JaroWinklerSimilarity(string s1, string s2)
         {
             if (string.IsNullOrEmpty(s1) || string.IsNullOrEmpty(s2))
@@ -4490,53 +6063,254 @@ namespace VBV_calc
 
             return dot / ((float)Math.Sqrt(normA) * (float)Math.Sqrt(normB));
         }
-        public void load_from_game(int sw, int sh, int ew, int eh)
+        private void BitmapToTensor_KerasCaffe_inplace(Bitmap bmp, float[] buffer)
         {
-            string path = @".\Temp\capture.png";
-            using Bitmap tempbmp = new Bitmap(path);
-
-            var cropRect = new System.Drawing.Rectangle(sw, sh, ew, eh);
-            using Bitmap bmp = tempbmp.Clone(cropRect, tempbmp.PixelFormat);
-            string debugPath = @".\Temp\cropped_debug.png";
-            //bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
-            string onnxPath = @"feature_extraction/resnet50_features.onnx";   // Pythonで変換したONNXモデル
-            string jsonPath = @"feature_extraction/chara_features.json";              // Python特徴量DB
-            string csvPath = @"feature_extraction/list.csv";                   // ID→名前
-
-            // 1. 画像ロード & 224x224 にリサイズ
-            //using Bitmap bmp = new Bitmap(inputPath);
-            using Bitmap resized = new Bitmap(bmp, 224, 224);
-
-            // 2. NHWC Tensor に変換 + Keras preprocess_input(Caffeモード)
-            var inputTensor = BitmapToTensor_KerasCaffe(resized);
-
-            // 3. ONNX 推論
-            //using var session = new InferenceSession(onnxPath);
-            string inputName = session.InputMetadata.Keys.First(); // 入力名はONNXで確認
-            var result = session.Run(new List<NamedOnnxValue> {
-                NamedOnnxValue.CreateFromTensor(inputName, inputTensor)
-            });
-
-            float[] queryFeature = result.First().AsEnumerable<float>().ToArray();
-            queryFeature = Normalize_chara(queryFeature);
-
-            var top = features
-                .AsParallel()
-                .Select(f => new { f.Id, Name = idNameMap[f.Id], Score = Cosine(f.Feature, queryFeature) })
-                // 並列処理された結果を OrderByDescending で順序付け
-                .OrderByDescending(x => x.Score)
-                .FirstOrDefault();
-            if (top != null)
+            // bmp は 224x224 RGB
+            for (int y = 0; y < 224; y++)
             {
-                Debug.WriteLine($"最も近い画像: {top.Name} (ID: {top.Id}, Score: {top.Score:F3})");
-
-                var match = characters.FirstOrDefault(c => c.名称 == top.Name);
-                if (match != null)
+                for (int x = 0; x < 224; x++)
                 {
-                    CharacterBox.SelectedItem = match;
+                    var color = bmp.GetPixel(x, y);
+                    int idx = (y * 224 + x) * 3;
+                    // Keras Caffeモード: BGR - mean subtraction
+                    buffer[idx + 0] = color.B - 103.939f;
+                    buffer[idx + 1] = color.G - 116.779f;
+                    buffer[idx + 2] = color.R - 123.68f;
                 }
             }
         }
+        public void load_from_game(int sw, int sh, int ew, int eh, float colorWeight = 1.0f)
+        {
+            // 1. 元画像ロード & クロップ
+            using var tempBmp = new Bitmap(@".\Temp\capture.png");
+            using var cropped = tempBmp.Clone(new System.Drawing.Rectangle(sw, sh, ew, eh), tempBmp.PixelFormat);
+            using var g = Graphics.FromImage(reusableBitmap);
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+            g.DrawImage(cropped, 0, 0, 224, 224);
+
+            // 2. Tensor 変換
+            BitmapToTensor_KerasCaffe_inplace(reusableBitmap, reusableTensorBuffer);
+
+            // 3. CNN特徴抽出
+            using var results = session.Run(new[] {
+        NamedOnnxValue.CreateFromTensor(inputName, new DenseTensor<float>(reusableTensorBuffer, new[] { 1, 224, 224, 3 }))
+    });
+            float[] cnnFeature = results.First().AsEnumerable<float>().ToArray();
+            cnnFeature = Normalize_chara(cnnFeature);
+
+            // 4. 色特徴抽出
+            float[] colorFeature = GetColorFeatureExtended(reusableBitmap); // RGB平均 + RGBヒスト + HSVヒスト
+            colorFeature = Normalize_chara(colorFeature);
+
+            // 5. CNN主軸＋色補助を結合
+            float[] queryFeature;
+            if (colorWeight <= 0f)
+            {
+                queryFeature = cnnFeature; // 色補助なし
+            }
+            else
+            {
+                queryFeature = cnnFeature.Concat(colorFeature.Select(v => v * colorWeight)).ToArray();
+                queryFeature = Normalize_chara(queryFeature); // 結合後正規化
+            }
+
+            // 6. 類似度計算
+            float bestScore = float.MinValue;
+            string bestName = null;
+            int bestId = -1;
+
+            foreach (var f in features)
+            {
+                if (f.Feature.Length != queryFeature.Length) continue; // 念のため
+                float score = Cosine(f.Feature, queryFeature);
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestName = idNameMap[f.Id];
+                    bestId = int.Parse(f.Id);
+                }
+            }
+
+            // 7. 選択反映
+            var match = characters.FirstOrDefault(c => c.名称 == bestName);
+            if (match != null)
+                CharacterBox.SelectedItem = match;
+        }
+        public void enemy_load_from_game(int sw, int sh, int ew, int eh, float colorWeight = 1.0f)
+        {
+            // 1. 元画像ロード & クロップ
+            using var tempBmp = new Bitmap(@".\Temp\capture.png");
+            using var cropped = tempBmp.Clone(new System.Drawing.Rectangle(sw, sh, ew, eh), tempBmp.PixelFormat);
+
+            // クロップ画像を保存
+            string savePath = $@".\Temp\cropped_debug.png";
+
+            using var g = Graphics.FromImage(reusableBitmap);
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+            g.DrawImage(cropped, 0, 0, 224, 224);
+
+            // ←ここで左右反転
+            reusableBitmap.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipX);
+            reusableBitmap.Save(savePath, System.Drawing.Imaging.ImageFormat.Png);
+
+            // 2. Tensor 変換
+            BitmapToTensor_KerasCaffe_inplace(reusableBitmap, reusableTensorBuffer);
+
+            // 3. CNN特徴抽出
+            using var results = session.Run(new[] {
+                NamedOnnxValue.CreateFromTensor(inputName, new DenseTensor<float>(reusableTensorBuffer, new[] { 1, 224, 224, 3 }))
+            });
+            float[] cnnFeature = results.First().AsEnumerable<float>().ToArray();
+            cnnFeature = Normalize_chara(cnnFeature);
+
+            // 4. 色特徴抽出
+            float[] colorFeature = GetColorFeatureExtended(reusableBitmap); // RGB平均 + RGBヒスト + HSVヒスト
+            colorFeature = Normalize_chara(colorFeature);
+
+            // 5. CNN主軸＋色補助を結合
+            float[] queryFeature;
+            if (colorWeight <= 0f)
+            {
+                queryFeature = cnnFeature; // 色補助なし
+            }
+            else
+            {
+                queryFeature = cnnFeature.Concat(colorFeature.Select(v => v * colorWeight)).ToArray();
+                queryFeature = Normalize_chara(queryFeature); // 結合後正規化
+            }
+
+            // 6. 類似度計算
+            float bestScore = float.MinValue;
+            string bestName = null;
+            int bestId = -1;
+
+            foreach (var f in features)
+            {
+                if (f.Feature.Length != queryFeature.Length) continue; // 念のため
+                float score = Cosine(f.Feature, queryFeature);
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestName = idNameMap[f.Id];
+                    bestId = int.Parse(f.Id);
+                }
+            }
+            // 7. 選択反映
+            var match = characters.FirstOrDefault(c => c.名称 == bestName);
+            if (match != null)
+                enemy_CharacterBox.SelectedItem = match;
+        }
+        private float[] GetColorFeatureExtended(Bitmap bmp)
+        {
+            int width = bmp.Width, height = bmp.Height;
+            var arr = new float[width, height, 3];
+
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    var c = bmp.GetPixel(x, y);
+                    arr[x, y, 0] = c.R / 255f;
+                    arr[x, y, 1] = c.G / 255f;
+                    arr[x, y, 2] = c.B / 255f;
+                }
+
+            // RGB平均
+            float rMean = 0, gMean = 0, bMean = 0;
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    rMean += arr[x, y, 0];
+                    gMean += arr[x, y, 1];
+                    bMean += arr[x, y, 2];
+                }
+            float total = width * height;
+            rMean /= total; gMean /= total; bMean /= total;
+
+            // RGBヒストグラム 8ビン
+            int binsRGB = 8;
+            float[] rHist = new float[binsRGB];
+            float[] gHist = new float[binsRGB];
+            float[] bHist = new float[binsRGB];
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    rHist[Math.Clamp((int)(arr[x, y, 0] * binsRGB), 0, binsRGB - 1)]++;
+                    gHist[Math.Clamp((int)(arr[x, y, 1] * binsRGB), 0, binsRGB - 1)]++;
+                    bHist[Math.Clamp((int)(arr[x, y, 2] * binsRGB), 0, binsRGB - 1)]++;
+                }
+            NormalizeHist(rHist);
+            NormalizeHist(gHist);
+            NormalizeHist(bHist);
+
+            // HSVヒストグラム 16ビン
+            int binsHSV = 16;
+            float[] hHist = new float[binsHSV];
+            float[] sHist = new float[binsHSV];
+            float[] vHist = new float[binsHSV];
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    ColorToHSV(bmp.GetPixel(x, y), out float h, out float s, out float v);
+                    hHist[Math.Clamp((int)(h / 360f * binsHSV), 0, binsHSV - 1)]++;
+                    sHist[Math.Clamp((int)(s * binsHSV), 0, binsHSV - 1)]++;
+                    vHist[Math.Clamp((int)(v * binsHSV), 0, binsHSV - 1)]++;
+                }
+            NormalizeHist(hHist);
+            NormalizeHist(sHist);
+            NormalizeHist(vHist);
+
+            // 結合 (RGB平均3 + RGBヒスト24 + HSVヒスト48 = 75次元)
+            return (new float[] { rMean, gMean, bMean })
+                .Concat(rHist).Concat(gHist).Concat(bHist)
+                .Concat(hHist).Concat(sHist).Concat(vHist)
+                .ToArray();
+        }
+        /// <summary>HSV変換</summary>
+        private static void ColorToHSV(System.Drawing.Color color, out float h, out float s, out float v)
+        {
+            float r = color.R / 255f;
+            float g = color.G / 255f;
+            float b = color.B / 255f;
+
+            float max = Math.Max(r, Math.Max(g, b));
+            float min = Math.Min(r, Math.Min(g, b));
+            v = max;
+
+            float delta = max - min;
+            if (max != 0)
+                s = delta / max;
+            else
+            {
+                s = 0;
+                h = 0;
+                return;
+            }
+
+            if (r == max)
+                h = (g - b) / delta;
+            else if (g == max)
+                h = 2 + (b - r) / delta;
+            else
+                h = 4 + (r - g) / delta;
+
+            h *= 60;
+            if (h < 0)
+                h += 360;
+        }
+
+        /// <summary>ヒストグラムを正規化</summary>
+        private static void NormalizeHist(float[] hist)
+        {
+            float sum = hist.Sum();
+            if (sum > 0)
+            {
+                for (int i = 0; i < hist.Length; i++)
+                    hist[i] /= sum;
+            }
+        }
+
+
+
 
         private void CaptureAndOcrButton_Click(object sender, RoutedEventArgs e)
         {
@@ -4547,6 +6321,7 @@ namespace VBV_calc
                 MessageBox.Show($"キャプチャ失敗: {hr}");
                 return;
             }
+            enablePassiveChange = false;
 
             using Bitmap bmp = new Bitmap(path);
             // 必要部分を切り抜き
@@ -4559,11 +6334,43 @@ namespace VBV_calc
             //using Bitmap cropped = bmp.Clone(cropRect, bmp.PixelFormat);
             // グレースケール
             string noSpace="";
-            var popup = new ProgressWindow(this);
+            var popup = new ProgressWindow(this,0);
             popup.Owner = this;
             popup.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             popup.ShowDialog();
+            save_character_name_box.Text = "";
+            enablePassiveChange = true;
         }
+
+        private void enemy_CaptureAndOcrButton_Click(object sender, RoutedEventArgs e)
+        {
+            
+            string path = @".\Temp\capture.png";
+            int hr = CaptureWrapper.CaptureWindowByTitle("VenusBloodVALKYRIE", path);
+            if (hr != 0)
+            {
+                MessageBox.Show($"キャプチャ失敗: {hr}");
+                return;
+            }
+            enemy_enablePassiveChange = false;
+            using Bitmap bmp = new Bitmap(path);
+            // 必要部分を切り抜き
+            //var cropRect = new System.Drawing.Rectangle(593, 100, 250, 33);//名前
+            var cropRect_chara = new System.Drawing.Rectangle(865, 370, 210, 210);//名前
+            var cropRect_shogo = new System.Drawing.Rectangle(593, 75, 300, 27);//称号
+            var cropRect_equip1 = new System.Drawing.Rectangle(558, 245, 231, 22);//装備1
+            var cropRect_equip2 = new System.Drawing.Rectangle(558, 271, 231, 22);//装備2
+            var cropRect_ryoshoku = new System.Drawing.Rectangle(558, 297, 231, 22);//糧食
+            //using Bitmap cropped = bmp.Clone(cropRect, bmp.PixelFormat);
+            // グレースケール
+            string noSpace = "";
+            var popup = new ProgressWindow(this,1);
+            popup.Owner = this;
+            popup.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            popup.ShowDialog();
+            enemy_enablePassiveChange = true;
+        }
+
 
         public void best_match_shogo(string noSpace)
         {
@@ -4625,11 +6432,22 @@ namespace VBV_calc
         private void Window_Closed(object sender, EventArgs e)
         {
             // 全ウィンドウ閉じる
-            foreach (Window w in Application.Current.Windows)
+            foreach (Window w in System.Windows.Application.Current.Windows)
                 w.Close();
 
             // 念のため完全終了
-            Application.Current.Shutdown();
+            System.Windows.Application.Current.Shutdown();
+        }
+
+        private void saved_list_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            hozon_button.IsEnabled = saved_list.SelectedItems.Count <= 1;
+            yomikomi_button.IsEnabled = saved_list.SelectedItems.Count <= 1;
+        }
+
+        private void enemy_passive1_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
         }
     }
 }

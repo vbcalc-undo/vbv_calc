@@ -12,10 +12,18 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Xml.Linq;
+using VBV_calc;
 using VBV_calc.Helpers;
+using VBV_calc.Models;
+using Windows.UI.ViewManagement;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using static VBV_calc.MainWindow;
+using Brush = System.Windows.Media.Brush;
+using Brushes = System.Windows.Media.Brushes;
 
 namespace VBV_formation
 {
@@ -379,13 +387,25 @@ namespace VBV_formation
             {
             }
             assist_skill_box.ItemsSource = shidan_assist;
-            //            assist_skill_box.DisplayMemberPath = "ItemDisp";
-            //            assist_skill_box.SelectedValuePath = "ItempValue";
             assist_skill_box.DisplayMemberPath = "Name";
             assist_skill_box.SelectedValuePath = "Id";
-
+            shidan_assist.Add(new ItemSet());
 
             //レギオン関連
+            leg_shidan1_assist_skill_box.ItemsSource = leg_shidan1_assist;
+            leg_shidan1_assist_skill_box.DisplayMemberPath = "Name";
+            leg_shidan1_assist_skill_box.SelectedValuePath = "Id";
+            leg_shidan1_assist.Add(new ItemSet());
+
+            leg_shidan2_assist_skill_box.ItemsSource = leg_shidan2_assist;
+            leg_shidan2_assist_skill_box.DisplayMemberPath = "Name";
+            leg_shidan2_assist_skill_box.SelectedValuePath = "Id";
+            leg_shidan2_assist.Add(new ItemSet());
+
+            leg_shidan3_assist_skill_box.ItemsSource = leg_shidan3_assist;
+            leg_shidan3_assist_skill_box.DisplayMemberPath = "Name";
+            leg_shidan3_assist_skill_box.SelectedValuePath = "Id";
+            leg_shidan3_assist.Add(new ItemSet());
 
             //shidan.jsonが保存されていないと破綻するので別にしておく。
             leg_hozon_shidan_list.ItemsSource = leg_all_shidan_savedata;
@@ -420,11 +440,12 @@ namespace VBV_formation
             else
             {
             }
-            string jsonPath = @"feature_extraction/features.json";              // Python特徴量DB
+            string jsonPath = @"feature_extraction/features_shidan.json";              // Python特徴量DB
             string csvPath = @"feature_extraction/list.csv";                   // ID→名前
 
             string json = File.ReadAllText(jsonPath);
             featureDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, float[]>>(json);
+            features = featureDict.Select(kv => new ImageFeature { Id = kv.Key, Feature = kv.Value }).ToList();
             idNameMap = File.ReadAllLines(csvPath)
             .Skip(1)
             .Select(line => line.Split(','))
@@ -710,20 +731,23 @@ namespace VBV_formation
                                         }
                                         if (skill.Key == "追加スキル")
                                         {
-                                            string[] skill_name = skill.Value.Split(':');
-                                            if (temp_skills.ContainsKey(skill_name[0]))
+                                            if (skill.Value != "" && skill.Value != null)
                                             {
-                                                int skill_value = 0;
-                                                if (skill_name.Length > 1)
-                                                    skill_value = int.Parse(skill_name[1]);
-                                                temp_skills[skill_name[0]] += skill_value;
-                                            }
-                                            else
-                                            {
-                                                int skill_value = 0;
-                                                if (skill_name.Length > 1)
-                                                    skill_value = int.Parse(skill_name[1]);
-                                                temp_skills[skill_name[0]] = skill_value;
+                                                string[] skill_name = skill.Value.Split(':');
+                                                if (temp_skills.ContainsKey(skill_name[0]))
+                                                {
+                                                    int skill_value = 0;
+                                                    if (skill_name.Length > 1)
+                                                        skill_value = int.Parse(skill_name[1]);
+                                                    temp_skills[skill_name[0]] += skill_value;
+                                                }
+                                                else
+                                                {
+                                                    int skill_value = 0;
+                                                    if (skill_name.Length > 1)
+                                                        skill_value = int.Parse(skill_name[1]);
+                                                    temp_skills[skill_name[0]] = skill_value;
+                                                }
                                             }
                                         }
                                     }
@@ -851,19 +875,21 @@ namespace VBV_formation
                     //師団スキルを設定する
                     set_shidan_skill();
                     //師団スキルを表示する
-                    shidan_skill_box.Text = "";
+                    rich_shidan_skill_box.Document.Blocks.Clear();
                     foreach (var skill in shidan_skill)
                     {
                         if (skill.Key != "四法結界")
                         {
 
-                            shidan_skill_box.Text += skill.Key;
+                            Paragraph paragraph = new Paragraph();
+                            string numberStr = skill.Value.Item1.ToString();
+                            paragraph.Inlines.Add(new Run($"{skill.Key}:{numberStr}") { Foreground = Brushes.Black });
 
-                            if (skill.Value.Item1 != 0)
-                                shidan_skill_box.Text += ":" + skill.Value.Item1;
-                            shidan_skill_box.Text += "\n";
+                            // RichTextBox に追加
+                            rich_shidan_skill_box.Document.Blocks.Add(paragraph);
                         }
                     }
+                    color_change_box(rich_shidan_skill_box);
                 }
             }
         }
@@ -1227,12 +1253,12 @@ namespace VBV_formation
                 all_characters[current_assist_select].assist_skill_flag = false;
                 if (assist_num == 1)
                 {
-                    shidan_skill_box.Text = "";
+                    
                     set_shidan_skill();
                 }
                 else if (assist_num == 2)
                 {
-                    shidan_skill_box.Text = "";
+                    
                     set_shidan_skill();
                 }
                 else if (assist_num == 3)
@@ -1272,7 +1298,7 @@ namespace VBV_formation
                 current_assist_skill_name = "";
                 current_assist_skill_value = 0;
 
-                shidan_skill_box.Text = "";
+                
                 set_shidan_skill();
                 character_kassei_update();
                 character_shiki_update();
@@ -1306,6 +1332,20 @@ namespace VBV_formation
             {
             }
         }
+
+        public void delete_resync_assist_skill(int number)
+        {
+            if (all_characters.ContainsKey(number))
+            {
+                if (all_characters[number].assist_skill_flag == true)
+                {
+                    del_assist_skill();
+                }
+                shidan_assist.Remove(shidan_assist.First(item => item.Id == number));
+            }
+
+        }
+
         public void resync_assist_skill()
         {
             int temp = current_assist_select;
@@ -1356,7 +1396,8 @@ namespace VBV_formation
                 current_assist_select = number;
                 if (assist_skill_num == 1 || assist_skill_num == 2)
                 {
-                    all_characters[number].assist_skill_flag = true;
+                    if(all_characters.ContainsKey(number))
+                        all_characters[number].assist_skill_flag = true;
                     set_shidan_skill();
                     character_kassei_update();
                     character_shiki_update();
@@ -2003,7 +2044,9 @@ namespace VBV_formation
             //師団スキルを設定する
             //各キャラクターの最終スキルを全て確認し、師団スキルを計算する
             shidan_skill.Clear();
-            shidan_skill_box.Text = "";
+
+            
+            rich_shidan_skill_box.Document.Blocks.Clear();
             foreach (var character in all_characters.Values)
             {
                 //character.character_skillを書き換えるとまずいのでディープコピー
@@ -2236,13 +2279,150 @@ namespace VBV_formation
             {
                 if (skill.Key != "四法結界")
                 {
-                    shidan_skill_box.Text += skill.Key;
-                    if (skill.Value.Item1 != 0)
-                        shidan_skill_box.Text += ":" + skill.Value.Item1;
-                    shidan_skill_box.Text += "\n";
+
+                    Paragraph paragraph = new Paragraph();
+                    string numberStr = skill.Value.Item1.ToString();
+                    paragraph.Inlines.Add(new Run($"{skill.Key}:{numberStr}") { Foreground = Brushes.Black });
+                    // RichTextBox に追加
+                    rich_shidan_skill_box.Document.Blocks.Add(paragraph);
                 }
             }
+            color_change_box(rich_shidan_skill_box);
         }
+
+        private void Shidan_kakikomi_Button_Click(object sender, RoutedEventArgs e)
+        {
+            string baseName = shidan_name_box.Text.Trim();
+
+            // 入力が空なら即エラー扱い
+            if (string.IsNullOrEmpty(baseName))
+            {
+                baseName = "師団_" + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+            }
+
+            // 既存データに同名があるかチェック
+            bool exists = shidan_saved_list.Items.Cast<object>()
+                .Any(x =>
+                {
+                    var prop = x.GetType().GetProperty(shidan_saved_list.DisplayMemberPath);
+                    var text = prop?.GetValue(x)?.ToString();
+                    return text == baseName;
+                });
+
+            // === ここで上書き確認 ===
+            if (exists)
+            {
+                var dlg = new SaveWindow(baseName, "師団");
+                dlg.Owner = this;
+                if (dlg.ShowDialog() == true)
+                {
+                    switch (dlg.Result)
+                    {
+                        case SaveDialogResult.Overwrite:
+                            // 既存を削除して上書き
+                            var existing = all_shidan_savedata
+                                .FirstOrDefault(x => x.shidan_name == baseName);
+                            if (existing != null)
+                                all_shidan_savedata.Remove(existing);
+                            break;
+
+                        case SaveDialogResult.SaveAsNew:
+                            // 名前に連番を付ける
+                            baseName = GenerateUniqueName(baseName);
+                            break;
+
+                        case SaveDialogResult.Cancel:
+                            return;
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            // ====== データ構築 ======
+            var tempdata = new shidan_savedata
+            {
+                shidan_name = baseName,
+                character = new Dictionary<int, character_info>(),
+                shidan_assist_skill = assist_skill_box.Text
+            };
+
+            int temp_leader = 0;
+            int temp_assist = 0;
+
+            foreach (var kv in all_characters)
+            {
+                if (kv.Value.leader_flag)
+                {
+                    del_leader_skill(kv.Key);
+                    kv.Value.leader_flag = true;
+                    temp_leader = kv.Key;
+                }
+
+                if (kv.Value.assist_skill_flag)
+                {
+                    del_assist_skill();
+                    kv.Value.assist_skill_flag = true;
+                    Debug.WriteLine("assistskil kakikomi=" + kv.Key);
+                    temp_assist = kv.Key;
+                }
+                Debug.WriteLine($"{kv.Key} leaderflag:{kv.Value.leader_flag}");
+            }
+
+            tempdata.character = all_characters
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.DeepCopy());
+
+            delete_shihou_skill(tempdata.character);
+
+            all_shidan_savedata.Add(tempdata);
+
+            add_leader_skill(temp_leader);
+            add_assist_skill(temp_assist);
+
+            // テキストボックスに確定名を反映
+            shidan_name_box.Text = baseName;
+            shidan_saved_list.SelectedItem = tempdata;
+        }
+
+        private void delete_shihou_skill(Dictionary<int, character_info> tempdata)
+        {
+            foreach(var character in tempdata)
+            {
+                if (character.Value.character_skill.ContainsKey("四法結界"))
+                {
+
+                }
+            }
+
+        }
+
+        private string GenerateUniqueName(string baseName)
+        {
+            // 末尾が (数字) の場合はそれを削除して基底名を作る
+            var match = System.Text.RegularExpressions.Regex.Match(baseName, @"^(.*?)(\(\d+\))?$");
+            string rootName = match.Groups[1].Value;
+
+            int counter = 1;
+            string newName;
+
+            do
+            {
+                newName = $"{rootName}({counter})";
+                counter++;
+            } while (shidan_saved_list.Items.Cast<object>().Any(x =>
+            {
+                var prop = x.GetType().GetProperty(shidan_saved_list.DisplayMemberPath);
+                var text = prop?.GetValue(x)?.ToString();
+                return text == newName;
+            }));
+
+            return newName;
+        }
+
+        /*
+
         private void Shidan_kakikomi_Button_Click(object sender, RoutedEventArgs e)
         {
             shidan_savedata tempdata;
@@ -2290,6 +2470,8 @@ namespace VBV_formation
             add_assist_skill(temp_assist);
             shidan_name_box.Text = tempdata.shidan_name;
         }
+        */
+
         private void shidan_yomikomi_Button_Click(object sender, RoutedEventArgs e)
         {
             //all_shidan_savedataから選択されたデータを読み込む
@@ -2316,6 +2498,7 @@ namespace VBV_formation
                 shidan_name_box.Text = selected.shidan_name;
 
                 shidan_assist.Clear();
+                shidan_assist.Add(new ItemSet());
                 int temp_assist_num = 0;
                 all_characters = selected.character.ToDictionary(
                     kvp => kvp.Key,
@@ -2354,7 +2537,7 @@ namespace VBV_formation
                     }
                     n++;
                 }
-                shidan_skill_box.Text = "";
+                
                 if (temp_assist_num != 0)
                     assist_skill_box.SelectedValue = temp_assist_num;
                 set_shidan_skill();
@@ -2452,7 +2635,7 @@ namespace VBV_formation
                 character1_skill_box.Text += skill.Key + ":" + skill.Value + "\n";
             }
             character.leader_flag = true;
-            shidan_skill_box.Text = "";
+            
             stance_text_box.Text = character.stance.Replace("&br;", ""); ;
             set_shidan_skill();
             character_kassei_update();
@@ -2492,7 +2675,7 @@ namespace VBV_formation
             {
                 character1_skill_box.Text += skill.Key + ":" + skill.Value + "\n";
             }
-            shidan_skill_box.Text = "";
+            
             stance_text_box.Text = "";
             set_shidan_skill();
             character_kassei_update();
@@ -2822,11 +3005,11 @@ namespace VBV_formation
                     otori_number = character.Key;
                     otori_bougyo = otori_bougyo_temp;
                 }
-                Debug.WriteLine("地形効果:" + chikei_bairitu + " ステータス倍率:" + statusup_skill_bairitu + "英雄倍率:" + eiyuu);
+                //Debug.WriteLine("地形効果:" + chikei_bairitu + " ステータス倍率:" + statusup_skill_bairitu + "英雄倍率:" + eiyuu);
                 character1_status_box.Text = "HP:" + character.Value.character_status["HP"] + "\n";
                 character1_status_box.Text += "攻撃:" + (int)((((character.Value.character_current_status["攻撃"] * kago_bairitu * chikei_bairitu) + stance_kou) * (int)(100.0 + (double)eiyuu) / 100.0) * statusup_skill_bairitu) + "(" + character.Value.character_status["攻撃"] + ")" + "\n";
                 character1_status_box.Text += "防御:" + (int)((((character.Value.character_current_status["防御"] * kago_bairitu * chuya_bairitu * chikei_bairitu) + stance_bougyo) * (int)(100.0 + (double)eiyuu) / 100.0) * statusup_skill_bairitu) + "(" + character.Value.character_status["防御"] + ")" + "\n";
-                Debug.WriteLine("速度" + character.Value.character_current_status["速度"] + "英雄:" + eiyuu + " ステータス:" + statusup_skill_bairitu + " 英雄:" + (int)(100.0 + (double)eiyuu) / 100.0);
+                //Debug.WriteLine("速度" + character.Value.character_current_status["速度"] + "英雄:" + eiyuu + " ステータス:" + statusup_skill_bairitu + " 英雄:" + (int)(100.0 + (double)eiyuu) / 100.0);
                 character1_status_box.Text += "速度:" + (int)((((character.Value.character_current_status["速度"] * kago_bairitu * chikei_bairitu) + stance_soku) * (int)(100.0 + (double)eiyuu) / 100.0) * statusup_skill_bairitu) + "(" + character.Value.character_status["速度"] + ")" + "\n";
                 character1_status_box.Text += "知力:" + (int)((((character.Value.character_current_status["知力"] * (1.0 + (kago_bairitu - 1.0) / 4.0) / 1.0 * (1.0 + (chikei_bairitu - 1.0) / 4.0) / 1.0 + stance_chi)) * (int)(400.0 + (double)eiyuu) / 400.0) * statusup_skill_bairitu) + "(" + character.Value.character_status["知力"] + ")" + "\n";
                 character1_status_box.Text += "称号1:" + character.Value.character_shogo1 + "\n";
@@ -3233,9 +3416,103 @@ namespace VBV_formation
                 Grid.SetRow(tbBlock, row);
                 MultiColumnGrid.Children.Add(tbBlock);
             }
+            BigPopup.IsOpen = true;
+        }
+        private void RichTextBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (!(sender is RichTextBox rtb)) return;
+
+            string fullText = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd).Text;
+            var lines = fullText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+
+            MultiColumnGrid.Children.Clear();
+            MultiColumnGrid.RowDefinitions.Clear();
+            MultiColumnGrid.ColumnDefinitions.Clear();
+
+            int maxRowsPerCol = 15;
+            int colCount = (int)Math.Ceiling((double)lines.Length / maxRowsPerCol);
+
+            for (int c = 0; c < colCount; c++)
+                MultiColumnGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            for (int r = 0; r < Math.Min(lines.Length, maxRowsPerCol); r++)
+                MultiColumnGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                int col = i / maxRowsPerCol;
+                int row = i % maxRowsPerCol;
+
+                var tbBlock = new TextBlock
+                {
+                    Text = lines[i],
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(5, 2, 5, 2)
+                };
+
+                Grid.SetColumn(tbBlock, col);
+                Grid.SetRow(tbBlock, row);
+                MultiColumnGrid.Children.Add(tbBlock);
+            }
 
             BigPopup.IsOpen = true;
         }
+
+        private void Rich_SmallBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+
+            if (!(sender is RichTextBox rtb)) return;
+
+            // スクロールバー幅を判定用に設定
+            const double scrollbarWidth = 20; // 実際の見た目に合わせて調整
+
+            // クリック位置を RichTextBox 内の座標で取得
+            System.Windows.Point clickPos = e.GetPosition(rtb);
+
+            // コントロールのサイズを取得
+            double controlWidth = rtb.ActualWidth;
+            double controlHeight = rtb.ActualHeight;
+
+            // 右端・下端のスクロールバー領域なら無視
+            if (clickPos.X > controlWidth - scrollbarWidth || clickPos.Y > controlHeight - scrollbarWidth)
+                return;
+
+            // ↓ここから本文クリック時の処理（ポップアップ表示など）
+            string fullText = new TextRange(rtb.Document.ContentStart, rtb.Document.ContentEnd).Text;
+            var lines = fullText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+
+            MultiColumnGrid.Children.Clear();
+            MultiColumnGrid.RowDefinitions.Clear();
+            MultiColumnGrid.ColumnDefinitions.Clear();
+
+            int maxRowsPerCol = 15;
+            int colCount = (int)Math.Ceiling((double)lines.Length / maxRowsPerCol);
+
+            for (int c = 0; c < colCount; c++)
+                MultiColumnGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            for (int r = 0; r < Math.Min(lines.Length, maxRowsPerCol); r++)
+                MultiColumnGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                int col = i / maxRowsPerCol;
+                int row = i % maxRowsPerCol;
+
+                var tbBlock = new TextBlock
+                {
+                    Text = lines[i],
+                    Margin = new Thickness(5, 2, 5, 2)
+                };
+
+                Grid.SetColumn(tbBlock, col);
+                Grid.SetRow(tbBlock, row);
+                MultiColumnGrid.Children.Add(tbBlock);
+            }
+
+            BigPopup.IsOpen = true;
+        }
+
         private void SmallBox_Click(object sender, MouseButtonEventArgs e)
         {
             if (!(sender is TextBox tb)) return;
@@ -3361,7 +3638,7 @@ namespace VBV_formation
                         }
                     }
                     if (temp_character_skill.ContainsKey(skill.Key))
-                        temp_character_skill[skill.Key] += temp_character_skill[skill.Key] + skill.Value;
+                        temp_character_skill[skill.Key] +=  skill.Value;
                     else
                     {
                         temp_character_skill.Add(skill.Key, skill.Value);
@@ -3479,18 +3756,20 @@ namespace VBV_formation
             .OrderBy(kv => kv.Value.Item2)       // Valueを昇順にソート
             .ToDictionary(kv => kv.Key, kv => kv.Value);
             leg_shidan_skill = sortedAsc;
-            var leg_shidan_skillBox = (TextBox)this.FindName($"leg_shidan{leg_number}_skillBox");
-            leg_shidan_skillBox.Text = "";
+            var rich_leg_shidan_skillBox = (RichTextBox)this.FindName($"rich_leg_shidan{leg_number}_skillbox");
+            rich_leg_shidan_skillBox.Document.Blocks.Clear();
             foreach (var skill in leg_shidan_skill)
             {
                 if (skill.Key != "四法結界")
                 {
-                    leg_shidan_skillBox.Text += skill.Key;
-                    if (skill.Value.Item1 != 0)
-                        leg_shidan_skillBox.Text += ":" + skill.Value.Item1;
-                    leg_shidan_skillBox.Text += "\n";
+                    Paragraph paragraph = new Paragraph();
+                    string numberStr = skill.Value.Item1.ToString();
+                    paragraph.Inlines.Add(new Run($"{skill.Key}:{numberStr}") { Foreground = Brushes.Black });
+                    // RichTextBox に追加
+                    rich_leg_shidan_skillBox.Document.Blocks.Add(paragraph);
                 }
             }
+            color_change_box(rich_leg_shidan_skillBox);
         }
         private void set_legion_skill()
         {
@@ -3523,7 +3802,7 @@ namespace VBV_formation
                             legion_skill[skill.Key] = (skill.Value.Item1, check_shidan_skill_type(skill.Key));
                         }
                     }
-                    if (skill.Key == "地形無効" || skill.Key == "決戦領域" || skill.Key == "正々堂々")
+                    if (skill.Key == "地形無効" || skill.Key == "決戦領域" || skill.Key == "正々堂々"|| skill.Key == "罠の領域")
                     {
                         legion_skill[skill.Key] = (skill.Value.Item1, check_shidan_skill_type(skill.Key));
                     }
@@ -3533,15 +3812,16 @@ namespace VBV_formation
             .OrderBy(kv => kv.Value.Item2)       // Valueを昇順にソート
             .ToDictionary(kv => kv.Key, kv => kv.Value);
             legion_skill = sortedAsc;
-            legion_skill_box.Text = "";
+            rich_legion_skill_box.Document.Blocks.Clear();
             foreach (var tempskill in legion_skill)
             {
-                legion_skill_box.Text += tempskill.Key;
-
-                if (tempskill.Value.Item1 != 0)
-                    legion_skill_box.Text += ":" + tempskill.Value.Item1;
-                legion_skill_box.Text += "\n";
+                Paragraph paragraph = new Paragraph();
+                string numberStr = tempskill.Value.Item1.ToString();
+                paragraph.Inlines.Add(new Run($"{tempskill.Key}:{numberStr}") { Foreground = Brushes.Black });
+                // RichTextBox に追加
+                rich_legion_skill_box.Document.Blocks.Add(paragraph);
             }
+            color_change_box(rich_legion_skill_box);
         }
         private (int, int, int, int) leg_leg_kassei_skill(MainWindow.character_info character, string skillname, int temp_kougeki, int temp_bougyo, int temp_sokudo, int temp_chiryoku)
         {
@@ -3994,7 +4274,7 @@ namespace VBV_formation
                         otori_number = character.Key;
                         otori_bougyo = otori_bougyo_temp;
                     }
-                    Debug.WriteLine("地形効果:" + chikei_bairitu + " ステータス倍率:" + status_bairitu);
+                    //Debug.WriteLine("地形効果:" + chikei_bairitu + " ステータス倍率:" + status_bairitu);
                     character1_status_box.Text = "HP:" + character.Value.character_status["HP"] + "\n";
                     character1_status_box.Text += "攻撃:" + (int)((character.Value.character_current_status["攻撃"] * kago_bairitu * chikei_bairitu + stance_kou) * status_bairitu * ((100.0 + (double)eiyuu) / 100.0)) + "(" + character.Value.character_status["攻撃"] + ")" + "\n";
                     character1_status_box.Text += "防御:" + (int)((character.Value.character_current_status["防御"] * kago_bairitu * chuya_bairitu * chikei_bairitu + stance_bougyo) * status_bairitu * ((100.0 + (double)eiyuu) / 100.0)) + "(" + character.Value.character_status["防御"] + ")" + "\n";
@@ -4259,233 +4539,313 @@ namespace VBV_formation
             current.IsChecked = false;
         }
 
-        private void leg_load_shidan1_Click(object sender, RoutedEventArgs e)
+        private void leg_leader_on(int number, Dictionary<int, character_info> leg_shidan_characters,TextBox leg_shidan_stance,int shidan_number)
         {
-            var selected = leg_hozon_shidan_list.SelectedItem as shidan_savedata;
-            if (selected != null)
+            if (leg_shidan_characters.TryGetValue(number, out var ch))
             {
-                // selected.character は Dictionary<int, character_info> なので、これをループする
-                //セーブされているリーダーフラグがあるか確認。もし変わっていたら戻す
-                legion_del_assist_skill(1);
-                legion_del_assist_skill(2);
-                legion_del_assist_skill(3);
-                leg_shidan1_characters.Clear();
-                leg_shidan1_skill.Clear();
-                leg_shidan1_name.Text = selected.shidan_name.ToString();
-                leg_shidan1_characters = selected.character.ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => kvp.Value.DeepCopy());
-                for (int i = 1; i < 7; i++)
+                if (ch == null) return;
+
+                leg_shidan_characters[number].leader_flag = true;
+                foreach (var skill in leg_shidan_characters[number].leader_skill)
                 {
-                    var skillBox = (TextBox)this.FindName($"shidan1_chara{i}_name");
-                    skillBox.Text = "";
-                    var statusBox = (TextBox)this.FindName($"shidan1_chara{i}_status");
-                    statusBox.Text = "";
-                    if (leg_shidan1_characters.ContainsKey(i) && leg_shidan1_characters[i] != null)
+                    if (leg_shidan_characters[number].character_skill.ContainsKey(skill.Key))
                     {
-                        if (skillBox != null)
+                        if (skill.Value != 0)
                         {
-                            skillBox.Text = "";
-                            if (leg_shidan1_characters[i].leader_flag == true)
-                            {
-                                skillBox.Text = "※";
-                                foreach (var skill in leg_shidan1_characters[i].leader_skill)
-                                {
-                                    if (leg_shidan1_characters[i].character_skill.ContainsKey(skill.Key))
-                                    {
-                                        if (skill.Value != 0)
-                                        {
-                                            leg_shidan1_characters[i].character_skill[skill.Key] += skill.Value;
-                                        }
-                                        else
-                                        {
-                                            leg_shidan1_characters[i].character_skill[skill.Key] = 1;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        leg_shidan1_characters[i].character_skill[skill.Key] = skill.Value;
-                                    }
-                                    leg_shidan1_stance.Text = leg_shidan1_characters[i].stance.Replace("&br;", "");
-                                }
-                            }
-                            skillBox.Text += leg_shidan1_characters[i].character_name + "\n";
-                            foreach (var kv in leg_shidan1_characters[i].character_skill)
-                            {
-                                skillBox.Text += kv.Key + ":" + kv.Value + "\n";
-                            }
+                            leg_shidan_characters[number].character_skill[skill.Key] += skill.Value;
                         }
-                        statusBox.Text = "HP:" + leg_shidan1_characters[i].character_current_status["HP"].ToString() + "\n";
-                        statusBox.Text += "攻撃:" + leg_shidan1_characters[i].character_current_status["攻撃"].ToString() + "\n";
-                        statusBox.Text += "防御:" + leg_shidan1_characters[i].character_current_status["防御"].ToString() + "\n";
-                        statusBox.Text += "速度:" + leg_shidan1_characters[i].character_current_status["速度"].ToString() + "\n";
-                        statusBox.Text += "知力:" + leg_shidan1_characters[i].character_current_status["知力"].ToString() + "\n";
+                        else
+                        {
+                            leg_shidan_characters[number].character_skill[skill.Key] += 1;
+                        }
                     }
+                    else
+                    {
+                        leg_shidan_characters[number].character_skill[skill.Key] = skill.Value;
+                    }
+                    leg_shidan_stance.Text = leg_shidan_characters[number].stance.Replace("&br;", "");
                 }
-                shidan1_assist_skill.Text = selected.shidan_assist_skill;
-                leg_set_shidan_skill(leg_shidan1_characters, 1);
-                set_legion_skill();
-                legion_add_assist_skill(1);
-                legion_add_assist_skill(2);
-                legion_add_assist_skill(3);
-                leg_character_kassei_update();
-                leg_character_shiki_update();
-                leg_kago_calc();
+                var skillBox = (TextBox)this.FindName($"shidan{shidan_number}_chara{number}_name");
+                skillBox.Text = "";
+                var statusBox = (TextBox)this.FindName($"shidan{shidan_number}_chara{number}_status");
+                statusBox.Text = "";
+                skillBox.Text += leg_shidan_characters[number].character_name + "\n";
+                foreach (var kv in leg_shidan_characters[number].character_skill)
+                {
+                    skillBox.Text += "　" + kv.Key + ":" + kv.Value + "\n";
+                }
+                statusBox.Text = "HP:" + leg_shidan_characters[number].character_current_status["HP"].ToString() + "\n";
+                statusBox.Text += "攻撃:" + leg_shidan_characters[number].character_current_status["攻撃"].ToString() + "\n";
+                statusBox.Text += "防御:" + leg_shidan_characters[number].character_current_status["防御"].ToString() + "\n";
+                statusBox.Text += "速度:" + leg_shidan_characters[number].character_current_status["速度"].ToString() + "\n";
+                statusBox.Text += "知力:" + leg_shidan_characters[number].character_current_status["知力"].ToString() + "\n";
             }
-            load_legion_shidan1 = selected;
-        }
-        private void leg_load_shidan2_Click(object sender, RoutedEventArgs e)
-        {
-            var selected = leg_hozon_shidan_list.SelectedItem as shidan_savedata;
-            if (selected != null)
+            else
             {
-                // selected.character は Dictionary<int, character_info> なので、これをループする
-                //セーブされているリーダーフラグがあるか確認。もし変わっていたら戻す
-                legion_del_assist_skill(1);
-                legion_del_assist_skill(2);
-                legion_del_assist_skill(3);
-                leg_shidan2_characters.Clear();
-                leg_shidan2_skill.Clear();
-                leg_shidan2_name.Text = selected.shidan_name.ToString();
-                leg_shidan2_characters = selected.character.ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => kvp.Value.DeepCopy());
-                for (int i = 1; i < 7; i++)
-                {
-                    var skillBox = (TextBox)this.FindName($"shidan2_chara{i}_name");
-                    skillBox.Text = "";
-                    var statusBox = (TextBox)this.FindName($"shidan2_chara{i}_status");
-                    statusBox.Text = "";
-                    if (leg_shidan2_characters.ContainsKey(i) && leg_shidan2_characters[i] != null)
-                    {
-                        if (skillBox != null)
-                        {
-                            skillBox.Text = "";
-                            if (leg_shidan2_characters[i].leader_flag == true)
-                            {
-                                skillBox.Text = "※";
-                                foreach (var skill in leg_shidan2_characters[i].leader_skill)
-                                {
-                                    if (leg_shidan2_characters[i].character_skill.ContainsKey(skill.Key))
-                                    {
-                                        if (skill.Value != 0)
-                                        {
-                                            leg_shidan2_characters[i].character_skill[skill.Key] += skill.Value;
-                                        }
-                                        else
-                                        {
-                                            leg_shidan2_characters[i].character_skill[skill.Key] = 1;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        leg_shidan2_characters[i].character_skill[skill.Key] = skill.Value;
-                                    }
-                                    leg_shidan2_stance.Text = leg_shidan2_characters[i].stance.Replace("&br;", "");
-                                }
-                            }
-                            skillBox.Text += leg_shidan2_characters[i].character_name + "\n";
-                            foreach (var kv in leg_shidan2_characters[i].character_skill)
-                            {
-                                skillBox.Text += kv.Key + ":" + kv.Value + "\n";
-                            }
-                        }
-                        statusBox.Text = "HP:" + leg_shidan2_characters[i].character_current_status["HP"].ToString() + "\n";
-                        statusBox.Text += "攻撃:" + leg_shidan2_characters[i].character_current_status["攻撃"].ToString() + "\n";
-                        statusBox.Text += "防御:" + leg_shidan2_characters[i].character_current_status["防御"].ToString() + "\n";
-                        statusBox.Text += "速度:" + leg_shidan2_characters[i].character_current_status["速度"].ToString() + "\n";
-                        statusBox.Text += "知力:" + leg_shidan2_characters[i].character_current_status["知力"].ToString() + "\n";
-                    }
-                }
-                shidan2_assist_skill.Text = selected.shidan_assist_skill;
-                leg_set_shidan_skill(leg_shidan2_characters, 2);
-                set_legion_skill();
-                legion_add_assist_skill(1);
-                legion_add_assist_skill(2);
-                legion_add_assist_skill(3);
-                leg_character_kassei_update();
-                leg_character_shiki_update();
-                leg_kago_calc();
+                // キーが存在しなかったときの処理
+                return;
             }
-            load_legion_shidan2 = selected;
         }
 
-        private void leg_load_shidan3_Click(object sender, RoutedEventArgs e)
+        private void leg_leader_off(int number, Dictionary<int, character_info> leg_shidan_characters, TextBox leg_shidan_stance,int shidan_number)
         {
-            var selected = leg_hozon_shidan_list.SelectedItem as shidan_savedata;
-            if (selected != null)
+            if (leg_shidan_characters.TryGetValue(number, out var ch))
             {
-                // selected.character は Dictionary<int, character_info> なので、これをループする
-                //セーブされているリーダーフラグがあるか確認。もし変わっていたら戻す
-                legion_del_assist_skill(1);
-                legion_del_assist_skill(2);
-                legion_del_assist_skill(3);
-                leg_shidan3_characters.Clear();
-                leg_shidan3_skill.Clear();
-                leg_shidan3_name.Text = selected.shidan_name.ToString();
-                leg_shidan3_characters = selected.character.ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => kvp.Value.DeepCopy());
-                for (int i = 1; i < 7; i++)
+
+                leg_shidan_characters[number].leader_flag = false;
+                foreach (var skill in leg_shidan_characters[number].leader_skill)
                 {
-                    var skillBox = (TextBox)this.FindName($"shidan3_chara{i}_name");
-                    skillBox.Text = "";
-                    var statusBox = (TextBox)this.FindName($"shidan3_chara{i}_status");
-                    statusBox.Text = "";
-                    if (leg_shidan3_characters.ContainsKey(i) && leg_shidan3_characters[i] != null)
+                    if (leg_shidan_characters[number].character_skill.ContainsKey(skill.Key))
                     {
-                        if (skillBox != null)
+                        if (skill.Value != 0)
                         {
-                            skillBox.Text = "";
-                            if (leg_shidan3_characters[i].leader_flag == true)
-                            {
-                                skillBox.Text = "※";
-                                foreach (var skill in leg_shidan3_characters[i].leader_skill)
-                                {
-                                    if (leg_shidan3_characters[i].character_skill.ContainsKey(skill.Key))
-                                    {
-                                        if (skill.Value != 0)
-                                        {
-                                            leg_shidan3_characters[i].character_skill[skill.Key] += skill.Value;
-                                        }
-                                        else
-                                        {
-                                            leg_shidan3_characters[i].character_skill[skill.Key] = 1;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        leg_shidan3_characters[i].character_skill[skill.Key] = skill.Value;
-                                    }
-                                    leg_shidan3_stance.Text = leg_shidan3_characters[i].stance.Replace("&br;", "");
-                                }
-                            }
-                            skillBox.Text += leg_shidan3_characters[i].character_name + "\n";
-                            foreach (var kv in leg_shidan3_characters[i].character_skill)
-                            {
-                                skillBox.Text += kv.Key + ":" + kv.Value + "\n";
-                            }
+                            leg_shidan_characters[number].character_skill[skill.Key] -= skill.Value;
+                            if (leg_shidan_characters[number].character_skill[skill.Key] <= 0)
+                                leg_shidan_characters[number].character_skill.Remove(skill.Key);
                         }
-                        statusBox.Text = "HP:" + leg_shidan3_characters[i].character_current_status["HP"].ToString() + "\n";
-                        statusBox.Text += "攻撃:" + leg_shidan3_characters[i].character_current_status["攻撃"].ToString() + "\n";
-                        statusBox.Text += "防御:" + leg_shidan3_characters[i].character_current_status["防御"].ToString() + "\n";
-                        statusBox.Text += "速度:" + leg_shidan3_characters[i].character_current_status["速度"].ToString() + "\n";
-                        statusBox.Text += "知力:" + leg_shidan3_characters[i].character_current_status["知力"].ToString() + "\n";
+                        else
+                        {
+                            leg_shidan_characters[number].character_skill[skill.Key] = -1;
+                            if (leg_shidan_characters[number].character_skill[skill.Key] < 0)
+                                leg_shidan_characters[number].character_skill.Remove(skill.Key);
+                        }
+                    }
+                    else
+                    {
+                        if (skill.Value == 0)
+                        {
+                            leg_shidan_characters[number].character_skill.Remove(skill.Key);
+                        }
                     }
                 }
-                shidan3_assist_skill.Text = selected.shidan_assist_skill;
-                leg_set_shidan_skill(leg_shidan3_characters, 3);
-                set_legion_skill();
-                legion_add_assist_skill(1);
-                legion_add_assist_skill(2);
-                legion_add_assist_skill(3);
-                leg_character_kassei_update();
-                leg_character_shiki_update();
-                leg_kago_calc();
+                leg_shidan_stance.Text = "";
+                var skillBox = (TextBox)this.FindName($"shidan{shidan_number}_chara{number}_name");
+                skillBox.Text = "";
+                var statusBox = (TextBox)this.FindName($"shidan{shidan_number}_chara{number}_status");
+                statusBox.Text = "";
+                skillBox.Text += leg_shidan_characters[number].character_name + "\n";
+                foreach (var kv in leg_shidan_characters[number].character_skill)
+                {
+                    skillBox.Text += "　" + kv.Key + ":" + kv.Value + "\n";
+                }
+                statusBox.Text = "HP:" + leg_shidan_characters[number].character_current_status["HP"].ToString() + "\n";
+                statusBox.Text += "攻撃:" + leg_shidan_characters[number].character_current_status["攻撃"].ToString() + "\n";
+                statusBox.Text += "防御:" + leg_shidan_characters[number].character_current_status["防御"].ToString() + "\n";
+                statusBox.Text += "速度:" + leg_shidan_characters[number].character_current_status["速度"].ToString() + "\n";
+                statusBox.Text += "知力:" + leg_shidan_characters[number].character_current_status["知力"].ToString() + "\n";
             }
-            load_legion_shidan3 = selected;
+            else
+            {
+                // キーが存在しなかったときの処理
+                return;
+            }
+
         }
 
+        private void LoadShidan(int shidanNum)
+        {
+            var selected = leg_hozon_shidan_list.SelectedItem as shidan_savedata;
+            if (selected == null) return;
+
+            // 全師団の助っ人スキルを削除
+            //legion_del_assist_skill(1);
+            //legion_del_assist_skill(2);
+            //legion_del_assist_skill(3);
+
+            // 既存のキャラクター変数と師団名TextBoxを取得
+            Dictionary<int, character_info> shidanCharacters = shidanNum switch
+            {
+                1 => leg_shidan1_characters,
+                2 => leg_shidan2_characters,
+                3 => leg_shidan3_characters,
+                _ => null
+            };
+
+            TextBox shidanNameBox = shidanNum switch
+            {
+                1 => leg_shidan1_name,
+                2 => leg_shidan2_name,
+                3 => leg_shidan3_name,
+                _ => null
+            };
+
+            ComboBox shidanAssistBox = shidanNum switch
+            {
+                1 => leg_shidan1_assist_skill_box,
+                2 => leg_shidan2_assist_skill_box,
+                3 => leg_shidan3_assist_skill_box,
+                _ => null
+            };
+
+            ObservableCollection<ItemSet> shidanAssist = shidanNum switch
+            {
+                1 => leg_shidan1_assist,
+                2 => leg_shidan2_assist,
+                3 => leg_shidan3_assist,
+                _ => null
+            };
+
+            int[] shidan_assist_temp = { 0, 0, 0 };
+            ClearLegion(shidanNum);
+            shidanAssist.Add(new ItemSet { Id = 0, Name = ""});
+            for (int i = 1; i<= 3; i++){
+                if (i == shidanNum)
+                {
+                }
+                else
+                {
+                    if (i == 1)
+                    {
+                        var selected_temp = leg_shidan1_assist_skill_box.SelectedItem as ItemSet;
+                        if (selected_temp != null)
+                        {
+                            shidan_assist_temp[i-1] = selected_temp.Id;
+                            leg_shidan1_assist_skill_box.SelectedIndex = 0;
+                        }
+                    }
+                    if (i == 2)
+                    {
+                        var selected_temp = leg_shidan2_assist_skill_box.SelectedItem as ItemSet;
+                        if (selected_temp != null)
+                        {
+                            shidan_assist_temp[i-1] = selected_temp.Id;
+                            leg_shidan2_assist_skill_box.SelectedIndex = 0;
+                        }
+                    }
+                    if (i == 3)
+                    {
+                        var selected_temp = leg_shidan3_assist_skill_box.SelectedItem as ItemSet;
+                        if (selected_temp != null)
+                        {
+                            shidan_assist_temp[i - 1] = selected_temp.Id;
+                            leg_shidan3_assist_skill_box.SelectedIndex = 0;
+                        }
+                    }
+                }
+            }
+
+            if (shidanCharacters == null || shidanNameBox == null) return;
+
+            // 中身をクリアして DeepCopy
+            shidanCharacters.Clear();
+            foreach (var kvp in selected.character)
+            {
+                shidanCharacters[kvp.Key] = kvp.Value.DeepCopy();
+            }
+
+            // 師団名表示
+            shidanNameBox.Text = selected.shidan_name;
+
+            // キャラクター情報をUIに反映
+            for (int i = 1; i <= 6; i++)
+            {
+                var skillBox = this.FindName($"shidan{shidanNum}_chara{i}_name") as TextBox;
+                var statusBox = this.FindName($"shidan{shidanNum}_chara{i}_status") as TextBox;
+
+                if (skillBox != null) skillBox.Text = "";
+                if (statusBox != null) statusBox.Text = "";
+
+                if (shidanCharacters.ContainsKey(i) && shidanCharacters[i] != null)
+                {
+                    var character = shidanCharacters[i];
+
+                    // リーダーフラグのチェックボックス
+                    if (character.leader_flag)
+                    {
+                        var cb = this.FindName($"leg_shidan{shidanNum}_leaderflag{i}") as CheckBox;
+                        if (cb != null) cb.IsChecked = true;
+                    }
+                    else if (skillBox != null)
+                    {
+                        skillBox.Text = character.character_name + "\n";
+                        foreach (var kv in character.character_skill)
+                            skillBox.Text += "　" + kv.Key + ":" + kv.Value + "\n";
+                    }
+
+                    // ステータス表示
+                    if (statusBox != null)
+                    {
+                        var s = character.character_current_status;
+                        statusBox.Text =
+                            $"HP:{s["HP"]}\n" +
+                            $"攻撃:{s["攻撃"]}\n" +
+                            $"防御:{s["防御"]}\n" +
+                            $"速度:{s["速度"]}\n" +
+                            $"知力:{s["知力"]}\n";
+                    }
+                    shidanAssist.Add(new ItemSet { Id=i, Name=character.assist_skill });
+                }
+            }
+            for (int i = 1; i <= 6; i++)
+            {
+                if (shidanCharacters.ContainsKey(i) && shidanCharacters[i] != null)
+                {
+                    if (shidanCharacters[i].assist_skill_flag == true)
+                    {
+                        var item = shidanAssist.FirstOrDefault(x => x.Id == i);
+                        if (item != null)
+                        {
+                            shidanAssistBox.SelectedItem = item;
+                        }
+                    }
+                }
+            }
+            leg_set_shidan_skill(shidanCharacters, shidanNum);
+            set_legion_skill();
+            // スキル設定
+            //legion_add_assist_skill(1);
+            //legion_add_assist_skill(2);
+            //legion_add_assist_skill(3);
+            for (int i = 1; i <= 3; i++)
+            {
+                if (i == shidanNum)
+                {
+                }
+                else
+                {
+                    if (i == 1)
+                    {
+                        if (shidan_assist_temp[0] != 0)
+                        {
+                            var item = leg_shidan1_assist.FirstOrDefault(x => x.Id == shidan_assist_temp[0]);
+                            leg_shidan1_assist_skill_box.SelectedItem = item;
+                        }
+                    }
+                    if (i == 2)
+                    {
+                        if (shidan_assist_temp[1] != 0)
+                        {
+                            var item = leg_shidan2_assist.FirstOrDefault(x => x.Id == shidan_assist_temp[1]);
+                            leg_shidan2_assist_skill_box.SelectedItem = item;
+                        }
+                    }
+                    if (i == 3)
+                    {
+                        if (shidan_assist_temp[2] != 0)
+                        {
+                            var item = leg_shidan3_assist.FirstOrDefault(x => x.Id == shidan_assist_temp[2]);
+                            leg_shidan3_assist_skill_box.SelectedItem = item;
+                        }
+                    }
+                }
+            }
+            // キャラクターUI更新
+            leg_character_kassei_update();
+            leg_character_shiki_update();
+            leg_kago_calc();
+
+            // どの師団をロードしたか記録
+            switch (shidanNum)
+            {
+                case 1: load_legion_shidan1 = selected; break;
+                case 2: load_legion_shidan2 = selected; break;
+                case 3: load_legion_shidan3 = selected; break;
+            }
+        }
+
+        private void leg_load_shidan1_Click(object sender, RoutedEventArgs e) => LoadShidan(1);
+        private void leg_load_shidan2_Click(object sender, RoutedEventArgs e) => LoadShidan(2);
+        private void leg_load_shidan3_Click(object sender, RoutedEventArgs e) => LoadShidan(3);
         private void legion_del_assist_skill(int number)
         {
             var tempbox = (TextBox)this.FindName($"shidan{number}_assist_skill");
@@ -4633,16 +4993,16 @@ namespace VBV_formation
                 {
                     legion_skill[skill_name] = (skill_value, check_shidan_skill_type(skill_name));
                 }
-                legion_skill_box.Text = "";
+                rich_legion_skill_box.Document.Blocks.Clear();
                 foreach (var tempskill in legion_skill)
                 {
-                    legion_skill_box.Text += tempskill.Key;
-
-                    if (tempskill.Value.Item1 != 0)
-                        legion_skill_box.Text += ":" + tempskill.Value.Item1;
-                    legion_skill_box.Text += "\n";
+                    Paragraph paragraph = new Paragraph();
+                    string numberStr = tempskill.Value.Item1.ToString();
+                    paragraph.Inlines.Add(new Run($"{tempskill.Key}:{numberStr}") { Foreground = Brushes.Black });
+                    // RichTextBox に追加
+                    rich_legion_skill_box.Document.Blocks.Add(paragraph);
                 }
-
+                color_change_box(rich_legion_skill_box);
             }
             //全師団スキルに付与
             else if (assist_skill_num == 2)
@@ -4668,19 +5028,22 @@ namespace VBV_formation
                 int leg_number = 1;
                 foreach (var legion_shidan_skill in legion_shidan_skill_list)
                 {
-                    var leg_shidan_skillBox = (TextBox)this.FindName($"leg_shidan{leg_number}_skillBox");
-                    leg_shidan_skillBox.Text = "";
+                    var rich_leg_shidan_skillBox = (RichTextBox)this.FindName($"rich_leg_shidan{number}_skillbox");
+                    rich_leg_shidan_skillBox.Document.Blocks.Clear();
                     foreach (var skill in legion_shidan_skill)
                     {
 
                         if (skill.Key != "四法結界")
                         {
-                            leg_shidan_skillBox.Text += skill.Key;
-                            if (skill.Value.Item1 != 0)
-                                leg_shidan_skillBox.Text += ":" + skill.Value.Item1;
-                            leg_shidan_skillBox.Text += "\n";
+                            Paragraph paragraph = new Paragraph();
+                            string numberStr = skill.Value.Item1.ToString();
+                            paragraph.Inlines.Add(new Run($"{skill.Key}:{numberStr}") { Foreground = Brushes.Black });
+
+                            // RichTextBox に追加
+                            rich_leg_shidan_skillBox.Document.Blocks.Add(paragraph);
                         }
                     }
+                    color_change_box(rich_leg_shidan_skillBox);
                 }
 
             }
@@ -4773,140 +5136,213 @@ namespace VBV_formation
         }
         private void legion_save_Click(object sender, RoutedEventArgs e)
         {
-            legion_savedata tempdata;
-            tempdata = new legion_savedata();
-            tempdata.legion_name = legion_name_box.Text;
+            string baseName = legion_name_box.Text.Trim();
+
+            // 空白または同名チェック
+            //もしnullなら”師団_年月日時分秒”
+            if (baseName == "")
+            {
+                baseName = "レギオン_" + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+            }
+
             bool exists = leg_hozon_leg_list.Items.Cast<object>()
-            .Any(x =>
+                .Any(x =>
+                {
+                    var prop = x.GetType().GetProperty(leg_hozon_leg_list.DisplayMemberPath);
+                    var text = prop?.GetValue(x)?.ToString();
+                    return text == baseName;
+                });
+
+            if (exists)
+            {
+                // 上書き確認
+                var dlg = new SaveWindow(baseName, "レギオン") { Owner = this };
+                if (dlg.ShowDialog() == true)
+                {
+                    switch (dlg.Result)
+                    {
+                        case SaveDialogResult.Overwrite:
+                            var existing = all_legion_savedata.FirstOrDefault(x => x.legion_name == baseName);
+                            if (existing != null) all_legion_savedata.Remove(existing);
+                            break;
+
+                        case SaveDialogResult.SaveAsNew:
+                            baseName = GenerateUniqueLegionName(baseName);
+                            break;
+
+                        case SaveDialogResult.Cancel:
+                            return;
+                    }
+                }
+                else return;
+            }
+
+            var tempdata = new legion_savedata
+            {
+                legion_name = baseName,
+                shidan = new Dictionary<int, shidan_savedata>
+                {
+                    {0, new shidan_savedata()},
+                    {1, new shidan_savedata()},
+                    {2, new shidan_savedata()}
+                }
+            };
+            int[] shidan_assist_temp = { 0, 0, 0 };
+            int[] shidan_leader_temp = { 0, 0, 0 };
+
+            // まとめて処理する配列
+            var shidanNames = new[] { leg_shidan1_name, leg_shidan2_name, leg_shidan3_name };
+            var shidanCharacters = new[] { leg_shidan1_characters, leg_shidan2_characters, leg_shidan3_characters };
+            //var shidanAssist = new[] { shidan1_assist_skill, shidan2_assist_skill, shidan3_assist_skill };
+
+            //一旦リーダーフラグとアシストフラグをオフにしてセーブ。終わったら戻す。
+            for (int i = 1; i <= 3; i++)
+            {
+                if (i == 1)
+                {
+                    var selected_temp = leg_shidan1_assist_skill_box.SelectedItem as ItemSet;
+                    if (selected_temp != null)
+                    {
+                        shidan_assist_temp[i - 1] = selected_temp.Id;
+                        leg_shidan1_assist_skill_box.SelectedIndex = 0;
+                        var character = leg_shidan1_characters[selected_temp.Id];
+                        character.assist_skill_flag = true;
+                        Debug.WriteLine("i=" + i + "selected=" + selected_temp.Id);
+                    }
+                }
+                if (i == 2)
+                {
+                    var selected_temp = leg_shidan2_assist_skill_box.SelectedItem as ItemSet;
+                    if (selected_temp != null)
+                    {
+                        shidan_assist_temp[i - 1] = selected_temp.Id;
+                        leg_shidan2_assist_skill_box.SelectedIndex = 0;
+                        var character = leg_shidan2_characters[selected_temp.Id];
+                        character.assist_skill_flag = true;
+                        Debug.WriteLine("i="+i + "selected="+selected_temp.Id);
+                    }
+                }
+                if (i == 3)
+                {
+                    var selected_temp = leg_shidan3_assist_skill_box.SelectedItem as ItemSet;
+                    if (selected_temp != null)
+                    {
+                        shidan_assist_temp[i - 1] = selected_temp.Id;
+                        leg_shidan3_assist_skill_box.SelectedIndex = 0;
+                        var character = leg_shidan3_characters[selected_temp.Id];
+                        character.assist_skill_flag = true;
+                        Debug.WriteLine("i=" + i + "selected=" + selected_temp.Id);
+                    }
+                }
+            }
+            int shidanNum = 1;
+            foreach (var characters in shidanCharacters)
+            {
+                int i = 1;
+                foreach (var character in characters)
+                {
+                    if (character.Value.leader_flag ==true)
+                    {
+                        var cb = this.FindName($"leg_shidan{shidanNum}_leaderflag{i}") as CheckBox;
+                        if (cb != null)
+                        {
+                            shidan_leader_temp[shidanNum - 1] = i;
+                            cb.IsChecked = false;
+                            character.Value.leader_flag = true;
+                        }
+                    }
+                    i++;
+                }
+                shidanNum++;
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                tempdata.shidan[i].shidan_name = shidanNames[i].Text;
+                tempdata.shidan[i].character = shidanCharacters[i].ToDictionary(kvp => kvp.Key, kvp => kvp.Value.DeepCopy());
+                //tempdata.shidan[i].shidan_assist_skill = shidanAssist[i].Text;
+                // リーダースキル処理
+                //ProcessLeaderSkills(shidanCharacters[i]);
+            }
+            all_legion_savedata.Add(tempdata);
+            // 保存後に追加したものを選択
+            leg_hozon_leg_list.SelectedItem = tempdata;
+            leg_hozon_leg_list.ScrollIntoView(tempdata);
+            legion_name_box.Text = tempdata.legion_name;
+
+            //再度リーダーとアシストをオン
+            for (int i = 1; i <= 3; i++) {
+                if (shidan_leader_temp[i-1] != 0)
+                {
+                    var cb = this.FindName($"leg_shidan{i}_leaderflag{shidan_leader_temp[i - 1]}") as CheckBox;
+                    cb.IsChecked = true;
+
+                }
+                if (shidan_assist_temp[i-1] !=0)
+                {
+
+                    if (i == 1)
+                    {
+                        leg_shidan1_assist_skill_box.SelectedIndex = shidan_assist_temp[i -1];
+                    }
+                    if (i == 2)
+                    {
+                        leg_shidan2_assist_skill_box.SelectedIndex = shidan_assist_temp[i - 1];
+                    }
+                    if (i== 3)
+                    {
+                        leg_shidan3_assist_skill_box.SelectedIndex = shidan_assist_temp[i - 1];
+                    }
+                }
+            }
+        }
+
+        // 共通メソッド：リーダースキル処理
+        private void ProcessLeaderSkills(Dictionary<int, character_info> characters)
+        {
+            foreach (var kv in characters)
+            {
+                if (!kv.Value.leader_flag) continue;
+
+                foreach (var skill in kv.Value.leader_skill)
+                {
+                    if (!kv.Value.character_skill.ContainsKey(skill.Key)) continue;
+
+                    if (skill.Value != 0)
+                    {
+                        kv.Value.character_skill[skill.Key] -= skill.Value;
+                        if (kv.Value.character_skill[skill.Key] <= 0)
+                            kv.Value.character_skill.Remove(skill.Key);
+                    }
+                    else
+                    {
+                        kv.Value.character_skill.Remove(skill.Key);
+                    }
+                }
+            }
+        }
+
+        // 連番生成
+        private string GenerateUniqueLegionName(string baseName)
+        {
+            // 末尾が (数字) の場合は取り除く
+            var match = System.Text.RegularExpressions.Regex.Match(baseName, @"^(.*?)(\(\d+\))?$");
+            string rootName = match.Groups[1].Value;
+
+            int counter = 1;
+            string newName;
+            do
+            {
+                newName = $"{rootName}({counter})";
+                counter++;
+            } while (leg_hozon_leg_list.Items.Cast<object>().Any(x =>
             {
                 var prop = x.GetType().GetProperty(leg_hozon_leg_list.DisplayMemberPath);
                 var text = prop?.GetValue(x)?.ToString();
-                return text == tempdata.legion_name;  // 完全一致
-            });
+                return text == newName;
+            }));
 
-            //もしnullなら”師団_年月日時分秒”
-            if (tempdata.legion_name == "" || exists)
-            {
-                tempdata.legion_name = "レギオン_" + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
-            }
-            // 師団のメンバーを保存する
-            //tempdata.shidan = new Dictionary<int, shidan_savedata>();
-
-            tempdata.shidan = new Dictionary<int, shidan_savedata> { { 0, new shidan_savedata() }, { 1, new shidan_savedata() }, { 2, new shidan_savedata() } };
-            int temp_leader = 0;
-            int leg_shidan1_leader = 0;
-            int leg_shidan2_leader = 0;
-            int leg_shidan3_leader = 0;
-            foreach (var kv in leg_shidan1_characters)
-            {
-                if (kv.Value.leader_flag == true)
-                {
-                    //del_leader_skill(kv.Key);
-                    foreach (var skill in kv.Value.leader_skill)
-                    {
-                        if (kv.Value.character_skill.ContainsKey(skill.Key))
-                        {
-                            if (skill.Value != 0)
-                            {
-                                kv.Value.character_skill[skill.Key] -= skill.Value;
-                                if (kv.Value.character_skill[skill.Key] <= 0)
-                                    kv.Value.character_skill.Remove(skill.Key);
-                            }
-                            else
-                            {
-                                if (skill.Value == 0)
-                                {
-                                    kv.Value.character_skill.Remove(skill.Key);
-                                }
-                            }
-                            kv.Value.leader_flag = true;
-                        }
-                    }
-                    temp_leader = kv.Key;
-                }
-                Debug.WriteLine(kv.Key + " leaderflag:" + kv.Value.leader_flag);
-            }
-            legion_del_assist_skill(1);
-            foreach (var kv in leg_shidan2_characters)
-            {
-                if (kv.Value.leader_flag == true)
-                {
-                    //del_leader_skill(kv.Key);
-                    foreach (var skill in kv.Value.leader_skill)
-                    {
-                        if (kv.Value.character_skill.ContainsKey(skill.Key))
-                        {
-                            if (skill.Value != 0)
-                            {
-                                kv.Value.character_skill[skill.Key] -= skill.Value;
-                                if (kv.Value.character_skill[skill.Key] <= 0)
-                                    kv.Value.character_skill.Remove(skill.Key);
-                            }
-                            else
-                            {
-                                if (skill.Value == 0)
-                                {
-                                    kv.Value.character_skill.Remove(skill.Key);
-                                }
-                            }
-                            kv.Value.leader_flag = true;
-                        }
-                    }
-                    temp_leader = kv.Key;
-                }
-                Debug.WriteLine(kv.Key + " leaderflag:" + kv.Value.leader_flag);
-            }
-            legion_del_assist_skill(2);
-            foreach (var kv in leg_shidan3_characters)
-            {
-                if (kv.Value.leader_flag == true)
-                {
-                    //del_leader_skill(kv.Key);
-                    foreach (var skill in kv.Value.leader_skill)
-                    {
-                        if (kv.Value.character_skill.ContainsKey(skill.Key))
-                        {
-                            if (skill.Value != 0)
-                            {
-                                kv.Value.character_skill[skill.Key] -= skill.Value;
-                                if (kv.Value.character_skill[skill.Key] <= 0)
-                                    kv.Value.character_skill.Remove(skill.Key);
-                            }
-                            else
-                            {
-                                if (skill.Value == 0)
-                                {
-                                    kv.Value.character_skill.Remove(skill.Key);
-                                }
-                            }
-                            kv.Value.leader_flag = true;
-                        }
-                    }
-                    temp_leader = kv.Key;
-                }
-                Debug.WriteLine(kv.Key + " leaderflag:" + kv.Value.leader_flag);
-            }
-            legion_del_assist_skill(3);
-            tempdata.shidan[0].shidan_name = leg_shidan1_name.Text;
-            tempdata.shidan[0].character = leg_shidan1_characters.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value.DeepCopy());
-            tempdata.shidan[1].shidan_name = leg_shidan2_name.Text;
-            tempdata.shidan[1].character = leg_shidan2_characters.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value.DeepCopy());
-            tempdata.shidan[2].shidan_name = leg_shidan3_name.Text;
-            tempdata.shidan[2].character = leg_shidan3_characters.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value.DeepCopy());
-            tempdata.shidan[0].shidan_assist_skill = shidan1_assist_skill.Text;
-            tempdata.shidan[1].shidan_assist_skill = shidan2_assist_skill.Text;
-            tempdata.shidan[2].shidan_assist_skill = shidan3_assist_skill.Text;
-            all_legion_savedata.Add(tempdata);
-            legion_add_assist_skill(1);
-            legion_add_assist_skill(2);
-            legion_add_assist_skill(3);
-            legion_name_box.Text = tempdata.legion_name;
+            return newName;
         }
         private void legion_load_Click(object sender, RoutedEventArgs e)
         {
@@ -4915,11 +5351,11 @@ namespace VBV_formation
             var selected = leg_hozon_leg_list.SelectedItem as legion_savedata;
             if (selected != null)
             {
-                leg_shidan1_characters.Clear();
+                ClearLegion(1);
+                ClearLegion(2);
+                ClearLegion(3);
                 leg_shidan1_name.Text = selected.shidan[0].shidan_name;
-                leg_shidan2_characters.Clear();
                 leg_shidan2_name.Text = selected.shidan[1].shidan_name;
-                leg_shidan3_characters.Clear();
                 leg_shidan3_name.Text = selected.shidan[2].shidan_name;
                 leg_shidan1_characters = selected.shidan[0].character.ToDictionary(
                     kvp => kvp.Key,
@@ -4958,54 +5394,56 @@ namespace VBV_formation
                         statusBox.Text = "";
                         if (character.Value.leader_flag == true)
                         {
-                            skillBox.Text = "※";
-                            foreach (var skill in character.Value.leader_skill)
-                            {
-                                if (character.Value.character_skill.ContainsKey(skill.Key))
-                                {
-                                    if (skill.Value != 0)
-                                    {
-                                        character.Value.character_skill[skill.Key] += skill.Value;
-                                    }
-                                    else
-                                    {
-                                        character.Value.character_skill[skill.Key] = 1;
-                                    }
-                                }
-                                else
-                                {
-                                    character.Value.character_skill[skill.Key] = skill.Value;
-                                }
-                                if (leg_num == 1)
-                                {
-                                    leg_shidan1_stance.Text = character.Value.stance.Replace("&br;", "");
-                                }
-                                else if (leg_num == 2)
-                                {
-                                    leg_shidan2_stance.Text = character.Value.stance.Replace("&br;", "");
-                                }
-                                else if (leg_num == 3)
-                                {
-                                    leg_shidan3_stance.Text = character.Value.stance.Replace("&br;", "");
-                                }
-                            }
+                            var cb = this.FindName($"leg_shidan{leg_num}_leaderflag{i}") as CheckBox;
+                            if (cb != null) cb.IsChecked = true;
                         }
                         skillBox.Text += character.Value.character_name + "\n";
                         foreach (var kv in character.Value.character_skill)
                         {
                             skillBox.Text += kv.Key + ":" + kv.Value + "\n";
                         }
+                        leg_shidan1_assist.Clear();
                         i++;
                     }
                     leg_num++;
                 }
+                //assistは別途ロードした後にする。一緒にやるとあとのほうがダメ
+                int legnum = 1;
+                foreach (var characters in region_character_list)
+                {
+                    ObservableCollection<ItemSet> shidanAssist = legnum switch
+                    {
+                        1 => leg_shidan1_assist,
+                        2 => leg_shidan2_assist,
+                        3 => leg_shidan3_assist,
+                        _ => null
+                    };
+                    ComboBox shidanAssistBox = legnum switch
+                    {
+                        1 => leg_shidan1_assist_skill_box,
+                        2 => leg_shidan2_assist_skill_box,
+                        3 => leg_shidan3_assist_skill_box,
+                        _ => null
+                    };
+                    shidanAssist.Add(new ItemSet { Id = 0, Name = "" });
+                    int i = 1;
+                    foreach (var character in characters)
+                    {
+                        shidanAssist.Add(new ItemSet { Id = i, Name = character.Value.assist_skill });
+                        if (character.Value.assist_skill_flag == true)
+                        {
+                            var item = shidanAssist.FirstOrDefault(x => x.Id == i);
+                            if (item != null)
+                            {
+                                shidanAssistBox.SelectedItem = item;
+                                Debug.WriteLine("load:" + legnum + " " + i);
+                            }
+                        }
+                        i++;
+                    }
+                    legnum++;
+                }
                 legion_name_box.Text = selected.legion_name;
-                shidan1_assist_skill.Text = selected.shidan[0].shidan_assist_skill;
-                shidan2_assist_skill.Text = selected.shidan[1].shidan_assist_skill;
-                shidan3_assist_skill.Text = selected.shidan[2].shidan_assist_skill;
-                legion_add_assist_skill(1);
-                legion_add_assist_skill(2);
-                legion_add_assist_skill(3);
                 leg_set_shidan_skill(leg_shidan1_characters, 1);
                 leg_set_shidan_skill(leg_shidan2_characters, 2);
                 leg_set_shidan_skill(leg_shidan3_characters, 3);
@@ -5072,23 +5510,42 @@ namespace VBV_formation
 
         }
 
-        private void legion1_clear_button_Click(object sender, RoutedEventArgs e)
+        private void ClearLegion(int index)
         {
+            // 各データ取得
+            var assistField = this.GetType().GetField($"leg_shidan{index}_assist", BindingFlags.NonPublic | BindingFlags.Instance);
+            var skillField = this.GetType().GetField($"leg_shidan{index}_skill", BindingFlags.NonPublic | BindingFlags.Instance);
+            var charaField = this.GetType().GetField($"leg_shidan{index}_characters", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            dynamic assist = assistField?.GetValue(this);
+            dynamic skill = skillField?.GetValue(this);
+            dynamic characters = charaField?.GetValue(this);
+
+            assist?.Clear();
+            skill?.Clear();
+            characters?.Clear();
+
+            // LeaderFlag チェックボックス解除
+            var allLeaderFlags = FindVisualChildren<CheckBox>(this)
+                .Where(cb => cb.Name.Contains($"leg_shidan{index}_leaderflag"));
+            foreach (var cb in allLeaderFlags)
+                cb.IsChecked = false;
+
+            // 各キャラ欄リセット
             for (int i = 1; i < 7; i++)
             {
-                var allbox = (TextBox)this.FindName($"shidan1_chara{i}_name");
-                var status = (TextBox)this.FindName($"shidan1_chara{i}_status");
-
-                allbox.ClearValue(TextBox.BackgroundProperty);
-                allbox.Text = "";
-                status.Text = "";
+                var allbox = (TextBox)this.FindName($"shidan{index}_chara{i}_name");
+                var status = (TextBox)this.FindName($"shidan{index}_chara{i}_status");
+                allbox?.ClearValue(TextBox.BackgroundProperty);
+                if (allbox != null) allbox.Text = "";
+                if (status != null) status.Text = "";
             }
-            leg_shidan1_name.Text = "";
-            leg_shidan1_stance.Text = "";
-            leg_shidan1_skillBox.Text = "";
-            leg_shidan1_skill.Clear();
-            leg_shidan1_characters.Clear();
-            //all_legion_savedata[0].shidan[0] = null;
+
+            // 師団名・陣形リセット
+            ((TextBox)this.FindName($"leg_shidan{index}_name")).Text = "";
+            ((TextBox)this.FindName($"leg_shidan{index}_stance")).Text = "";
+
+            // スキル・加護など再計算
             leg_set_shidan_skill(leg_shidan1_characters, 1);
             leg_set_shidan_skill(leg_shidan2_characters, 2);
             leg_set_shidan_skill(leg_shidan3_characters, 3);
@@ -5097,56 +5554,10 @@ namespace VBV_formation
             leg_character_shiki_update();
             leg_kago_calc();
         }
-        private void legion2_clear_button_Click(object sender, RoutedEventArgs e)
-        {
-            for (int i = 1; i < 7; i++)
-            {
-                var allbox = (TextBox)this.FindName($"shidan2_chara{i}_name");
-                var status = (TextBox)this.FindName($"shidan2_chara{i}_status");
-                allbox.ClearValue(TextBox.BackgroundProperty);
-                allbox.Text = "";
-                status.Text = "";
-            }
-            leg_shidan2_name.Text = "";
-            leg_shidan2_stance.Text = "";
-            leg_shidan2_skillBox.Text = "";
-            leg_shidan2_skill.Clear();
-            leg_shidan2_characters.Clear();
-            //all_legion_savedata[0].shidan[1] = null;
-            leg_set_shidan_skill(leg_shidan1_characters, 1);
-            leg_set_shidan_skill(leg_shidan2_characters, 2);
-            leg_set_shidan_skill(leg_shidan3_characters, 3);
-            set_legion_skill();
-            leg_character_kassei_update();
-            leg_character_shiki_update();
-            leg_kago_calc();
+        private void legion1_clear_button_Click(object sender, RoutedEventArgs e) => ClearLegion(1);
+        private void legion2_clear_button_Click(object sender, RoutedEventArgs e) => ClearLegion(2);
+        private void legion3_clear_button_Click(object sender, RoutedEventArgs e) => ClearLegion(3);
 
-        }
-        private void legion3_clear_button_Click(object sender, RoutedEventArgs e)
-        {
-            for (int i = 1; i < 7; i++)
-            {
-                var allbox = (TextBox)this.FindName($"shidan3_chara{i}_name");
-                var status = (TextBox)this.FindName($"shidan3_chara{i}_status");
-                allbox.ClearValue(TextBox.BackgroundProperty);
-                allbox.Text = "";
-                status.Text = "";
-            }
-            leg_shidan3_name.Text = "";
-            leg_shidan3_stance.Text = "";
-            leg_shidan3_skillBox.Text = "";
-            leg_shidan3_skill.Clear();
-            leg_shidan3_characters.Clear();
-            //all_legion_savedata[0].shidan[2] = null;
-            leg_set_shidan_skill(leg_shidan1_characters, 1);
-            leg_set_shidan_skill(leg_shidan2_characters, 2);
-            leg_set_shidan_skill(leg_shidan3_characters, 3);
-            set_legion_skill();
-            leg_character_kassei_update();
-            leg_character_shiki_update();
-            leg_kago_calc();
-
-        }
         private Window1 popup = new Window1();
 
         private void legion_duplicate_check_Click(object sender, RoutedEventArgs e)
@@ -5402,66 +5813,212 @@ namespace VBV_formation
             popup.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             popup.ShowDialog();
         }
+
+
+        private float[] GetColorFeatureExtended(Bitmap bmp)
+        {
+            int width = bmp.Width, height = bmp.Height;
+            var arr = new float[width, height, 3];
+
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    var c = bmp.GetPixel(x, y);
+                    arr[x, y, 0] = c.R / 255f;
+                    arr[x, y, 1] = c.G / 255f;
+                    arr[x, y, 2] = c.B / 255f;
+                }
+
+            // RGB平均
+            float rMean = 0, gMean = 0, bMean = 0;
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    rMean += arr[x, y, 0];
+                    gMean += arr[x, y, 1];
+                    bMean += arr[x, y, 2];
+                }
+            float total = width * height;
+            rMean /= total; gMean /= total; bMean /= total;
+
+            // RGBヒストグラム 8ビン
+            int binsRGB = 8;
+            float[] rHist = new float[binsRGB];
+            float[] gHist = new float[binsRGB];
+            float[] bHist = new float[binsRGB];
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    rHist[Math.Clamp((int)(arr[x, y, 0] * binsRGB), 0, binsRGB - 1)]++;
+                    gHist[Math.Clamp((int)(arr[x, y, 1] * binsRGB), 0, binsRGB - 1)]++;
+                    bHist[Math.Clamp((int)(arr[x, y, 2] * binsRGB), 0, binsRGB - 1)]++;
+                }
+            NormalizeHist(rHist);
+            NormalizeHist(gHist);
+            NormalizeHist(bHist);
+
+            // HSVヒストグラム 16ビン
+            int binsHSV = 16;
+            float[] hHist = new float[binsHSV];
+            float[] sHist = new float[binsHSV];
+            float[] vHist = new float[binsHSV];
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
+                {
+                    ColorToHSV(bmp.GetPixel(x, y), out float h, out float s, out float v);
+                    hHist[Math.Clamp((int)(h / 360f * binsHSV), 0, binsHSV - 1)]++;
+                    sHist[Math.Clamp((int)(s * binsHSV), 0, binsHSV - 1)]++;
+                    vHist[Math.Clamp((int)(v * binsHSV), 0, binsHSV - 1)]++;
+                }
+            NormalizeHist(hHist);
+            NormalizeHist(sHist);
+            NormalizeHist(vHist);
+
+            // 結合 (RGB平均3 + RGBヒスト24 + HSVヒスト48 = 75次元)
+            return (new float[] { rMean, gMean, bMean })
+                .Concat(rHist).Concat(gHist).Concat(bHist)
+                .Concat(hHist).Concat(sHist).Concat(vHist)
+                .ToArray();
+        }
+        /// <summary>HSV変換</summary>
+        private static void ColorToHSV(System.Drawing.Color color, out float h, out float s, out float v)
+        {
+            float r = color.R / 255f;
+            float g = color.G / 255f;
+            float b = color.B / 255f;
+
+            float max = Math.Max(r, Math.Max(g, b));
+            float min = Math.Min(r, Math.Min(g, b));
+            v = max;
+
+            float delta = max - min;
+            if (max != 0)
+                s = delta / max;
+            else
+            {
+                s = 0;
+                h = 0;
+                return;
+            }
+
+            if (r == max)
+                h = (g - b) / delta;
+            else if (g == max)
+                h = 2 + (b - r) / delta;
+            else
+                h = 4 + (r - g) / delta;
+
+            h *= 60;
+            if (h < 0)
+                h += 360;
+        }
+
+        /// <summary>ヒストグラムを正規化</summary>
+        private static void NormalizeHist(float[] hist)
+        {
+            float sum = hist.Sum();
+            if (sum > 0)
+            {
+                for (int i = 0; i < hist.Length; i++)
+                    hist[i] /= sum;
+            }
+        }
+
+
         private static InferenceSession session = new InferenceSession(@"feature_extraction/resnet50_features.onnx");
         private static Dictionary<string, float[]> featureDict;
         private static Dictionary<string, string> idNameMap;
-        public void load_from_game(int sw, int sh, int ew, int eh, int chara_num)
+        private Bitmap reusableBitmap = new Bitmap(224, 224); 
+        private float[] reusableTensorBuffer = new float[3 * 224 * 224]; // RGB 224x224
+
+        private void BitmapToTensor_KerasCaffe_inplace(Bitmap bmp, float[] buffer)
         {
-            string path = @".\Temp\capture_shidan.png";
-            using Bitmap tempbmp = new Bitmap(path);
-            var cropRect = new System.Drawing.Rectangle(sw, sh, ew, eh);
-            using Bitmap bmp = tempbmp.Clone(cropRect, tempbmp.PixelFormat);
-            //using Bitmap bmp = new Bitmap("./data/ic0000.png");
-            string debugPath = @".\Temp\cropped_debug_shidan.png";
-            //bmp.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
-            Stopwatch stopwa = Stopwatch.StartNew();
-
-            // 1. 画像ロード & 224x224 にリサイズ
-            //using Bitmap bmp = new Bitmap(inputPath);
-            using Bitmap resized = new Bitmap(bmp, 224, 224);
-
-            // 2. NHWC Tensor に変換 + Keras preprocess_input(Caffeモード)
-            var inputTensor = BitmapToTensor_KerasCaffe(resized);
-
-            // 3. ONNX 推論
-            string inputName = session.InputMetadata.Keys.First(); // 入力名はONNXで確認
-            var result = session.Run(new List<NamedOnnxValue> {
-                NamedOnnxValue.CreateFromTensor(inputName, inputTensor)
-            });
-
-            float[] queryFeature = result.First().AsEnumerable<float>().ToArray();
-            queryFeature = Normalize(queryFeature);
-
-            List<ImageFeature> features = featureDict.Select(kv => new ImageFeature { Id = kv.Key, Feature = kv.Value }).ToList();
-
-            // 5. 類似検索（コサイン類似度）
-            var top = features
-                .Select(f => new { f.Id, Name = idNameMap[f.Id], Score = Cosine(f.Feature, queryFeature) })
-                .OrderByDescending(x => x.Score)
-                .FirstOrDefault();
-            stopwa.Stop();
-            Debug.WriteLine($"ここまで画像検索: {stopwa.ElapsedMilliseconds} ms");
-            stopwa = Stopwatch.StartNew();
-            if (top != null)
+            // bmp は 224x224 RGB
+            for (int y = 0; y < 224; y++)
             {
-                Debug.WriteLine($"最も近い画像: {top.Name} (ID: {top.Id}, Score: {top.Score:F3})");
-
-                var match = all_save_data.FirstOrDefault(c => c.character_name == top.Name);
-                if (match != null)
+                for (int x = 0; x < 224; x++)
                 {
-                    saved_list.SelectedItem = match;
-                    //saved_list.ScrollIntoView(match);
-                    Character_load_capture(chara_num);
-                }
-                else
-                {
-                    delete_shidan_chara(chara_num);
+                    var color = bmp.GetPixel(x, y);
+                    int idx = (y * 224 + x) * 3;
+                    // Keras Caffeモード: BGR - mean subtraction
+                    buffer[idx + 0] = color.B - 103.939f;
+                    buffer[idx + 1] = color.G - 116.779f;
+                    buffer[idx + 2] = color.R - 123.68f;
                 }
             }
-            stopwa.Stop();
-            Debug.WriteLine($"選択: {stopwa.ElapsedMilliseconds} ms");
         }
+        List<ImageFeature> features;
 
+        public void load_from_game(int sw, int sh, int ew, int eh, int chara_num, float colorWeight = 1.0f)
+        {
+            string path = @".\Temp\capture_shidan.png";
+            using Bitmap tempBmp = new Bitmap(path);
+
+            using var cropped = tempBmp.Clone(new System.Drawing.Rectangle(sw, sh, ew, eh), tempBmp.PixelFormat);
+            using var g = Graphics.FromImage(reusableBitmap);
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+            g.DrawImage(cropped, 0, 0, 224, 224);
+            string inputName = session.InputMetadata.Keys.First();
+            // 2. Tensor 変換
+            BitmapToTensor_KerasCaffe_inplace(reusableBitmap, reusableTensorBuffer);
+
+            // 3. CNN特徴抽出
+            using var results = session.Run(new[] {
+        NamedOnnxValue.CreateFromTensor(inputName, new DenseTensor<float>(reusableTensorBuffer, new[] { 1, 224, 224, 3 }))
+    });
+            float[] cnnFeature = results.First().AsEnumerable<float>().ToArray();
+            cnnFeature = Normalize_chara(cnnFeature);
+
+            // 4. 色特徴抽出
+            float[] colorFeature = GetColorFeatureExtended(reusableBitmap); // RGB平均 + RGBヒスト + HSVヒスト
+            colorFeature = Normalize_chara(colorFeature);
+
+            // 5. CNN主軸＋色補助を結合
+            float[] queryFeature;
+            if (colorWeight <= 0f)
+            {
+                queryFeature = cnnFeature; // 色補助なし
+            }
+            else
+            {
+                queryFeature = cnnFeature.Concat(colorFeature.Select(v => v * colorWeight)).ToArray();
+                queryFeature = Normalize_chara(queryFeature); // 結合後正規化
+            }
+
+            // 6. 類似度計算
+            float bestScore = float.MinValue;
+            string bestName = null;
+            int bestId = -1;
+
+            foreach (var f in features)
+            {
+                if (f.Feature.Length != queryFeature.Length) continue; // 念のため
+                float score = Cosine(f.Feature, queryFeature);
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestName = idNameMap[f.Id];
+                    bestId = int.Parse(f.Id);
+                }
+            }
+
+
+            var match = all_save_data.FirstOrDefault(c => c.character_name == bestName);
+            if (match != null)
+            {
+                saved_list.SelectedItem = match;
+                Character_load_capture(chara_num);
+            }
+            else
+            {
+                delete_shidan_chara(chara_num);
+            }
+        }
+        static float[] Normalize_chara(float[] vec)
+        {
+            double norm = Math.Sqrt(vec.Select(v => v * v).Sum());
+            return vec.Select(v => (float)(v / norm)).ToArray();
+        }
 
         class ImageFeature
         {
@@ -5495,9 +6052,11 @@ namespace VBV_formation
             string targetstatus = $"character{number}_status_box";
             string targetbuko = $"buko{number}_fig";
 
+            delete_resync_assist_skill(number);
             all_characters.Remove(number);
             set_shidan_skill();
             resync_assist_skill();
+
             character_kassei_update();
             character_shiki_update();
             kago_calc();
@@ -5535,11 +6094,507 @@ namespace VBV_formation
             }
         }
 
+        public class ThresholdColor
+        {
+            public int Threshold { get; set; }   // この値以上で色を適用
+            public System.Windows.Media.Brush Color { get; set; }
+        }
+        public static void ColorizeEntireTextByNumber(
+        RichTextBox rtb,
+        List<string> targetTexts,
+        List<ThresholdColor> thresholdColors,
+        Brush defaultBrush)
+        {
+            var paragraphs = rtb.Document.Blocks.OfType<Paragraph>().ToList();
+
+            foreach (var para in paragraphs)
+            {
+                var runs = para.Inlines.OfType<Run>().ToList();
+
+                foreach (var run in runs)
+                {
+                    string text = run.Text;
+                    int sepIndex = text.IndexOf(':');
+                    if (sepIndex > 0 && sepIndex < text.Length - 1)
+                    {
+                        string prefix = text.Substring(0, sepIndex); // text
+                        string numberStr = text.Substring(sepIndex + 1); // number
+
+                        if (!targetTexts.Contains(prefix)) continue;
+
+                        if (int.TryParse(numberStr, out int value))
+                        {
+                            // 閾値に応じた色を決定
+                            Brush brush = defaultBrush;
+                            foreach (var tc in thresholdColors)
+                            {
+                                if (value >= tc.Threshold)
+                                {
+                                    brush = tc.Color;
+                                    break;
+                                }
+                            }
+
+                            // 既存 Run に直接色を適用
+                            run.Foreground = brush;
+                        }
+                    }
+                }
+            }
+        }
+        public static void DecorateFoolLieGlobal(RichTextBox rtb)
+        {
+            // RichTextBox 全体の Run を取得
+            var allRuns = rtb.Document.Blocks
+                .OfType<Paragraph>()
+                .SelectMany(p => p.Inlines.OfType<Run>())
+                .ToList();
+
+            // RichTextBox 全体に特定文字列が存在するかをチェック
+            bool hasSpecial = allRuns.Any(r => r.Text.StartsWith("地形無効") || r.Text.StartsWith("正々堂々"));
+
+            // "愚者の嘘" の Run に装飾を適用
+            foreach (var run in allRuns)
+            {
+                if (run.Text.StartsWith("愚者の嘘"))
+                {
+                    run.Foreground = hasSpecial ? Brushes.Red : Brushes.Blue;
+                    run.TextDecorations = hasSpecial ? TextDecorations.Strikethrough : null;
+                }
+            }
+        }
+        private void color_change_box(RichTextBox rtb)
+        {
+            var targetTexts = new List<string> { "自爆結界", "戦術結界", "砲撃結界", "対術結界" };
+
+            var darkYellow = new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 150, 0)); // 暗めの黄色
+
+            var thresholds = new List<ThresholdColor>
+            {
+                new ThresholdColor { Threshold = 95, Color = Brushes.Blue },
+                new ThresholdColor { Threshold = 85, Color = Brushes.Green },
+                new ThresholdColor { Threshold = 70, Color = darkYellow },
+                new ThresholdColor { Threshold = 0, Color = Brushes.Red }
+            };
+            ColorizeEntireTextByNumber(
+                rtb,
+                targetTexts,
+                thresholds,
+                defaultBrush: Brushes.Black
+            );
+            DecorateFoolLieGlobal(rtb);
+        }
+
+
         private void kyohon_box_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             kago_calc();
         }
 
-    }
+        private void shidan_skill_box_TextChanged(object sender, TextChangedEventArgs e)
+        {
 
+        }
+        private void Region_LeaderFlag_Checked(object sender, RoutedEventArgs e)
+        {
+            var leg_shidan_characters_list = new Dictionary<int, character_info>[]
+            {
+                leg_shidan1_characters,
+                leg_shidan2_characters,
+                leg_shidan3_characters
+            };
+            var leg_shidan_stance_list = new TextBox[]
+            {
+                leg_shidan1_stance,
+                leg_shidan2_stance,
+                leg_shidan3_stance
+            };
+
+            if (sender is not CheckBox clicked) return;
+
+            // 名前からグループキーを抽出（例: leg_shidan3_leaderflag1 → "shidan3"）
+            string name = clicked.Name;
+            string groupKey = name.Split('_')[1]; // "shidan3"
+
+            // 対象グループ内の全CheckBoxを探す
+            var allLeaderFlags = FindVisualChildren<CheckBox>(this)
+                .Where(cb => cb.Name.Contains($"leg_{groupKey}_leaderflag") && cb != clicked);
+
+            // 他のチェックを解除
+            foreach (var cb in allLeaderFlags)
+                cb.IsChecked = false;
+
+
+            //クリックから師団番号とキャラ番号取り出し
+            var parts = name.Split('_'); // ["leg", "shidan3", "leaderflag5"]
+            // 2. shidanX から X を取り出す
+            int shidanX = int.Parse(parts[1].Replace("shidan", "")); // 3
+            // 3. leaderflagY から Y を取り出す
+            int leaderY = int.Parse(parts[2].Replace("leaderflag", "")); // 5
+            leg_leader_on(leaderY, leg_shidan_characters_list[shidanX-1], leg_shidan_stance_list[shidanX-1], shidanX);
+            leg_set_shidan_skill(leg_shidan_characters_list[shidanX - 1], shidanX);
+            set_legion_skill();
+            leg_character_kassei_update();
+            leg_character_shiki_update();
+            leg_kago_calc();
+
+        }
+        public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj == null) yield break;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+                if (child is T t)
+                    yield return t;
+
+                foreach (T childOfChild in FindVisualChildren<T>(child))
+                    yield return childOfChild;
+            }
+        }
+        private void Region_LeaderFlag_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (sender is not CheckBox clicked) return;
+
+            string name = clicked.Name;
+            string groupKey = name.Split('_')[1]; // "shidan3"
+            var leg_shidan_characters_list = new Dictionary<int, character_info>[]
+            {
+                leg_shidan1_characters,
+                leg_shidan2_characters,
+                leg_shidan3_characters
+            };
+            var leg_shidan_stance_list = new TextBox[]
+            {
+                leg_shidan1_stance,
+                leg_shidan2_stance,
+                leg_shidan3_stance
+            };
+            //クリックから師団番号とキャラ番号取り出し
+            var parts = name.Split('_'); // ["leg", "shidan3", "leaderflag5"]
+            // 2. shidanX から X を取り出す
+            int shidanX = int.Parse(parts[1].Replace("shidan", "")); // 3
+            // 3. leaderflagY から Y を取り出す
+            int leaderY = int.Parse(parts[2].Replace("leaderflag", "")); // 5
+            leg_leader_off(leaderY, leg_shidan_characters_list[shidanX - 1], leg_shidan_stance_list[shidanX - 1], shidanX);
+            leg_set_shidan_skill(leg_shidan_characters_list[shidanX - 1], shidanX);
+            set_legion_skill();
+            leg_character_kassei_update();
+            leg_character_shiki_update();
+            leg_kago_calc();
+        }
+        private void legion_del_assist_skill_fix(int number,string assist_name,int shidan_number)
+        {
+            string assist_string = assist_name;
+
+            if (assist_string == "")
+            {
+                return;
+            }
+            string skill_name = "";
+            int skill_value = 0;
+            (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(assist_string);
+            skill_value = leg_calc_shidan_chiryoku(skill_name, skill_value, shidan_number);
+
+            var legion_character_list = new List<Dictionary<int, character_info>> { leg_shidan1_characters, leg_shidan2_characters, leg_shidan3_characters };
+            var legion_shidan_skill_list = new List<Dictionary<string, (int, int)>> { leg_shidan1_skill, leg_shidan2_skill, leg_shidan3_skill };
+
+            var temp_characters = legion_character_list[shidan_number - 1];
+            if (temp_characters.ContainsKey(number))
+            {
+                temp_characters[number].assist_skill_flag = false;
+            }
+            int assist_skill_num = assist_skill_Dict[skill_name];
+            if (assist_skill_num == 1)
+            {
+                int shidan_num = 1;
+                foreach (var leg_characters in legion_character_list)
+                {
+                    int chara_num = 0;
+                    foreach (var leg_character in leg_characters)
+                    {
+                        var chara_skill = leg_character.Value.character_skill;
+                        if (skill_value != 0)
+                        {
+                            chara_skill[skill_name] = chara_skill[skill_name] - skill_value;
+                            if (chara_skill[skill_name] <= 0)
+                                chara_skill.Remove(skill_name);
+                        }
+                        else
+                        {
+                            chara_skill[skill_name] = chara_skill[skill_name] - 1;
+                            if (chara_skill[skill_name] < 0)
+                                chara_skill.Remove(skill_name);
+
+                        }
+                        var skillBox = (TextBox)this.FindName($"shidan{shidan_num}_chara{chara_num + 1}_name");
+                        skillBox.Text = "";
+                        skillBox.Text += leg_character.Value.character_name;
+                        foreach (var kv in leg_character.Value.character_skill)
+                        {
+                            skillBox.Text += "\n" + kv.Key + ":" + kv.Value;
+                        }
+                        chara_num++;
+                        break;
+                    }
+                    shidan_num++;
+                }
+            }
+            //全師団スキルに付与
+            else if (assist_skill_num == 2)
+            {
+                //全キャラクターに付与
+                int shidan_num = 1;
+                foreach (var leg_characters in legion_character_list)
+                {
+                    int chara_num = 0;
+                    foreach (var leg_character in leg_characters)
+                    {
+                        var chara_skill = leg_character.Value.character_skill;
+                        if (skill_value != 0)
+                        {
+                            chara_skill[skill_name] = chara_skill[skill_name] - skill_value;
+                            if (chara_skill[skill_name] <= 0)
+                                chara_skill.Remove(skill_name);
+                        }
+                        else
+                        {
+                            chara_skill[skill_name] = chara_skill[skill_name] - 1;
+                            if (chara_skill[skill_name] < 0)
+                                chara_skill.Remove(skill_name);
+                        }
+                        var skillBox = (TextBox)this.FindName($"shidan{shidan_num}_chara{chara_num + 1}_name");
+                        skillBox.Text = "";
+                        skillBox.Text += leg_character.Value.character_name;
+                        foreach (var kv in leg_character.Value.character_skill)
+                        {
+                            skillBox.Text += "\n" + kv.Key + ":" + kv.Value;
+                        }
+                        chara_num++;
+                        break;
+                    }
+                    shidan_num++;
+                }
+            }
+            else if (assist_skill_num == 3)
+            {
+                //全キャラクターに付与
+                int shidan_num = 1;
+                foreach (var leg_characters in legion_character_list)
+                {
+                    int chara_num = 0;
+                    foreach (var leg_character in leg_characters)
+                    {
+                        var chara_skill = leg_character.Value.character_skill;
+                        if (skill_value != 0)
+                        {
+                            chara_skill[skill_name] = chara_skill[skill_name] - skill_value;
+                            if (chara_skill[skill_name] <= 0)
+                                chara_skill.Remove(skill_name);
+                        }
+                        else
+                        {
+                            chara_skill[skill_name] = chara_skill[skill_name] - 1;
+                            if (chara_skill[skill_name] == 0)
+                                chara_skill.Remove(skill_name);
+                        }
+                        var skillBox = (TextBox)this.FindName($"shidan{shidan_num}_chara{chara_num + 1}_name");
+                        skillBox.Text = "";
+                        skillBox.Text += leg_character.Value.character_name;
+                        foreach (var kv in leg_character.Value.character_skill)
+                        {
+                            skillBox.Text += "\n" + kv.Key + ":" + kv.Value;
+                        }
+                        chara_num++;
+                    }
+                    shidan_num++;
+                }
+            }
+        }
+
+
+        private void legion_add_assist_skill_fix(int number,string asssist_name ,int shidan_number)
+        {
+            //var tempbox = (TextBox)this.FindName($"shidan{number}_assist_skill");
+            string assist_string = asssist_name;
+
+            if (assist_string == "")
+            {
+                return;
+            }
+            string skill_name = "";
+            int skill_value = 0;
+            (skill_name, skill_value) = SkillParser.Div_Skill_Name_Value(assist_string);
+
+            skill_value = leg_calc_shidan_chiryoku(skill_name, skill_value, shidan_number);
+            var legion_character_list = new List<Dictionary<int, character_info>> { leg_shidan1_characters, leg_shidan2_characters, leg_shidan3_characters };
+            var legion_shidan_skill_list = new List<Dictionary<string, (int, int)>> { leg_shidan1_skill, leg_shidan2_skill, leg_shidan3_skill };
+            int assist_skill_num = assist_skill_Dict[skill_name];
+
+            if (number != 0)
+            {
+                var temp_characters = legion_character_list[shidan_number - 1];
+                if(temp_characters.ContainsKey(number))
+                    temp_characters[number].assist_skill_flag = true;
+            }
+            //軍団、師団スキルは先頭のキャラに付与することにする（色々と面倒）
+            if (assist_skill_num == 1)
+            {
+                int shidan_num = 1;
+                foreach (var leg_characters in legion_character_list)
+                {
+                    int chara_num = 0;
+                    foreach (var leg_character in leg_characters)
+                    {
+
+                        var chara_skill = leg_character.Value.character_skill;
+                        if (chara_skill.ContainsKey(skill_name))
+                        {
+                            if (skill_value != 0)
+                            {
+                                chara_skill[skill_name] = chara_skill[skill_name] + skill_value;
+                            }
+                            else
+                            {
+                                chara_skill[skill_name] = chara_skill[skill_name] + 1;
+                            }
+
+                        }
+                        else
+                        {
+                            chara_skill[skill_name] = skill_value;
+                        }
+                        var skillBox = (TextBox)this.FindName($"shidan{shidan_num}_chara{chara_num + 1}_name");
+                        skillBox.Text = "";
+                        skillBox.Text += leg_character.Value.character_name;
+                        foreach (var kv in leg_character.Value.character_skill)
+                        {
+                            skillBox.Text += "\n" + kv.Key + ":" + kv.Value;
+                        }
+                        chara_num++;
+                        break;
+                    }
+                    shidan_num++;
+                }
+            }
+            //全師団スキルに付与
+            else if (assist_skill_num == 2)
+            {
+                int shidan_num = 1;
+                foreach (var leg_characters in legion_character_list)
+                {
+                    int chara_num = 0;
+                    foreach (var leg_character in leg_characters)
+                    {
+
+                        var chara_skill = leg_character.Value.character_skill;
+                        if (chara_skill.ContainsKey(skill_name))
+                        {
+                            if (skill_value != 0)
+                            {
+                                chara_skill[skill_name] = chara_skill[skill_name] + skill_value;
+                            }
+                            else
+                            {
+                                chara_skill[skill_name] = chara_skill[skill_name] + 1;
+                            }
+
+                        }
+                        else
+                        {
+                            chara_skill[skill_name] = skill_value;
+                        }
+                        var skillBox = (TextBox)this.FindName($"shidan{shidan_num}_chara{chara_num + 1}_name");
+                        skillBox.Text = "";
+                        skillBox.Text += leg_character.Value.character_name;
+                        foreach (var kv in leg_character.Value.character_skill)
+                        {
+                            skillBox.Text += "\n" + kv.Key + ":" + kv.Value;
+                        }
+                        chara_num++;
+                        break;
+                    }
+                    shidan_num++;
+                }
+            }
+            else if (assist_skill_num == 3)
+            {
+                //全キャラクターに付与
+                int shidan_num = 1;
+                foreach (var leg_characters in legion_character_list)
+                {
+                    int chara_num = 0;
+                    foreach (var leg_character in leg_characters)
+                    {
+                        var chara_skill = leg_character.Value.character_skill;
+                        if (chara_skill.ContainsKey(skill_name))
+                        {
+                            if (skill_value != 0)
+                            {
+                                chara_skill[skill_name] = chara_skill[skill_name] + skill_value;
+                            }
+                            else
+                            {
+                                chara_skill[skill_name] = chara_skill[skill_name] + 1;
+                            }
+                        }
+                        else
+                        {
+                            chara_skill[skill_name] = skill_value;
+                        }
+                        var skillBox = (TextBox)this.FindName($"shidan{shidan_num}_chara{leg_character.Key}_name");
+                        skillBox.Text = "";
+                        skillBox.Text += leg_character.Value.character_name;
+                        foreach (var kv in leg_character.Value.character_skill)
+                        {
+                            skillBox.Text += "\n" + kv.Key + ":" + kv.Value;
+                        }
+                        chara_num++;
+                    }
+                    shidan_num++;
+                }
+            }
+
+            leg_set_shidan_skill(leg_shidan1_characters, 1);
+            leg_set_shidan_skill(leg_shidan2_characters, 2);
+            leg_set_shidan_skill(leg_shidan3_characters, 3);
+            set_legion_skill();
+            leg_character_kassei_update();
+            leg_character_shiki_update();
+            leg_kago_calc();
+        }
+        private void leg_shidan_assist_skill_box_SelectionChanged(int shidan_number,SelectionChangedEventArgs e)
+        {
+            if (e.RemovedItems.Count > 0)
+            {
+                var oldItem = e.RemovedItems[0] as ItemSet;
+                if(oldItem.Id != 0)
+                {
+                    legion_del_assist_skill_fix(oldItem.Id, oldItem.Name, shidan_number);
+                }
+            }
+            // 変更後（新しい値）
+            if (e.AddedItems.Count > 0)
+            {
+                var newItem = e.AddedItems[0] as ItemSet;
+                if (newItem.Id != 0)
+                {
+                    legion_add_assist_skill_fix(newItem.Id, newItem.Name,shidan_number);
+                }
+            }
+
+            leg_set_shidan_skill(leg_shidan1_characters, 1);
+            leg_set_shidan_skill(leg_shidan2_characters, 2);
+            leg_set_shidan_skill(leg_shidan3_characters, 3);
+            set_legion_skill();
+            leg_character_kassei_update();
+            leg_character_shiki_update();
+            leg_kago_calc();
+        }
+        private void leg_shidan1_assist_skill_box_SelectionChanged(object sender, SelectionChangedEventArgs e) => leg_shidan_assist_skill_box_SelectionChanged(1, e);
+        private void leg_shidan2_assist_skill_box_SelectionChanged(object sender, SelectionChangedEventArgs e) => leg_shidan_assist_skill_box_SelectionChanged(2, e);
+        private void leg_shidan3_assist_skill_box_SelectionChanged(object sender, SelectionChangedEventArgs e) => leg_shidan_assist_skill_box_SelectionChanged(3, e);
+
+    }
 }
