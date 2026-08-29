@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -77,6 +78,51 @@ namespace VBV_formation
             load_json_equipment_func(@"./json/equipments\soubi_ryoushoku.json", "糧食");
         }
 
+        private void load_json_shogo()
+        {         // ここにJSON読み込みのコードを追加
+            load_json_shogo_func(@"./json/medallion\mu.json", "無");
+            load_json_shogo_func(@"./json/medallion\tikara.json", "力");
+            load_json_shogo_func(@"./json/medallion\ti.json", "知");
+            load_json_shogo_func(@"./json/medallion\waza.json", "技");
+            load_json_shogo_func(@"./json/medallion\kemono.json", "獣");
+            load_json_shogo_func(@"./json/medallion\ja.json", "邪");
+            load_json_shogo_func(@"./json/medallion\i.json", "異");
+            load_json_shogo_func(@"./json/medallion\riku.json", "陸");
+            load_json_shogo_func(@"./json/medallion\umi.json", "海");
+            load_json_shogo_func(@"./json/medallion\sora.json", "空");
+            load_json_shogo_func(@"./json/medallion\tou.json", "闘");
+            load_json_shogo_func(@"./json/medallion\shin.json", "信");
+            load_json_shogo_func(@"./json/medallion\ku.json", "苦");
+            load_json_shogo_func(@"./json/medallion\maboroshi.json", "幻");
+            load_json_shogo_func(@"./json/medallion\kyojin.json", "巨人");
+            load_json_shogo_func(@"./json/medallion\akuma.json", "悪魔");
+            load_json_shogo_func(@"./json/medallion\zouma.json", "造魔");
+            load_json_shogo_func(@"./json/medallion\ryu.json", "竜");
+            load_json_shogo_func(@"./json/medallion\rekisen.json", "歴戦");
+            load_json_shogo_func(@"./json/medallion\kyo.json", "凶");
+            load_json_shogo_func(@"./json/medallion\mushi.json", "蟲");
+            load_json_shogo_func(@"./json/medallion\eiyu.json", "英雄");
+            load_json_shogo_func(@"./json/medallion\kenja.json", "賢者");
+            load_json_shogo_func(@"./json/medallion\inochi.json", "命");
+            load_json_shogo_func(@"./json/medallion\ou.json", "王");
+            load_json_shogo_func(@"./json/medallion\mukuro.json", "骸");
+            load_json_shogo_func(@"./json/medallion\shito.json", "使徒");
+            load_json_shogo_func(@"./json/medallion\kakushin.json", "革新");
+            load_json_shogo_func(@"./json/medallion\oni.json", "鬼");
+            load_json_shogo_func(@"./json/medallion\teiou.json", "帝王");
+            load_json_shogo_func(@"./json/medallion\kami.json", "神");
+            load_json_shogo_func(@"./json/medallion\bi.json", "尾");
+            load_json_shogo_func(@"./json/medallion\kikou.json", "機巧");
+            load_json_shogo_func(@"./json/medallion\shinri.json", "真理");
+            load_json_shogo_func(@"./json/medallion\hametsu.json", "破滅");
+            load_json_shogo_func(@"./json/medallion\unmei.json", "運命");
+            load_json_shogo_func(@"./json/medallion\setuna.json", "刹那");
+            load_json_shogo_func(@"./json/medallion\sousei.json", "創成");
+            load_json_shogo_func(@"./json/medallion\meifu.json", "冥府");
+            load_json_shogo_func(@"./json/medallion\kinki.json", "禁忌");
+            load_json_shogo_func(@"./json/medallion\rakuen.json", "楽園");
+            load_json_shogo_func(@"./json/medallion\busho_shogo.json", "キャラクター");
+        }
         public class character_info
         {
             public string character_id;
@@ -147,52 +193,7 @@ namespace VBV_formation
                 };
             }
         }
-        private void load_json_shogo()
-        {         // ここにJSON読み込みのコードを追加
-            load_json_shogo_func(@"./json/medallion\mu.json", "無");
-            load_json_shogo_func(@"./json/medallion\tikara.json", "力");
-            load_json_shogo_func(@"./json/medallion\ti.json", "知");
-            load_json_shogo_func(@"./json/medallion\waza.json", "技");
-            load_json_shogo_func(@"./json/medallion\kemono.json", "獣");
-            load_json_shogo_func(@"./json/medallion\ja.json", "邪");
-            load_json_shogo_func(@"./json/medallion\i.json", "異");
-            load_json_shogo_func(@"./json/medallion\riku.json", "陸");
-            load_json_shogo_func(@"./json/medallion\umi.json", "海");
-            load_json_shogo_func(@"./json/medallion\sora.json", "空");
-            load_json_shogo_func(@"./json/medallion\tou.json", "闘");
-            load_json_shogo_func(@"./json/medallion\shin.json", "信");
-            load_json_shogo_func(@"./json/medallion\ku.json", "苦");
-            load_json_shogo_func(@"./json/medallion\maboroshi.json", "幻");
-            load_json_shogo_func(@"./json/medallion\kyojin.json", "巨人");
-            load_json_shogo_func(@"./json/medallion\akuma.json", "悪魔");
-            load_json_shogo_func(@"./json/medallion\zouma.json", "造魔");
-            load_json_shogo_func(@"./json/medallion\ryu.json", "竜");
-            load_json_shogo_func(@"./json/medallion\rekisen.json", "歴戦");
-            load_json_shogo_func(@"./json/medallion\kyo.json", "凶");
-            load_json_shogo_func(@"./json/medallion\mushi.json", "蟲");
-            load_json_shogo_func(@"./json/medallion\eiyu.json", "英雄");
-            load_json_shogo_func(@"./json/medallion\kenja.json", "賢者");
-            load_json_shogo_func(@"./json/medallion\inochi.json", "命");
-            load_json_shogo_func(@"./json/medallion\ou.json", "王");
-            load_json_shogo_func(@"./json/medallion\mukuro.json", "骸");
-            load_json_shogo_func(@"./json/medallion\shito.json", "使徒");
-            load_json_shogo_func(@"./json/medallion\kakushin.json", "革新");
-            load_json_shogo_func(@"./json/medallion\oni.json", "鬼");
-            load_json_shogo_func(@"./json/medallion\teiou.json", "帝王");
-            load_json_shogo_func(@"./json/medallion\kami.json", "神");
-            load_json_shogo_func(@"./json/medallion\bi.json", "尾");
-            load_json_shogo_func(@"./json/medallion\kikou.json", "機巧");
-            load_json_shogo_func(@"./json/medallion\shinri.json", "真理");
-            load_json_shogo_func(@"./json/medallion\hametsu.json", "破滅");
-            load_json_shogo_func(@"./json/medallion\unmei.json", "運命");
-            load_json_shogo_func(@"./json/medallion\setuna.json", "刹那");
-            load_json_shogo_func(@"./json/medallion\sousei.json", "創成");
-            load_json_shogo_func(@"./json/medallion\meifu.json", "冥府");
-            load_json_shogo_func(@"./json/medallion\kinki.json", "禁忌");
-            load_json_shogo_func(@"./json/medallion\rakuen.json", "楽園");
-            load_json_shogo_func(@"./json/medallion\busho_shogo.json", "キャラクター");
 
-        }
         private void load_json_character()
         {
             List<string> temp_asistskills = new List<string>();
@@ -302,6 +303,7 @@ namespace VBV_formation
             public string Name { get; set; }
         }
         Dictionary<string, (int, int)> shidan_skill = new Dictionary<string, (int, int)>();
+        Dictionary<string, (int, int)> wiki_shidan_skill = new Dictionary<string, (int, int)>();
         Dictionary<string, (int, int)> leg_shidan1_skill = new Dictionary<string, (int, int)>();
         Dictionary<string, (int, int)> leg_shidan2_skill = new Dictionary<string, (int, int)>();
         Dictionary<string, (int, int)> leg_shidan3_skill = new Dictionary<string, (int, int)>();
@@ -5558,7 +5560,8 @@ namespace VBV_formation
         private void legion2_clear_button_Click(object sender, RoutedEventArgs e) => ClearLegion(2);
         private void legion3_clear_button_Click(object sender, RoutedEventArgs e) => ClearLegion(3);
 
-        private Window1 popup = new Window1();
+        private Window1 popup = new Window1(); 
+        private Window2 wiki_popup = new Window2();
 
         private void legion_duplicate_check_Click(object sender, RoutedEventArgs e)
         {
@@ -6596,5 +6599,537 @@ namespace VBV_formation
         private void leg_shidan2_assist_skill_box_SelectionChanged(object sender, SelectionChangedEventArgs e) => leg_shidan_assist_skill_box_SelectionChanged(2, e);
         private void leg_shidan3_assist_skill_box_SelectionChanged(object sender, SelectionChangedEventArgs e) => leg_shidan_assist_skill_box_SelectionChanged(3, e);
 
+        private void legion_wiki_Click(object sender, RoutedEventArgs e)
+        {
+            string wiki_message = "";
+
+            if (wiki_popup == null || !wiki_popup.IsLoaded)  // まだ作られていない or 閉じられている
+            {
+                wiki_popup = new Window2();
+                wiki_popup.Message = wiki_message;
+                wiki_popup.Show();
+            }
+            wiki_popup.Message = wiki_message;
+            wiki_popup.Activate();
+        }
+
+        public void wiki_set_shidan_skill()
+        {
+            //師団スキルを設定する
+            //各キャラクターの最終スキルを全て確認し、師団スキルを計算する
+            wiki_shidan_skill = shidan_skill;
+            foreach (var character in all_characters.Values)
+            {
+                //character.character_skillを書き換えるとまずいのでディープコピー
+                Dictionary<string, int> temp_character_skill = new Dictionary<string, int>();
+                foreach (var skill in character.character_skill)
+                {
+                    if (skill.Key == "四法結界")
+                    {
+                        if (temp_character_skill.ContainsKey("自爆結界"))
+                        {
+                            int temp_value = temp_character_skill["自爆結界"];
+                            temp_character_skill["自爆結界"] = skill.Value + temp_value;
+                        }
+                        else
+                        {
+                            temp_character_skill.Add("自爆結界", skill.Value);
+                        }
+                        if (temp_character_skill.ContainsKey("戦術結界"))
+                        {
+                            int temp_value = temp_character_skill["戦術結界"];
+                            temp_character_skill["戦術結界"] = skill.Value + temp_value;
+                        }
+                        else
+                        {
+                            temp_character_skill.Add("戦術結界", skill.Value);
+                        }
+                        if (temp_character_skill.ContainsKey("砲撃結界"))
+                        {
+                            int temp_value = temp_character_skill["砲撃結界"];
+                            temp_character_skill["砲撃結界"] = skill.Value + temp_value;
+                        }
+                        else
+                        {
+                            temp_character_skill.Add("砲撃結界", skill.Value);
+                        }
+                        if (temp_character_skill.ContainsKey("対術結界"))
+                        {
+                            int temp_value = temp_character_skill["対術結界"];
+                            temp_character_skill["対術結界"] = skill.Value + temp_value;
+                        }
+                        else
+                        {
+                            temp_character_skill.Add("対術結界", skill.Value);
+                        }
+                    }
+                    if (temp_character_skill.ContainsKey(skill.Key))
+                    {
+                        temp_character_skill[skill.Key] += skill.Value;
+                    }
+                    else
+                    {
+                        temp_character_skill.Add(skill.Key, skill.Value);
+                    }
+                }
+                foreach (var skill in temp_character_skill)
+                {
+                    int value = check_shidan_skill_type(skill.Key);
+                    if (value == (int)SkillType.hanni)
+                    {
+                        shidan_skill[skill.Key] = (skill.Value, value);
+                    }
+                    else if (value == (int)SkillType.kekkai)
+                    {
+                        if (!shidan_skill.ContainsKey(skill.Key))
+                            shidan_skill[skill.Key] = (skill.Value, value);
+                        else
+                        {
+                            if (skill.Value < 100 && shidan_skill[skill.Key].Item1 < 100)
+                            {
+                                //和ではなく積算
+                                double temp_value = (100.0 - shidan_skill[skill.Key].Item1) / 100.0;
+                                double temp_value2 = (shidan_skill[skill.Key].Item1 + (temp_value * skill.Value));
+                                shidan_skill[skill.Key] = ((int)temp_value2, value);
+                            }
+                            else
+                            {
+                                if (shidan_skill[skill.Key].Item1 < skill.Value)
+                                {
+                                    shidan_skill[skill.Key] = (skill.Value, value);
+                                }
+                            }
+                        }
+                    }
+                    //嘘のみ最大値を設定する
+                    else if (value == (int)SkillType.uso)
+                    {
+                        if (skill.Key == "愚者の嘘")
+                        {
+                            if (!shidan_skill.ContainsKey(skill.Key))
+                                shidan_skill[skill.Key] = (skill.Value, value);
+                            else
+                            {
+                                if (shidan_skill[skill.Key].Item1 < skill.Value)
+                                    shidan_skill[skill.Key] = (skill.Value, value);
+                            }
+                        }
+                        else
+                        {
+                            shidan_skill[skill.Key] = (skill.Value, value);
+                        }
+                    }
+                    else if (value == (int)SkillType.unmei)
+                    {
+                        //運命値は加算
+                        if (!shidan_skill.ContainsKey(skill.Key))
+                            shidan_skill[skill.Key] = (skill.Value, value);
+                        else shidan_skill[skill.Key] = (shidan_skill[skill.Key].Item1 + skill.Value, value);
+                    }
+                    else if (value == (int)SkillType.kassei)
+                    {
+                        if (!shidan_skill.ContainsKey(skill.Key))
+                            shidan_skill[skill.Key] = (skill.Value, value);
+                        else shidan_skill[skill.Key] = (shidan_skill[skill.Key].Item1 + skill.Value, value);
+                    }
+                    //指揮系は加算する
+                    else if (value == (int)SkillType.siki)
+                    {
+                        if (!shidan_skill.ContainsKey(skill.Key))
+                            shidan_skill[skill.Key] = (skill.Value, value);
+                        else shidan_skill[skill.Key] = (shidan_skill[skill.Key].Item1 + skill.Value, value);
+                    }
+                    else if (value == (int)SkillType.sonota)
+                    {
+                        if (!shidan_skill.ContainsKey(skill.Key))
+                            shidan_skill[skill.Key] = (skill.Value, value);
+                        else shidan_skill[skill.Key] = (shidan_skill[skill.Key].Item1 + skill.Value, value);
+                    }
+                    //その他のほうが優先度高い
+                    else if (value == (int)SkillType.treatment)
+                    {
+                        if (!shidan_skill.ContainsKey(skill.Key))
+                            shidan_skill[skill.Key] = (skill.Value, value);
+                        else shidan_skill[skill.Key] = (shidan_skill[skill.Key].Item1 + skill.Value, value);
+                    }
+                    else if (value == (int)SkillType.jakutai)
+                    {
+                        if (!shidan_skill.ContainsKey(skill.Key))
+                            shidan_skill[skill.Key] = (skill.Value, value);
+                        else shidan_skill[skill.Key] = (shidan_skill[skill.Key].Item1 + skill.Value, value);
+                    }
+                    //回復
+                    else if (value == (int)SkillType.kaifuku)
+                    {
+                        if (skill.Key == "回帰治癒")
+                        {
+                            if (!shidan_skill.ContainsKey(skill.Key))
+                                shidan_skill[skill.Key] = (skill.Value, value);
+                            else
+                            {
+                                if (shidan_skill[skill.Key].Item1 < skill.Value)
+                                    shidan_skill[skill.Key] = (skill.Value, value);
+                            }
+                        }
+                        if (!shidan_skill.ContainsKey(skill.Key))
+                            shidan_skill[skill.Key] = (skill.Value, value);
+                        else shidan_skill[skill.Key] = (shidan_skill[skill.Key].Item1 + skill.Value, value);
+                    }
+                    else if (value == (int)SkillType.keizoku)
+                    {
+                        if (!shidan_skill.ContainsKey(skill.Key))
+                            shidan_skill[skill.Key] = (skill.Value, value);
+                        else shidan_skill[skill.Key] = (shidan_skill[skill.Key].Item1 + skill.Value, value);
+                    }
+                    else if (value == (int)SkillType.hougeki)
+                    {
+                        if (!shidan_skill.ContainsKey(skill.Key))
+                            shidan_skill[skill.Key] = (skill.Value, value);
+                        else shidan_skill[skill.Key] = (shidan_skill[skill.Key].Item1 + skill.Value, value);
+                    }
+                }
+            }
+            //コピーコード、どうにかする
+            if (current_assist_select != 0)
+            {
+                if (assist_skill_Dict[current_assist_skill_name] == 1 || assist_skill_Dict[current_assist_skill_name] == 2)
+                {
+                    int value = check_shidan_skill_type(current_assist_skill_name);
+                    if (value == (int)SkillType.hanni)
+                    {
+                        shidan_skill[current_assist_skill_name] = (current_assist_skill_value, value);
+                    }
+                    else if (value == (int)SkillType.kekkai || current_assist_skill_name == "自爆障壁")
+                    {
+                        string temp_skillname = current_assist_skill_name;
+                        if (current_assist_skill_name == "自爆障壁")
+                        {
+                            value = (int)SkillType.kekkai;
+                            temp_skillname = "自爆結界";
+                        }
+                        if (!shidan_skill.ContainsKey(temp_skillname))
+                        {
+                            shidan_skill[temp_skillname] = (current_assist_skill_value, value);
+                        }
+                        else
+                        {
+                            if (current_assist_skill_value < 100 && shidan_skill[temp_skillname].Item1 < 100)
+                            {
+                                //和ではなく積算
+                                double temp_value = (100.0 - shidan_skill[temp_skillname].Item1) / 100.0;
+                                double temp_value2 = (shidan_skill[temp_skillname].Item1 + (temp_value * current_assist_skill_value));
+                                shidan_skill[temp_skillname] = ((int)temp_value2, value);
+                            }
+                            else
+                            {
+                                if (shidan_skill[current_assist_skill_name].Item1 < current_assist_skill_value)
+                                {
+                                    shidan_skill[current_assist_skill_name] = (current_assist_skill_value, value);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (shidan_skill.ContainsKey(current_assist_skill_name))
+                        {
+                            shidan_skill[current_assist_skill_name] = (shidan_skill[current_assist_skill_name].Item1 + current_assist_skill_value, value);
+                        }
+                        else
+                        {
+                            shidan_skill[current_assist_skill_name] = (current_assist_skill_value, value);
+                        }
+                    }
+                }
+            }
+            var sortedAsc = shidan_skill
+            .OrderBy(kv => kv.Value.Item2)       // Valueを昇順にソート
+            .ToDictionary(kv => kv.Key, kv => kv.Value);
+            shidan_skill = sortedAsc;
+            foreach (var skill in shidan_skill)
+            {
+                if (skill.Key != "四法結界")
+                {
+
+                    Paragraph paragraph = new Paragraph();
+                    string numberStr = skill.Value.Item1.ToString();
+                    paragraph.Inlines.Add(new Run($"{skill.Key}:{numberStr}") { Foreground = Brushes.Black });
+                    // RichTextBox に追加
+                    rich_shidan_skill_box.Document.Blocks.Add(paragraph);
+                }
+            }
+        }
+
+        private string wiki_str_plus(string skillname,int skillvalue)
+        {
+
+            string wiki_message="";
+            if (skillvalue != 0)
+            {
+                if(skillname == "四法結界")
+                {
+                    wiki_message += "(";
+                }
+                wiki_message += skillname + skillvalue + " ";
+                if (skillname == "四法結界")
+                {
+                    wiki_message += ")";
+                }
+            }
+            else
+            {
+                wiki_message += skillname + " ";
+
+            }
+            return wiki_message;
+        }
+
+        private void wiki_Click(object sender, RoutedEventArgs e)
+        {
+            string wiki_message = "";
+            wiki_shidan_skill = shidan_skill;
+
+            wiki_message += "|CENTER:75|CENTER:130|CENTER:10|CENTER:90|CENTER:90|CENTER:100|CENTER:100|CENTER:100|275|c\n";
+            wiki_message += "|~アシスト|>|>|>|";
+            if (assist_skill_box.Text!="")
+            {
+                wiki_message += assist_skill_box.Text;
+            }
+            wiki_message += "|";
+            //wiki_message += "絶対治療|~";
+            wiki_message += "戦術スキル|>|>|";
+            CheckBox[] leaderFlags = { leader1_flag, leader2_flag, leader3_flag, leader4_flag, leader5_flag, leader6_flag };
+            for (int i = 0; i < 6; i++)
+            {
+                if (leaderFlags[i].IsChecked == true)
+                {
+                    //wiki_message += all_characters[i+1].leader_skill.ToString;
+                }
+            }
+            wiki_message += "|\n";
+            wiki_message += "|~編成可能 &br;時期 |>|>|>|>|>|>|>|（編成時期）|h\n";
+            wiki_message += "|~配置 &br;位置|~ユニット名|~ランク|~接頭称号|~接尾称号|~装備1|~装備2|~糧食|~備考|\n";
+            for (int i = 1; i < 7; i++)
+            {
+                string controlName = $"character{i}_name_box";
+                string cname="";
+                if (this.FindName(controlName) is TextBox textBox)
+                {
+                    cname = textBox.Text;
+                }
+
+                CharacterJson characterObj = characters.Find(c => c.名称 == cname);
+                if (characterObj != null)
+                {
+                    wiki_message += "|~" + (i) + "|";
+                    wiki_message += all_characters[i].character_name;
+
+                    if (leaderFlags[i-1].IsChecked == true)
+                    {
+                        wiki_message += "(リーダー)";
+                    }
+                    wiki_message += "|" + all_characters[i].rank + "|";
+                    ShogoJson shogoObj = new ShogoJson();
+                    foreach (var list in all_shogo.Values)
+                    {
+                        foreach (var shogo in list)
+                        {
+                            if (shogo.二つ名 == all_characters[i].character_shogo1)
+                            {
+                                shogoObj = shogo;
+                            }
+                        }
+                    }
+                    wiki_message += "" + all_characters[i].character_shogo1 + "&br;(" + shogoObj.メダリオン + ")" + " &br;|";
+                    foreach (var list in all_shogo.Values)
+                    {
+                        foreach (var shogo in list)
+                        {
+                            if (shogo.二つ名 == all_characters[i].character_shogo2)
+                            {
+                                shogoObj = shogo;
+                            }
+                        }
+                    }
+                    wiki_message += "" + all_characters[i].character_shogo2 + "&br;(" + shogoObj.メダリオン + ")" + " &br;|";
+
+                    EquipmentJson equipmentObj = new EquipmentJson();
+                    foreach (var list in all_equipments.Values)
+                    {
+                        foreach (var equipment in list)
+                        {
+                            if (equipment.名称 == all_characters[i].character_equipment1)
+                            {
+                                equipmentObj = equipment;
+                            }
+                        }
+                    }
+
+                    wiki_message += "" + all_characters[i].character_equipment1 + "&br;(R" + equipmentObj.レア + ")" + "&br;|";
+                    foreach (var list in all_equipments.Values)
+                    {
+                        foreach (var equipment in list)
+                        {
+                            if (equipment.名称 == all_characters[i].character_equipment2)
+                            {
+                                equipmentObj = equipment;
+                            }
+                        }
+                    }
+                    wiki_message += "" + all_characters[i].character_equipment2 + "&br;(R" + equipmentObj.レア + ")" + "&br;|";
+                    foreach (var list in all_equipments.Values)
+                    {
+                        foreach (var equipment in list)
+                        {
+                            if (equipment.名称 == all_characters[i].character_ryoshoku)
+                            {
+                                equipmentObj = equipment;
+                            }
+                        }
+                    }
+                    wiki_message += "" + all_characters[i].character_ryoshoku + "&br;(R" + equipmentObj.レア + ")" + "&br;|";
+                    wiki_message += "|\n";
+                }
+            }
+            wiki_message += "|>|>|>|>|>|>|>|>|~師団スキル|\n";
+            // 愚直に医療系のスキルを探して、次に継続探して…とやっていく。ソートしとけば楽だがそうなってない 
+            wiki_message += "|~医療系|>|>|>|LEFT:";
+            List<string> treat_check=new List<string>();
+            foreach (var skill in wiki_shidan_skill)
+            {
+                if(check_shidan_skill_type(skill.Key) == (int)SkillType.kaifuku)
+                {
+                    wiki_message += wiki_str_plus(skill.Key, skill.Value.Item1);
+                }
+            }
+            wiki_message += " &br;";
+            /*
+            foreach (var skill in wiki_shidan_skill)
+            {
+                if (check_shidan_skill_type(skill.Key) == (int)SkillType.treatment)
+                {
+                    if (treat_check.Contains(skill.Key))
+                    {
+
+                    }
+                    else
+                    {
+                        wiki_message += wiki_str_plus(skill.Key, skill.Value.Item1);
+                        treat_check.Add(skill.Key);
+                    }
+                }
+            }*/
+            
+            foreach (var skill in wiki_shidan_skill)
+            {
+                if (check_shidan_skill_type(skill.Key) == (int)SkillType.treatment)
+                {
+                    wiki_message += wiki_str_plus(skill.Key, skill.Value.Item1);
+                }
+            }
+            wiki_message += "|~継続ダメージ|>|>|";
+            foreach (var skill in wiki_shidan_skill)
+            {
+                if (check_shidan_skill_type(skill.Key) == (int)SkillType.keizoku)
+                {
+                    if(skill.Key.Contains("放射")) 
+                        wiki_message += wiki_str_plus(skill.Key, skill.Value.Item1);
+                }
+            }
+            wiki_message += " &br;";
+            foreach (var skill in wiki_shidan_skill)
+            {
+                if (check_shidan_skill_type(skill.Key) == (int)SkillType.keizoku)
+                {
+                    if (!skill.Key.Contains("放射"))
+                        wiki_message += wiki_str_plus(skill.Key, skill.Value.Item1);
+                }
+            }
+            wiki_message += " &br;";
+            foreach (var skill in wiki_shidan_skill)
+            {
+                if (check_shidan_skill_type(skill.Key) == (int)SkillType.hougeki)
+                {
+                    wiki_message += wiki_str_plus(skill.Key, skill.Value.Item1);
+                }
+            }
+            wiki_message += "|\n";
+            wiki_message += "|~攻撃無効系|>|>|>|LEFT:";
+            foreach (var skill in wiki_shidan_skill)
+            {
+                if (check_shidan_skill_type(skill.Key) == (int)SkillType.hanni)
+                {
+                    wiki_message += wiki_str_plus(skill.Key, skill.Value.Item1);
+                }
+            }
+            
+            wiki_message += "|~結界系|>|>|";
+            foreach (var skill in wiki_shidan_skill)
+            {
+                if (check_shidan_skill_type(skill.Key) == (int)SkillType.kekkai)
+                {
+                    wiki_message += wiki_str_plus(skill.Key, skill.Value.Item1);
+                }
+            }
+            wiki_message += "|\n";
+
+            wiki_message += "|~活性・布陣|>|>|>|LEFT:";
+            foreach (var skill in wiki_shidan_skill)
+            {
+                if (check_shidan_skill_type(skill.Key) == (int)SkillType.kassei)
+                {
+                    if (skill.Key != "武具研磨" && skill.Key != "英雄覇気")
+                        wiki_message += wiki_str_plus(skill.Key, skill.Value.Item1);
+                }
+            }
+            wiki_message += " &br;";
+            foreach (var skill in wiki_shidan_skill)
+            {
+                if (check_shidan_skill_type(skill.Key) == (int)SkillType.siki)
+                {
+                    wiki_message += wiki_str_plus(skill.Key, skill.Value.Item1);
+                }
+            }
+
+            wiki_message += "|~その他|>|>|";
+            foreach (var skill in wiki_shidan_skill)
+            {
+
+                if (check_shidan_skill_type(skill.Key) == (int)SkillType.uso)
+                {
+                    wiki_message += wiki_str_plus(skill.Key, skill.Value.Item1);
+                }
+            }
+            wiki_message += " &br;";
+            foreach (var skill in wiki_shidan_skill)
+            {
+
+                if (check_shidan_skill_type(skill.Key) == (int)SkillType.unmei)
+                {
+                    wiki_message += wiki_str_plus(skill.Key, skill.Value.Item1);
+                }
+            }
+            wiki_message += " &br;";
+            foreach (var skill in wiki_shidan_skill)
+            {
+
+                if (check_shidan_skill_type(skill.Key) == (int)SkillType.sonota)
+                {
+                    wiki_message += wiki_str_plus(skill.Key, skill.Value.Item1);
+                }
+            }
+            wiki_message += "|\n";
+            wiki_message += "|>|>|>|>|>|>|>|>|~雑感|\n";
+            wiki_message += "|>|>|>|>|>|>|>|>|（ここに雑感)|\n";
+
+            if (wiki_popup == null || !wiki_popup.IsLoaded)  // まだ作られていない or 閉じられている
+            {
+                wiki_popup = new Window2();
+                wiki_popup.Message = wiki_message;
+                wiki_popup.Show();
+            }
+            wiki_popup.Message = wiki_message;
+            wiki_popup.Activate();
+        }
     }
 }
