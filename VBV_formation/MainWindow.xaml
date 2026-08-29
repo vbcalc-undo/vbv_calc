@@ -7,7 +7,8 @@
         <!-- 師団編成タブ -->
         <TabItem Header="師団編成">
             <Canvas>
-                <Button Content="再読み込み" Width="100" Height="30" Canvas.Left="80" Canvas.Top="615" HorizontalAlignment="Center" VerticalAlignment="Top" Click="Button_Click" />
+                <Button Content="再読み込み" Width="100" Height="30" Canvas.Left="10" Canvas.Top="620" HorizontalAlignment="Left" VerticalAlignment="Top" Click="Button_Click" />
+                <Button Content="wiki出力" Width="100" Height="30" Canvas.Left="132" Canvas.Top="619" HorizontalAlignment="Left" VerticalAlignment="Top" Click="wiki_Click" />
                 <Button Content="書き込み" Width="58" Height="30" Canvas.Left="258" Canvas.Top="250" HorizontalAlignment="Left" VerticalAlignment="Center" Click="Shidan_kakikomi_Button_Click" />
                 <Button Content="読み込み" Width="59" Height="30" Canvas.Left="324" Canvas.Top="250" HorizontalAlignment="Left" VerticalAlignment="Center" Click="shidan_yomikomi_Button_Click" />
                 <Button Content="削除" Width="59" Height="30" Canvas.Left="389" Canvas.Top="250" Click="shidan_sakujo_Button_Click" HorizontalAlignment="Left" VerticalAlignment="Center" />
@@ -623,13 +624,13 @@
                 <Button x:Name="legion_save" Content="保存" Canvas.Left="19" Canvas.Top="566" Height="30" Width="61" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion_save_Click"/>
                 <Button x:Name="legion_load" Content="読み込み" Canvas.Left="90" Canvas.Top="566" Height="30" Width="59" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion_load_Click"/>
                 <Button x:Name="legion_del" Content="削除" Canvas.Left="157" Canvas.Top="566" Height="30" Width="59" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion_del_Click"/>
-                <Button x:Name="legion_file_save" Content="ファイルに保存" Canvas.Left="19" Canvas.Top="604" Height="30" Width="197" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion_file_save_Click"/>
+                <Button x:Name="legion_file_save" Content="ファイルに保存" Canvas.Left="19" Canvas.Top="604" Height="30" Width="95" HorizontalAlignment="Left" VerticalAlignment="Center" Click="legion_file_save_Click"/>
                 <TextBox x:Name="legion_name_box" Canvas.Left="19" TextWrapping="Wrap" Text="" Canvas.Top="329" Width="197" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <TextBlock x:Name="legion_name" Canvas.Left="90" TextWrapping="Wrap" Text="レギオン名" Canvas.Top="305" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <Button x:Name="legion1_clear_button" Content="クリア" Canvas.Left="453" Canvas.Top="135" Height="61" Width="62" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion1_clear_button_Click"/>
                 <Button x:Name="legion2_clear_button" Content="クリア" Canvas.Left="453" Canvas.Top="345" Height="61" Width="62" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion2_clear_button_Click"/>
                 <Button x:Name="legion3_clear_button" Content="クリア" Canvas.Left="454" Canvas.Top="555" Height="61" Width="62" HorizontalAlignment="Center" VerticalAlignment="Top" Click="legion3_clear_button_Click"/>
-                <Button x:Name="legion_duplicate_check" Content="レギオンチェック" Canvas.Left="240" Canvas.Top="576" Height="58" Width="185" Click="legion_duplicate_check_Click" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <Button x:Name="legion_duplicate_check" Content="レギオンチェック" Canvas.Left="240" Canvas.Top="576" Height="40" Width="185" Click="legion_duplicate_check_Click" HorizontalAlignment="Center" VerticalAlignment="Top" />
             </Canvas>
         </TabItem>
     </TabControl>
